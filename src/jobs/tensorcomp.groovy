@@ -24,11 +24,11 @@ def dockerImageTagParameter(context, defaultValue = DockerVersion.version) {
   }
 }
 
-def tcbotAuthId = '87a0200a-2193-4bb4-8920-b853c00e1f10'
+def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 // Runs on pull requests
 multiJob("tensorcomp-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, 'facebookresearch/TensorComprehensions', tcbotAuthId, Users)
+  JobUtil.gitHubPullRequestTrigger(delegate, 'facebookresearch/TensorComprehensions', pytorchbotAuthId, Users)
 
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -48,8 +48,7 @@ multiJob("tensorcomp-pull-request") {
             // Pass parameters of this job
             currentBuild()
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            // This MUST be changed if you are using a bot that is NOT @caffe2bot.
-            predefinedProp('ghprbCredentialsId', tcbotAuthId)
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }

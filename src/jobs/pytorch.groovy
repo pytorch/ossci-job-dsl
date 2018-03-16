@@ -97,6 +97,7 @@ multiJob("pytorch-pull-request") {
             currentBuild()
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
             predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+            predefinedProp('COMMIT_SOURCE', 'pull-request')
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
@@ -125,6 +126,7 @@ multiJob("pytorch-master") {
             gitRevision()
             propertiesFile(gitPropertiesFile)
             booleanParam('DOC_PUSH', true)
+            predefinedProp('COMMIT_SOURCE', 'master')
           }
           if (!buildEnvironment.contains('linux')) {
             PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
@@ -204,6 +206,12 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         false,
         'Whether to doc push or not',
       )
+
+      stringParam(
+        'COMMIT_SOURCE',
+        '',
+        'Source of the commit (master or pull-request)',
+      )
     }
 
     steps {
@@ -255,12 +263,14 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             phaseJob("${buildBasePath}/short-perf-test-cpu") {
              parameters {
                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+               predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
              }
             }
             // yf225: disabled due to flakiness
             // phaseJob("${buildBasePath}/short-perf-test-gpu") {
             //   parameters {
             //     predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+            //     predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
             //   }
             // }
           }
@@ -461,6 +471,12 @@ git status
           pythonVersion,
           "Python version"
         )
+
+        stringParam(
+          'COMMIT_SOURCE',
+          '',
+          'Source of the commit (master or pull-request)',
+        )
       }
 
       scm {
@@ -521,6 +537,12 @@ git status
           'PYTHON_VERSION',
           pythonVersion,
           "Python version"
+        )
+
+        stringParam(
+          'COMMIT_SOURCE',
+          '',
+          'Source of the commit (master or pull-request)',
         )
       }
 

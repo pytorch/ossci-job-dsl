@@ -471,9 +471,11 @@ git status
 
       wrappers {
         credentialsBinding {
-          // yf225: I couldn't get secret text binding to work here, using usernamePassword instead
-          usernamePassword('DBNAME', 'DBHOSTNAME', 'pytorchdb-connect')
           usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
+        }
+        credentialsBinding {
+          // yf225: I couldnt get secret text binding to work here, using usernamePassword instead
+          usernamePassword('DBNAME', 'DBHOSTNAME', 'pytorchdb-connect')
         }
       }
 
@@ -530,9 +532,11 @@ git status
 
       wrappers {
         credentialsBinding {
-          // yf225: I couldn't get secret text binding to work here, using usernamePassword instead
-          usernamePassword('DBNAME', 'DBHOSTNAME', 'pytorchdb-connect')
           usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
+        }
+        credentialsBinding {
+          // yf225: I couldnt get secret text binding to work here, using usernamePassword instead
+          usernamePassword('DBNAME', 'DBHOSTNAME', 'pytorchdb-connect')
         }
       }
 

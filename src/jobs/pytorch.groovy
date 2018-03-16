@@ -491,6 +491,8 @@ git status
 
       wrappers {
         credentialsBinding {
+          string('DBHOSTNAME', 'pytorchdb-host')
+          string('DBNAME', 'pytorchdb-name')
           usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
         }
       }
@@ -554,6 +556,8 @@ git status
 
       wrappers {
         credentialsBinding {
+          string('DBHOSTNAME', 'pytorchdb-host')
+          string('DBNAME', 'pytorchdb-name')
           usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
         }
       }

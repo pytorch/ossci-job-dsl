@@ -113,6 +113,9 @@ multiJob("pytorch-master") {
     ParametersUtil.RUN_DOCKER_ONLY(delegate)
   }
   steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
     phase("Master jobs") {
       buildEnvironments.each {
         def buildEnvironment = it;
@@ -120,6 +123,7 @@ multiJob("pytorch-master") {
           parameters {
             // Checkout this exact same revision in downstream builds.
             gitRevision()
+            propertiesFile(gitPropertiesFile)
             booleanParam('DOC_PUSH', true)
           }
           if (!buildEnvironment.contains('linux')) {

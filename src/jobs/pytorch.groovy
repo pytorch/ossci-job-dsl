@@ -469,6 +469,12 @@ git status
         }
       }
 
+      wrappers {
+        credentialsBinding {
+          usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
+        }
+      }
+
       steps {
         environmentVariables {
           env(
@@ -517,6 +523,12 @@ git status
             credentials('caffe2bot')
           }
           branch('origin/gpu')
+        }
+      }
+
+      wrappers {
+        credentialsBinding {
+          usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
         }
       }
 

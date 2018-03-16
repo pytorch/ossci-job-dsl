@@ -78,7 +78,7 @@ buildEnvironments.each {
     steps {
       GitUtil.mergeStep(delegate)
 
-      shell("1m")
+      shell("sleep 1m")
     }
   }
 

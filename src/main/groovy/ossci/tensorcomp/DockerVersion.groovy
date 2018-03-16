@@ -5,5 +5,5 @@
 // to the same version
 package ossci.tensorcomp
 class DockerVersion {
-  static final String version = "10";
+  static final String version = "16";
 }

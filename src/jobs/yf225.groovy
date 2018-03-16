@@ -17,6 +17,9 @@ def buildEnvironments = [
 multiJob("yf225-master") {
   JobUtil.masterTrigger(delegate, "yf225/test-repo")
   steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
     phase("Master jobs") {
       buildEnvironments.each {
         def buildEnvironment = it;
@@ -24,6 +27,7 @@ multiJob("yf225-master") {
           parameters {
             // Checkout this exact same revision in downstream builds.
             gitRevision()
+            propertiesFile(gitPropertiesFile)
           }
         }
       }

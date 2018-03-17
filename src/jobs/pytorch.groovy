@@ -158,34 +158,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     cudaVersion = '9'
   }
 
-  def pythonVersion = '';
-  if ( buildEnvironment.contains('py2.7') ) {
-    pythonVersion = '2.7'
-  }
-  if ( buildEnvironment.contains('py2.7.9') ) {
-    pythonVersion = '2.7.9'
-  }
-  if ( buildEnvironment.contains('py3.5') ) {
-    pythonVersion = '3.5'
-  }
-  if ( buildEnvironment.contains('py3.6') ) {
-    pythonVersion = '3.6'
-  }
-  if ( buildEnvironment.contains('pynightly') ) {
-    pythonVersion = 'nightly'
-  }
-
-  def gccVersion = '';
-  if ( !buildEnvironment.contains('cuda') ) {
-    gccVersion = '5'
-  }
-  if ( buildEnvironment.contains('gcc4.8') ) {
-    gccVersion = '4.8'
-  }
-  if ( buildEnvironment.contains('gcc7.2') ) {
-    gccVersion = '7'
-  }
-
   multiJob("${buildBasePath}/${buildEnvironment}-trigger") {
     JobUtil.commonTrigger(delegate)
     JobUtil.subJobDownstreamCommitStatus(delegate, buildEnvironment)

@@ -88,6 +88,7 @@ class Users {
     "asoltysik",
     "myleott",
     "Lalaland",
-    "jma127"
+    "jma127",
+    "vedanuj"
   ]
 }

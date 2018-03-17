@@ -298,17 +298,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         '',
         'Tag of image to commit and push after this build completes (if non-empty)',
       )
-      // TODO: Axe these
-      stringParam(
-        'PYTHON_VERSION',
-        pythonVersion,
-        "Python version"
-      )
-      stringParam(
-        'GCC_VERSION',
-        gccVersion,
-        "GCC version"
-      )
     }
 
     wrappers {
@@ -465,13 +454,6 @@ git status
 
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-
-        stringParam(
-          'PYTHON_VERSION',
-          pythonVersion,
-          "Python version"
-        )
-
         stringParam(
           'COMMIT_SOURCE',
           '',
@@ -530,13 +512,6 @@ git status
 
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-
-        stringParam(
-          'PYTHON_VERSION',
-          pythonVersion,
-          "Python version"
-        )
-
         stringParam(
           'COMMIT_SOURCE',
           '',
@@ -606,18 +581,6 @@ git status
         'RUN_TESTS',
         true,
         'Whether to run tests or not',
-      )
-
-      stringParam(
-        'PYTHON_VERSION',
-        pythonVersion,
-        "Python version"
-      )
-
-      stringParam(
-        'GCC_VERSION',
-        gccVersion,
-        "GCC version"
       )
     }
 
@@ -759,12 +722,6 @@ fi
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
         stringParam(
-          'PYTHON_VERSION',
-          pythonVersion,
-          "Python version"
-        )
-
-        stringParam(
           'IMAGE_COMMIT_ID',
           '',
           "Identifier for built torch package"
@@ -801,12 +758,6 @@ fi
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
-
-        stringParam(
-          'PYTHON_VERSION',
-          pythonVersion,
-          "Python version"
-        )
 
         stringParam(
           'IMAGE_COMMIT_ID',

@@ -66,6 +66,16 @@ class ParametersUtil {
     }
   }
 
+  static void COMMIT_SOURCE(BuildParametersContext context, String defaultValue = '') {
+    context.with {
+      stringParam(
+          'COMMIT_SOURCE',
+          defaultValue,
+          'Source of the commit (master or pull-request)',
+      )
+    }
+  }
+
   static void GIT_MERGE_TARGET(BuildParametersContext context, String defaultValue = '') {
     context.with {
       stringParam(

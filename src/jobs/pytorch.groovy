@@ -166,6 +166,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.COMMIT_SOURCE(delegate)
 
       booleanParam(
         'RUN_TESTS',
@@ -177,12 +178,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         'DOC_PUSH',
         false,
         'Whether to doc push or not',
-      )
-
-      stringParam(
-        'COMMIT_SOURCE',
-        '',
-        'Source of the commit (master or pull-request)',
       )
     }
 
@@ -426,11 +421,7 @@ git status
 
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-        stringParam(
-          'COMMIT_SOURCE',
-          '',
-          'Source of the commit (master or pull-request)',
-        )
+        ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
       scm {
@@ -484,11 +475,7 @@ git status
 
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-        stringParam(
-          'COMMIT_SOURCE',
-          '',
-          'Source of the commit (master or pull-request)',
-        )
+        ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
       scm {

@@ -218,6 +218,17 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               predefinedProp('IMAGE_COMMIT_ID', builtImageId)
             }
           }
+          if (buildEnvironment == perfTestEnvironment) {
+            phaseJob("${buildBasePath}/${buildEnvironment}-multigpu-test") {
+              parameters {
+                currentBuild()
+                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+              }
+            }
+          }
           if (buildEnvironment == docEnvironment) {
             phaseJob("${buildBasePath}/doc-push") {
               parameters {
@@ -602,6 +613,51 @@ exit 0
         }
       }
     } // job(... + "-test")
+
+
+  job("${buildBasePath}/${buildEnvironment}-multigpu-test") {
+    JobUtil.common delegate, 'docker && multigpu'
+    JobUtil.timeoutAndFailAfter(delegate, 15)
+
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    }
+
+    steps {
+      // TODO: delete this when obsolete
+      environmentVariables {
+        env(
+          'BUILD_ENVIRONMENT',
+          "${buildEnvironment}",
+        )
+      }
+
+      DockerUtil.shell context: delegate,
+              cudaVersion: cudaVersion,
+              image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+              workspaceSource: "docker",
+              script: '''
+set -ex
+
+if [[ -x .jenkins/multigpu-test.sh ]]; then
+    echo "Using in-repo script"
+    .jenkins/multigpu-test.sh
+else
+    echo "No multigpu test enabled"
+fi
+
+exit 0
+'''
+      }
+
+      publishers {
+        groovyPostBuild {
+          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+        }
+      }
+    } // job(... + "-multigpu-test")
+
+
   } // buildEnvironment.contains('linux')
 
   // TODO: This is not enabled at the moment because the docker build does not

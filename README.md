@@ -4,7 +4,7 @@ This is a [Job DSL](https://github.com/jenkinsci/job-dsl-plugin) project
 for FAIR/AML's OSSCI infrastructure.
 
 Looking for information about the actual machines the jobs run on?
-See [pietern/ossci-infra](https://github.com/pietern/ossci-infra)
+See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra)
 
 ## CI failed, but my local build is fine. What should I do?!
 

@@ -38,7 +38,7 @@ def dockerWorkers = [
 
 def macOsWorkers = [
   "worker-macos-high-sierra-0",
-  "worker-macos-high-sierra-1",
+  // "worker-macos-high-sierra-1",
   "worker-macos-high-sierra-2",
   "worker-macos-high-sierra-3",
   "worker-macos-high-sierra-4",

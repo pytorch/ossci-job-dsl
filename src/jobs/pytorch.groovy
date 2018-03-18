@@ -252,10 +252,10 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             //   }
             // }
           }
-        }
-      }
-    }
-  }
+        } // phase("Test and Push")
+      } // else (buildEnvironment.contains("macos") || buildEnvironment.contains("docker"))
+    } // steps
+  } // multiJob("${buildBasePath}/${buildEnvironment}-trigger")
 
   if (buildEnvironment.contains('linux')) {
   job("${buildBasePath}/${buildEnvironment}-build") {

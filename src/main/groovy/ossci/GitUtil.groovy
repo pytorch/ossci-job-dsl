@@ -82,7 +82,7 @@ else
 fi
 
 if [ -n "\${GIT_MERGE_TARGET}" ]; then
-  echo "GIT_MERGE_TARGET=\$(git rev-parse "\${GIT_MERGE_TARGET}")" >> "${file}"
+  echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"
   # NB: This logic is specific to pytorch/pytorch.
   # It's temporary; once we start mixing the repos together this
   # needs to accurately reflect folder structure.

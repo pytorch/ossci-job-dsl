@@ -69,8 +69,11 @@ fi
       // Capture the raw commit hash of GIT_COMMIT/GIT_MERGE_TARGET,
       // such that they can be passed to downstream builds without
       // risking that they are changed at the remote.
-      shell """
-rm -f "${file}"
+      shell """#!/bin/bash
+
+set -ex
+
+rm -f "${file}" || true
 
 # Expect the Git SCM plugin to have checked out the right commit if
 # GIT_COMMIT is empty. Figure out what it points to so the commit hash
@@ -78,17 +81,18 @@ rm -f "${file}"
 if [ -z "\${GIT_COMMIT}" ]; then
   echo "GIT_COMMIT=\$(git rev-parse HEAD)" >> "${file}"
 else
-  echo "GIT_COMMIT=\$(git rev-parse "\${GIT_COMMIT}")" >> "${file}"
+  echo "GIT_COMMIT=\$(git rev-parse \${GIT_COMMIT})" >> "${file}"
 fi
+
+function changed() {
+  git diff --name-only "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"
+}
 
 if [ -n "\${GIT_MERGE_TARGET}" ]; then
   echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"
   # NB: This logic is specific to pytorch/pytorch.
   # It's temporary; once we start mixing the repos together this
   # needs to accurately reflect folder structure.
-  function changed() {
-    git diff --name-only "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"
-  }
   if (changed | grep -q "^caffe2/"); then
     echo "CAFFE2_CHANGED=1" >> "${file}"
   else

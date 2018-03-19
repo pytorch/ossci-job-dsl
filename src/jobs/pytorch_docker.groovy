@@ -50,6 +50,7 @@ multiJob("${dockerBasePath}-master") {
   triggers {
     // Pushes trigger builds
     githubPush()
+    scm('* * * * *')
     // We also refresh the docker image on a weekly basis
     cron('@weekly')
   }

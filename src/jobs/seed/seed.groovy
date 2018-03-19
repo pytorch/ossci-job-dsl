@@ -22,6 +22,7 @@ job('seed') {
   }
   triggers {
     githubPush()
+    scm('* * * * *')
   }
   steps {
     gradle 'clean test'

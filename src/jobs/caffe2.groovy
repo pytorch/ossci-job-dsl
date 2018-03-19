@@ -14,6 +14,10 @@ folder(buildBasePath) {
   description 'Jobs for all Caffe2 build environments'
 }
 
+// Caffe2 is setup to have different build environments depending
+// on if you have a master build or just pull-request, which explains
+// the duplication
+
 def dockerBuildEnvironments = DockerImages.images
 
 def macOsBuildEnvironments = [

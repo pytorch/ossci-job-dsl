@@ -89,6 +89,10 @@ multiJob("pytorch-pull-request") {
     GitUtil.mergeStep(delegate)
     GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
+    environmentVariables {
+      propertiesFile(gitPropertiesFile)
+    }
+
     phase("Build and test") {
       buildEnvironments.each {
         phaseJob("${buildBasePath}/${it}-trigger") {
@@ -101,6 +105,7 @@ multiJob("pytorch-pull-request") {
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
+          PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
         }
       }
     }

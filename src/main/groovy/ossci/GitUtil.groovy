@@ -82,7 +82,28 @@ else
 fi
 
 if [ -n "\${GIT_MERGE_TARGET}" ]; then
-  echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"
+  echo "GIT_MERGE_TARGET=\$(git rev-parse "\${GIT_MERGE_TARGET}")" >> "${file}"
+  # NB: This logic is specific to pytorch/pytorch.
+  # It's temporary; once we start mixing the repos together this
+  # needs to accurately reflect folder structure.
+  function changed() {
+    git diff --name-only "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"
+  }
+  if (changed | grep -q "^caffe2/"); then
+    echo "CAFFE2_CHANGED=1" >> "${file}"
+  else
+    echo "CAFFE2_CHANGED=0" >> "${file}"
+  fi
+  # PyTorch is top-level, so anything that is not caffe2 is us
+  if (changed | grep -qv "^caffe2/"); then
+    echo "PYTORCH_CHANGED=1" >> "${file}"
+  else
+    echo "PYTORCH_CHANGED=0" >> "${file}"
+  fi
+else
+  # Assume the worst
+  echo "CAFFE2_CHANGED=1" >> "${file}"
+  echo "PYTORCH_CHANGED=1" >> "${file}"
 fi
 """
     }

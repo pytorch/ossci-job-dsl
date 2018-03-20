@@ -64,7 +64,8 @@ if [ -z "${DOCKER_IMAGE:-}" ]; then
   exit 1
 fi
 
-export -p | sed -e '/ DOCKER_IMAGE=/d' -e '/ PWD=/d' > ./env
+export -p | sed -e '/ DOCKER_IMAGE=/d' -e '/ PWD=/d' -e '/ PATH=/d' > ./env
+cat ./env
 
 docker_args=""
 

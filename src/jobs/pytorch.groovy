@@ -224,6 +224,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
+            /*
+            // Waiting on AWS to approve our instance increase request
             phaseJob("${buildBasePath}/${buildEnvironment}-multigpu-test") {
               parameters {
                 currentBuild()
@@ -233,6 +235,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                 predefinedProp('IMAGE_COMMIT_ID', builtImageId)
               }
             }
+            */
           }
           if (buildEnvironment == docEnvironment) {
             phaseJob("${buildBasePath}/doc-push") {

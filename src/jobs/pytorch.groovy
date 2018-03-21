@@ -453,9 +453,7 @@ git status
 
       wrappers {
         credentialsBinding {
-          string('DBHOSTNAME', 'pytorchdb-host')
-          string('DBNAME', 'pytorchdb-name')
-          usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
+          usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'iam-user-perf')
         }
       }
 
@@ -507,9 +505,7 @@ git status
 
       wrappers {
         credentialsBinding {
-          string('DBHOSTNAME', 'pytorchdb-host')
-          string('DBNAME', 'pytorchdb-name')
-          usernamePassword('USERNAME', 'PASSWORD', 'pytorchdb')
+          usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'iam-user-perf')
         }
       }
 

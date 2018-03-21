@@ -625,10 +625,11 @@ fi
     }
 
     publishers {
-      archiveArtifacts {
-        allowEmpty()
-        pattern('crash/*')
-      }
+      // Experiment: disable this, see if anyone notices
+      //archiveArtifacts {
+      //  allowEmpty()
+      //  pattern('crash/*')
+      //}
       archiveArtifacts {
         allowEmpty()
         pattern('build*/CMakeCache.txt')

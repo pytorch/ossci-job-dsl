@@ -22,5 +22,7 @@ class Users {
     "chr1sj0nes",
     "mingzhe09088",
     "salexspb",
+    "apaszke",
+    "ezyang",
   ]
 }

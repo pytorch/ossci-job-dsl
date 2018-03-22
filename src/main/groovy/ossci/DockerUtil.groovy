@@ -64,6 +64,7 @@ if [ -z "${DOCKER_IMAGE:-}" ]; then
   exit 1
 fi
 
+# TODO: Get rid of this (may need to adjust build scripts)
 export -p | sed -e '/ DOCKER_IMAGE=/d' -e '/ PWD=/d' -e '/ PATH=/d' > ./env
 cat ./env
 
@@ -132,10 +133,21 @@ if [ "$WORKSPACE_SOURCE" = "host-copy" ]; then
     # Pick this if you want the source code to persist into a saved
     # docker image
     docker cp $WORKSPACE/. "$id:/var/lib/jenkins/workspace"
+
+    # Commit and push the source only image (to be overwritten when
+    # the build completes.)  (But don't bother doing this if it's
+    # not a host-copy, because then there won't be any useful
+    # source anyhow.)
+    #
+    # NB: Do this before env copy, in case env has private data.
+    docker commit "$id" "${COMMIT_DOCKER_IMAGE}" > "$output"
+    retry docker push "${COMMIT_DOCKER_IMAGE}" > "$output"
 fi
 
-# Copy in the env file
-docker cp $WORKSPACE/env "$id:/var/lib/jenkins/workspace/env"
+if [ "$IMPORT_ENV" == 1 ]; then
+    # Copy in the env file
+    docker cp $WORKSPACE/env "$id:/var/lib/jenkins/workspace/env"
+fi
 
 # I found the only way to make the command below return the proper
 # exit code is by splitting run and exec. Executing run directly

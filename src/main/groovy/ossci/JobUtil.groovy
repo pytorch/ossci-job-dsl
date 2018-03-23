@@ -80,9 +80,10 @@ class JobUtil {
         downstreamCommitStatus {
           context("pr/${reportAs}")
 
-          // No need to inform when build is triggered...
-          // The '--none--' constant makes the ghprb plugin skip this.
-          triggeredStatus('--none--')
+          // To prevent informing the build when it is triggered, you can
+          // set the '--none--' constant; but I think we actually want to
+          // see when the trigger occurs
+          triggeredStatus('Build is triggered')
 
           // Only inform when build is started...
           startedStatus('Build in progress')

@@ -441,16 +441,6 @@ git status
         ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
-      scm {
-        git {
-          remote {
-            github('yf225/perf-tests', 'ssh')
-            credentials('caffe2bot')
-          }
-          branch('origin/cpu')
-        }
-      }
-
       wrappers {
         credentialsBinding {
           usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'iam-user-perf')
@@ -475,14 +465,6 @@ git status
           script(EmailUtil.sendEmailScript + ciFailureEmailScript)
         }
       }
-
-      publishers {
-        git {
-          pushOnlyIfSuccess()
-          forcePush()
-          branch('origin', 'cpu')
-        }
-      }
     }
 
     job("${buildBasePath}/short-perf-test-gpu") {
@@ -491,16 +473,6 @@ git status
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
-      }
-
-      scm {
-        git {
-          remote {
-            github('yf225/perf-tests', 'ssh')
-            credentials('caffe2bot')
-          }
-          branch('origin/gpu')
-        }
       }
 
       wrappers {
@@ -527,14 +499,6 @@ git status
       publishers {
         groovyPostBuild {
           script(EmailUtil.sendEmailScript + ciFailureEmailScript)
-        }
-      }
-
-      publishers {
-        git {
-          pushOnlyIfSuccess()
-          forcePush()
-          branch('origin', 'gpu')
         }
       }
     } // job(... + "short-perf-test-gpu")

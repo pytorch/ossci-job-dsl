@@ -63,7 +63,8 @@ if (manager.build.result.toString().contains("FAILURE")) {
     || it.contains("Server does not allow request for unadvertised object") /* Submodule commit doesn't exist, Windows */
   } > 0)
   def isFalseNegative = (logLines.count {
-    it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */
+    it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */ \
+    || it.contains("No space left on device") /* OOD error */
   } > 0)
   def hasEnteredUserLand = (logLines.count {it.contains("ENTERED_USER_LAND")} > 0)
   def hasExitedUserLand = (logLines.count {it.contains("EXITED_USER_LAND")} > 0)

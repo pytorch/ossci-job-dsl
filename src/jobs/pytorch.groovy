@@ -250,13 +250,12 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
              }
             }
-            // yf225: disabled due to flakiness
-            // phaseJob("${buildBasePath}/short-perf-test-gpu") {
-            //   parameters {
-            //     predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-            //     predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
-            //   }
-            // }
+            phaseJob("${buildBasePath}/short-perf-test-gpu") {
+              parameters {
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
+              }
+            }
           }
         } // phase("Test and Push")
       } // else (buildEnvironment.contains("macos") || buildEnvironment.contains("docker"))

@@ -55,7 +55,7 @@ def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.co
 
 def ciFailureEmailScript = '''
 if (manager.build.result.toString().contains("FAILURE")) {
-  def logLines = manager.build.logFile.readLines()
+  def logLines = manager.build.logFile.text
   def isFalsePositive = (logLines.count {
     it.contains("ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.") /* This commit is not the latest one anymore. */ \
     || it.contains("java.lang.InterruptedException") /* Job is cancelled. */ \

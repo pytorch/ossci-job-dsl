@@ -10,6 +10,7 @@ class Users {
     "wsmoses",
     "nicolasvasilache",
     "ttheodor",
+    "skimo-openhub",
   ]
 
   // GitHub users for who pull request builds are automatically started.

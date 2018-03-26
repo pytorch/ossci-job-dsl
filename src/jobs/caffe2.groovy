@@ -426,16 +426,14 @@ Run container with: <code>docker run -i -t registry.pytorch.org/caffe2/${buildEn
         )
       }
 
-      // Fetch both master and gh-pages, as SSH so we can push
+      // Fetch caffe2.github.io as SSH so we can push
       scm {
         git {
           remote {
-            github('caffe2/caffe2', 'ssh')
+            github('caffe2/caffe2.github.io', 'ssh')
             credentials('caffe2bot')
-
-            refspec('+refs/heads/*:refs/remotes/origin/*')
           }
-          branch('origin/gh-pages')
+          branch('origin/master')
           GitUtil.defaultExtensions(delegate)
         }
       }
@@ -465,8 +463,10 @@ sudo apt-get install -y doxygen graphviz
 temp_dir=$(mktemp -d)
 trap "rm -rf ${temp_dir}" EXIT
 
-# Checkout master as documentation source
-git checkout master
+# Get all the documentation sources, put them in one place
+rm -rf caffe2_source || true
+git clone https://github.com/caffe2/caffe2 caffe2_source
+pushd caffe2_source
 
 # The NCCL external build keeps stuff around in third_party/nccl
 rm -rf third_party
@@ -498,9 +498,11 @@ mv build/docs/doxygen-python "${temp_dir}"
 export PYTHONPATH="build:$PYTHONPATH"
 python caffe2/python/docs/github.py "${temp_dir}/operators-catalogue.md"
 
-# Checkout gh-pages for doc push
-git checkout -B gh-pages origin/gh-pages
-git reset --hard
+# Go up a level for the doc push
+popd
+
+# Remove source directory
+rm -rf caffe2_source || true
 
 # Copy docs from the temp folder and git add
 git rm -rf doxygen-c || true

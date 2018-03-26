@@ -484,7 +484,6 @@ ccache -o log_file=$PWD/build/ccache.log
 cd build
 time cmake -DBUILD_DOCS=ON .. && make
 cd ..
-#./.jenkins/build.sh "-DBUILD_DOCS=ON
 
 # Move docs to the temp folder
 mv build/docs/doxygen-c "${temp_dir}"
@@ -615,7 +614,11 @@ if [[ "${BUILD_ENVIRONMENT}" == conda* ]]; then
 fi
 
 # Build
-./.jenkins/build.sh ${cmake_args}
+if test -x ".jenkins/caffe2/build.sh"; then
+  ./.jenkins/caffe2/build.sh ${cmake_args}
+else
+  ./.jenkins/build.sh ${cmake_args}
+fi
 
 # Show sccache stats if it is running
 if pgrep sccache > /dev/null; then
@@ -707,7 +710,11 @@ if [[ "${BUILD_ENVIRONMENT}" == conda* ]]; then
 fi
 
 # Build
-./.jenkins/test.sh
+if test -x ".jenkins/caffe2/test.sh"; then
+  ./.jenkins/caffe2/test.sh
+else
+  ./.jenkins/test.sh
+fi
 
 # Remove benign core dumps.
 # These are tests for signal handling (including SIGABRT).

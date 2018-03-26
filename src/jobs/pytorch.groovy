@@ -320,8 +320,11 @@ set -ex
 # Reinitialize submodules
 git submodule update --init
 
-echo "Using in-repo script"
-.jenkins/build.sh
+if test -x ".jenkins/pytorch/build.sh"; then
+  .jenkins/pytorch/build.sh
+else
+  .jenkins/build.sh
+fi
 
 # Clean up temporary build products so that the docker image we commit
 # has less size
@@ -457,7 +460,13 @@ git status
 
         MacOSUtil.dockerShell context: delegate,
                 image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
-                script: '.jenkins/short-perf-test-cpu.sh'
+                script: '''
+if test -x ".jenkins/pytorch/short-perf-test-cpu.sh"; then
+  .jenkins/pytorch/short-perf-test-cpu.sh
+else
+  .jenkins/short-perf-test-cpu.sh
+fi
+'''
       }
 
       publishers {
@@ -493,7 +502,13 @@ git status
                 cudaVersion: cudaVersion,
                 image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
                 workspaceSource: "docker",
-                script: '.jenkins/short-perf-test-gpu.sh'
+                script: '''
+if test -x ".jenkins/pytorch/short-perf-test-gpu.sh"; then
+  .jenkins/pytorch/short-perf-test-gpu.sh
+else
+  .jenkins/short-perf-test-gpu.sh
+fi
+'''
       }
 
       publishers {
@@ -566,8 +581,11 @@ if [ "${RUN_TESTS:-true}" == "false" ]; then
   exit 0
 fi
 
-echo "Using in-repo script"
-.jenkins/test.sh
+if test -x ".jenkins/pytorch/test.sh"; then
+  .jenkins/pytorch/test.sh
+else
+  .jenkins/test.sh
+fi
 
 exit 0
 '''
@@ -605,11 +623,10 @@ exit 0
               script: '''
 set -ex
 
-if [[ -x .jenkins/multigpu-test.sh ]]; then
-    echo "Using in-repo script"
-    .jenkins/multigpu-test.sh
+if [[ -x .jenkins/pytorch/multigpu-test.sh ]]; then
+  .jenkins/pytorch/multigpu-test.sh
 else
-    echo "No multigpu test enabled"
+  .jenkins/multigpu-test.sh
 fi
 
 exit 0
@@ -649,10 +666,10 @@ exit 0
         shell '''#!/bin/bash
 set -ex
 
-if test -x ".jenkins/docker-build-test.sh"; then
-    echo "Using in-repo script"
-    .jenkins/docker-build-test.sh
-    exit 0
+if test -x ".jenkins/pytorch/docker-build-test.sh"; then
+  .jenkins/pytorch/docker-build-test.sh
+else
+  .jenkins/docker-build-test.sh
 fi
 
 # PURPOSEFULLY DO NOT PUSH THIS IMAGE.  We are not sure if
@@ -682,7 +699,13 @@ fi
 
       steps {
         GitUtil.mergeStep(delegate)
-        MacOSUtil.sandboxShell delegate, '.jenkins/macos-build-test.sh'
+        MacOSUtil.sandboxShell delegate, '''
+if test -x ".jenkins/pytorch/macos-build-test.sh"; then
+  .jenkins/pytorch/macos-build-test.sh
+else
+  .jenkins/macos-build-test.sh
+fi
+'''
       }
 
       publishers {
@@ -720,7 +743,13 @@ fi
           )
         }
 
-        WindowsUtil.shell delegate, '.jenkins/win-build.sh', cudaVersion
+        WindowsUtil.shell delegate, '''
+if test -x ".jenkins/pytorch/win-build.sh"; then
+  .jenkins/pytorch/win-build.sh
+else
+  .jenkins/win-build.sh
+fi
+''', cudaVersion
       }
 
       publishers {
@@ -758,7 +787,13 @@ fi
           )
         }
 
-        WindowsUtil.shell delegate, ".jenkins/win-test.sh", cudaVersion
+        WindowsUtil.shell delegate, '''
+if test -x ".jenkins/pytorch/win-test.sh"; then
+  .jenkins/pytorch/win-test.sh
+else
+  .jenkins/win-test.sh
+fi
+''', cudaVersion
       }
 
       publishers {

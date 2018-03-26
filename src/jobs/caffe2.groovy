@@ -1032,8 +1032,7 @@ windowsBuildEnvironments.each {
       }
 
       WindowsUtil.shell delegate, '''
-set PATH=C:\\Program Files\\CMake\\bin;C:\\Program Files\\7-Zip;C:\\curl-7.57.0-win64-mingw\\bin;C:\\Program Files\\Git\\cmd;C:\\Program Files\\Amazon\\AWSCLI;%PATH%
-./scripts/build_windows.bat
+cmd /V /C "set PATH=C:\\Program Files\\CMake\\bin;%PATH%&& .\scripts\build_windows.bat"
 ''', cudaVersion
     }
   } // Windows build jobs

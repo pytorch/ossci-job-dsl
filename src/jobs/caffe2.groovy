@@ -2,6 +2,7 @@ import ossci.DockerUtil
 import ossci.GitUtil
 import ossci.JobUtil
 import ossci.MacOSUtil
+import ossci.WindowsUtil
 import ossci.ParametersUtil
 import ossci.caffe2.Users
 import ossci.caffe2.DockerImages
@@ -33,6 +34,10 @@ def macOsBuildEnvironments = [
   'conda2-macos10.13',
   // This is actually hardcoded to 3.6 inside scripts/build_anaconda.sh
   'conda3-macos10.13',
+]
+
+def windowsBuildEnvironments = [
+  'py2-cuda9.0-cudnn7-windows'
 ]
 
 def dockerCondaBuildEnvironments =
@@ -967,6 +972,70 @@ fi
     }
   }
 }
+
+windowsBuildEnvironments.each {
+  // Capture variable for delayed evaluation
+  def buildEnvironment = it
+
+  // Windows trigger jobs
+  // TODO this is a verbatim copy paste from another trigger job in this file.
+  // These should be consolidated
+  def jobName = "${buildBasePath}/${buildEnvironment}-trigger-build"
+  def gitHubName = "${buildEnvironment}-build"
+
+  multiJob(jobName) {
+    JobUtil.commonTrigger(delegate)
+    JobUtil.gitCommitFromPublicGitHub(delegate, "caffe2/caffe2")
+    JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.CMAKE_ARGS(delegate)
+    }
+
+    steps {
+      def gitPropertiesFile = './git.properties'
+      GitUtil.mergeStep(delegate)
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      phase("Build") {
+        phaseJob("${buildBasePath}/${buildEnvironment}-build") {
+          parameters {
+            currentBuild()
+            propertiesFile(gitPropertiesFile)
+          }
+        }
+      }
+    }
+  } // Actual definition of Windows trigger multijob
+
+  // Windows build jobs
+  job("${buildBasePath}/${buildEnvironment}-build") {
+    JobUtil.common(delegate, 'windows && cpu')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'caffe2/caffe2')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+
+      def cudaVersion = ''
+      if (buildEnvironment.contains('cuda')) {
+        def cudaVersionRegexMatch = buildEnvironment =~ /cuda(\d.\d)/
+        cudaVersion = cudaVersionRegexMatch[0][1]
+      }
+
+      WindowsUtil.shell delegate, '''
+set PATH=C:\\Program Files\\CMake\\bin;C:\\Program Files\\7-Zip;C:\\curl-7.57.0-win64-mingw\\bin;C:\\Program Files\\Git\\cmd;C:\\Program Files\\Amazon\\AWSCLI;%PATH%
+./scripts/build_windows.bat
+''', cudaVersion
+    }
+  } // Windows build jobs
+} // Windows jobs, just build for now
 
 
 //

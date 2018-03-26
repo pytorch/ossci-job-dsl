@@ -303,7 +303,8 @@ fi
 # is done.  Because we only have a single executor per node,
 # it is always safe to kill any Docker stragglers.  So kill
 # them all, and this way prune can kill a lot more things.
-# docker kill $(docker ps -q)
+# NB: This will fail when docker ps -q is empty; we don't care
+docker kill $(docker ps -q) || true
 docker system prune --filter "until=2h" --all --force
 '''
   }

@@ -55,7 +55,7 @@ def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.co
 
 def ciFailureEmailScript = '''
 if (manager.build.result.toString().contains("FAILURE")) {
-  def logLines = manager.build.logFile.text
+  def logLines = manager.build.logFile.readLines()
   def isFalsePositive = (logLines.count {
     it.contains("ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.") /* This commit is not the latest one anymore. */ \
     || it.contains("java.lang.InterruptedException") /* Job is cancelled. */ \
@@ -71,7 +71,7 @@ if (manager.build.result.toString().contains("FAILURE")) {
   def inUserLand = (hasEnteredUserLand && !hasExitedUserLand)
   if ((!inUserLand && !isFalsePositive) || isFalseNegative) {
     // manager.listener.logger.println "CI system failure occured"
-    sendEmail("'''+mailRecipients+'''", 'CI system failure', 'See <'+manager.build.getEnvironment()["BUILD_URL"]+'>'+'\\n\\n'+'Log:\\n\\n'+logLines)
+    sendEmail("'''+mailRecipients+'''", 'CI system failure', 'See <'+manager.build.getEnvironment()["BUILD_URL"]+'>'+'\\n\\n'+'Log:\\n\\n'+manager.build.logFile.text)
   }
 }
 '''

@@ -169,7 +169,11 @@ if [ -n "${last_tag}" ]; then
 fi
 
 # Build new image
-cd ./docker/jenkins
+if [ -d ./docker/caffe2/jenkins ]; then
+  cd ./docker/caffe2/jenkins
+else
+  cd ./docker/jenkins
+fi
 mkdir -p bin
 ./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}"
 docker push "${image}:${tag}"

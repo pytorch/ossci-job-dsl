@@ -56,9 +56,8 @@ class GitUtil {
       // Merge GIT_COMMIT into GIT_MERGE_TARGET, if set
       shell '''
 if [ -n "${GIT_MERGE_TARGET}" ]; then
-  git branch -f merge-target ${GIT_MERGE_TARGET}
-  git checkout -f merge-target
-  git merge --no-ff ${GIT_COMMIT}
+  git reset --hard ${GIT_COMMIT}
+  git merge --no-ff ${GIT_MERGE_TARGET}
 fi
 '''
     }

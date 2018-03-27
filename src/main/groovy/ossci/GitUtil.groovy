@@ -57,8 +57,7 @@ class GitUtil {
       shell '''
 if [ -n "${GIT_MERGE_TARGET}" ]; then
   git reset --hard ${GIT_COMMIT}
-  git clean -xffd
-  git merge --no-ff ${GIT_MERGE_TARGET}
+  git merge --no-ff ${GIT_MERGE_TARGET} || git merge --abort
 fi
 '''
     }

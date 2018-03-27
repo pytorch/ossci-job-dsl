@@ -107,6 +107,9 @@ multiJob("caffe2-pull-request") {
         // macOS builds
         'py2-system-macos10.13',
 
+        // Windows builds
+        'py2-cuda9.0-cudnn7-windows',
+
         // Builds for Anaconda
         'conda2-ubuntu16.04',
         'conda3-ubuntu16.04',

@@ -2,7 +2,6 @@ import ossci.DockerUtil
 import ossci.GitUtil
 import ossci.JobUtil
 import ossci.MacOSUtil
-import ossci.WindowsUtil
 import ossci.ParametersUtil
 import ossci.caffe2.Users
 import ossci.caffe2.DockerImages
@@ -1024,16 +1023,8 @@ windowsBuildEnvironments.each {
 
     steps {
       GitUtil.mergeStep(delegate)
-
-      def cudaVersion = ''
-      if (buildEnvironment.contains('cuda')) {
-        def cudaVersionRegexMatch = buildEnvironment =~ /cuda(\d.\d)/
-        cudaVersion = cudaVersionRegexMatch[0][1]
-      }
-
-      WindowsUtil.shell delegate, '''
-cmd /V /C "set PATH=C:\\Program Files\\CMake\\bin;%PATH%&& .\\scripts\\build_windows.bat"
-''', cudaVersion
+      // TODO use WindowsUtil
+      powerShell('& { PATH=C:\\Program Files\\CMake\\bin;%PATH%; .\\scripts\\build_windows.bat }')
     }
   } // Windows build jobs
 } // Windows jobs, just build for now

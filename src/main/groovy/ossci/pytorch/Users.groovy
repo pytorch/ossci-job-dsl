@@ -91,5 +91,6 @@ class Users {
     "jma127",
     "vedanuj",
     "alexholdenmiller",
+    "smessmer",
   ]
 }

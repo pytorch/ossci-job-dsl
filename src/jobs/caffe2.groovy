@@ -1027,10 +1027,10 @@ windowsBuildEnvironments.each {
     steps {
       GitUtil.mergeStep(delegate)
       // TODO use WindowsUtil
-      powerShell('''
-git submodule update
-$env:PATH = "$env:PATH;C:\\Program Files\\CMake\\bin"
-.\\scripts\\build_windows.bat
+      shell('''
+git submodule update --init
+export PATH="$PATH:/c/Program Files/CMake/bin:"
+./scripts/build_windows.bat
 ''')
     }
   } // Windows build jobs

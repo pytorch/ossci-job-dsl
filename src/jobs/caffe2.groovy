@@ -1026,6 +1026,7 @@ windowsBuildEnvironments.each {
       // TODO use WindowsUtil
       powerShell('& { PATH=C:\\Program Files\\CMake\\bin;%PATH%; .\\scripts\\build_windows.bat }')
       powerShell('''dir''')
+      powerShell('''cmd .\\scripts\\build_windows.bat''')
       powerShell('''Start-Process .\\scripts\\build_windows.bat''')
       powerShell('''echo "hello jenkins''')
     }

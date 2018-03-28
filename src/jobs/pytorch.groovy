@@ -521,7 +521,7 @@ fi
 
   job("${buildBasePath}/${buildEnvironment}-test") {
     JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
-    JobUtil.timeoutAndFailAfter(delegate, 30)
+    JobUtil.timeoutAndFailAfter(delegate, 40)
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -763,7 +763,7 @@ fi
     job("${buildBasePath}/${buildEnvironment}-test") {
       JobUtil.common delegate, 'windows && gpu'
       JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
-      JobUtil.timeoutAndFailAfter(delegate, 30)
+      JobUtil.timeoutAndFailAfter(delegate, 40)
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)

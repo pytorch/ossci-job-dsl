@@ -24,6 +24,7 @@ class Users {
     "yf225",
     "goldsborough",
     "theweiho",
+    "orionr",
   ]
 
   // GitHub users for who builds automatically run
@@ -92,5 +93,6 @@ class Users {
     "vedanuj",
     "alexholdenmiller",
     "smessmer",
+    "orionr",
   ]
 }

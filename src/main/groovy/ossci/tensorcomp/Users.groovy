@@ -11,6 +11,7 @@ class Users {
     "nicolasvasilache",
     "ttheodor",
     "skimo-openhub",
+    "orionr",
   ]
 
   // GitHub users for who pull request builds are automatically started.
@@ -25,5 +26,6 @@ class Users {
     "salexspb",
     "apaszke",
     "ezyang",
+    "orionr",
   ]
 }

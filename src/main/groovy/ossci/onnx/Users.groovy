@@ -9,6 +9,7 @@ class Users {
     "ezyang",
     "bddppq",
     "houseroad",
+    "orionr",
     "SsnL",
   ] + ossci.pytorch.Users.githubAdmins
 
@@ -28,6 +29,7 @@ class Users {
     "jywumsft",
     "killeent",
     "linkerzhang",
+    "orionr",
     "prasanthpul",
     "prigoyal",
     "smessmer",

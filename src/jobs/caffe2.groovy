@@ -3,7 +3,7 @@ import ossci.GitUtil
 import ossci.JobUtil
 import ossci.MacOSUtil
 import ossci.ParametersUtil
-import ossci.caffe2.Users
+import ossci.pytorch.Users
 import ossci.caffe2.DockerImages
 import ossci.caffe2.DockerVersion
 
@@ -52,10 +52,11 @@ def macCondaBuildEnvironments = [
 ]
 
 def docEnvironment = 'py2-gcc5-ubuntu16.04'
+def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 // Runs on pull requests
 multiJob("caffe2-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, "caffe2/caffe2", 'e8c3034a-549f-432f-b811-ec4bbc4b3d62', Users)
+  // JobUtil.gitHubPullRequestTrigger(delegate, "pytorch/pytorch", pytorchbotAuthId, Users)
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate)
@@ -185,7 +186,7 @@ def masterBuildOnlyEnvironments = [
 
 // Runs on release build on master
 multiJob("caffe2-master") {
-  JobUtil.masterTrigger(delegate, "caffe2/caffe2")
+  // JobUtil.masterTrigger(delegate, "pytorch/pytorch")
 
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -223,7 +224,7 @@ multiJob("caffe2-master") {
 
 // Runs on debug build on master (triggered nightly)
 multiJob("caffe2-master-debug") {
-  JobUtil.masterTrigger(delegate, "caffe2/caffe2", false)
+  // JobUtil.masterTrigger(delegate, "pytorch/pytorch", false)
 
   triggers {
     cron('@daily')
@@ -275,10 +276,10 @@ multiJob("caffe2-master-doc") {
   scm {
     git {
       remote {
-        github('caffe2/caffe2')
-        refspec('+refs/heads/gh-pages:refs/remotes/origin/gh-pages')
+        github('caffe2/caffe2.github.io')
+        refspec('+refs/heads/master:refs/remotes/origin/master')
       }
-      branch('origin/gh-pages')
+      branch('origin/master')
       GitUtil.defaultExtensions(delegate)
     }
   }
@@ -540,7 +541,7 @@ git status
 
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, "caffe2/caffe2")
+    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -657,7 +658,7 @@ fi
     // Run tests on GPU machine if built with CUDA support
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
     JobUtil.timeoutAndFailAfter(delegate, 30)
-    JobUtil.gitCommitFromPublicGitHub(delegate, "caffe2/caffe2")
+    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -790,7 +791,7 @@ macOsBuildEnvironments.each {
 
     multiJob(jobName) {
       JobUtil.commonTrigger(delegate)
-      JobUtil.gitCommitFromPublicGitHub(delegate, "caffe2/caffe2")
+      JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
       JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
       parameters {
@@ -855,7 +856,7 @@ macOsBuildEnvironments.each {
 
     job("${_buildBasePath}/${buildEnvironment}-${_buildSuffix}") {
       JobUtil.common(delegate, 'osx')
-      JobUtil.gitCommitFromPublicGitHub(delegate, 'caffe2/caffe2')
+      JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
@@ -989,7 +990,7 @@ windowsBuildEnvironments.each {
 
   multiJob(jobName) {
     JobUtil.commonTrigger(delegate)
-    JobUtil.gitCommitFromPublicGitHub(delegate, "caffe2/caffe2")
+    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
     JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
     parameters {
@@ -1017,7 +1018,7 @@ windowsBuildEnvironments.each {
   // Windows build jobs
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'windows && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'caffe2/caffe2')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -1056,7 +1057,7 @@ dockerCondaBuildEnvironments.each {
 
   job("${uploadBasePath}/${buildEnvironment}-build-upload") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'caffe2/caffe2')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -1124,7 +1125,7 @@ PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh
 // every night with UPLOAD_TO_CONDA set to 1
 multiJob("nightly-conda-package-upload") {
   JobUtil.commonTrigger(delegate)
-  JobUtil.gitCommitFromPublicGitHub(delegate, 'caffe2/caffe2')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)

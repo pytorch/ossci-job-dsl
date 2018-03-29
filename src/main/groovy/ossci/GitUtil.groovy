@@ -86,7 +86,7 @@ fi
 if [ -n "\${GIT_MERGE_TARGET}" ]; then
   echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"
 
-  if [ test -x .jenkins/pytorch/dirty.sh ]; then
+  if [ test -x .jenkins/pytorch/changed.sh ]; then
     if .jenkins/pytorch/dirty.sh "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"; then
       echo "PYTORCH_CHANGED=1" >> "${file}"
     else
@@ -96,21 +96,19 @@ if [ -n "\${GIT_MERGE_TARGET}" ]; then
     echo "PYTORCH_CHANGED=1" >> "${file}"
   fi
 
-  if [ test -x .jenkins/caffe2/dirty.sh ]; then
+  if [ test -x .jenkins/caffe2/changed.sh ]; then
     if .jenkins/caffe2/dirty.sh "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"; then
       echo "CAFFE2_CHANGED=1" >> "${file}"
     else
       echo "CAFFE2_CHANGED=0" >> "${file}"
     fi
   else
-    # FIX ME
-    echo "CAFFE2_CHANGED=0" >> "${file}"
+    echo "CAFFE2_CHANGED=1" >> "${file}"
   fi
 else
   # Assume the worst
+  echo "CAFFE2_CHANGED=1" >> "${file}"
   echo "PYTORCH_CHANGED=1" >> "${file}"
-  # FIX ME
-  echo "CAFFE2_CHANGED=0" >> "${file}"
 fi
 """
     }

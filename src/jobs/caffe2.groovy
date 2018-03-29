@@ -130,6 +130,7 @@ multiJob("caffe2-pull-request") {
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
+          PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
         }
       }
 

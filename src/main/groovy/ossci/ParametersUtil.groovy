@@ -16,26 +16,6 @@ class ParametersUtil {
     }
   }
 
-  static void PYTORCH_DOCKER_IMAGE_TAG(BuildParametersContext context, defaultValue = '') {
-    context.with {
-      stringParam(
-          'PYTORCH_DOCKER_IMAGE_TAG',
-          defaultValue,
-          'Tag of Docker image to use in PyTorch downstream builds',
-      )
-    }
-  }
-
-  static void CAFFE2_DOCKER_IMAGE_TAG(BuildParametersContext context, defaultValue = '') {
-    context.with {
-      stringParam(
-          'CAFFE2_DOCKER_IMAGE_TAG',
-          defaultValue,
-          'Tag of Docker image to use in Caffe2 downstream builds',
-      )
-    }
-  }
-
   static void DOCKER_IMAGE_TAG(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

@@ -3,6 +3,7 @@ import ossci.GitUtil
 import ossci.JobUtil
 import ossci.MacOSUtil
 import ossci.ParametersUtil
+import ossci.PhaseJobUtil
 import ossci.pytorch.Users
 import ossci.caffe2.DockerImages
 import ossci.caffe2.DockerVersion

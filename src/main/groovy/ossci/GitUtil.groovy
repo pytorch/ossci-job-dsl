@@ -87,7 +87,7 @@ if [ -n "\${GIT_MERGE_TARGET}" ]; then
   echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"
 
   if test -x .jenkins/pytorch/dirty.sh; then
-    if .jenkins/pytorch/dirty.sh "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"; then
+    if .jenkins/pytorch/dirty.sh "\${GIT_MERGE_TARGET}" "\${git rev-parse HEAD}"; then
       echo "PYTORCH_CHANGED=1" >> "${file}"
     else
       echo "PYTORCH_CHANGED=0" >> "${file}"
@@ -97,7 +97,7 @@ if [ -n "\${GIT_MERGE_TARGET}" ]; then
   fi
 
   if test -x .jenkins/caffe2/dirty.sh; then
-    if .jenkins/caffe2/dirty.sh "\${GIT_MERGE_TARGET}" "\${GIT_COMMIT}"; then
+    if .jenkins/caffe2/dirty.sh "\${GIT_MERGE_TARGET}" "\${git rev-parse HEAD}"; then
       echo "CAFFE2_CHANGED=1" >> "${file}"
     else
       echo "CAFFE2_CHANGED=0" >> "${file}"

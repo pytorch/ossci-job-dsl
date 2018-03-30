@@ -520,7 +520,7 @@ git status
       JobUtil.common delegate, 'cpu-perf-test'
 
       parameters {
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, PytorchDockerVersion.version)
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
       }
 

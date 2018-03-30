@@ -56,7 +56,7 @@ def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 // Runs on pull requests
 multiJob("caffe2-pull-request") {
-  // JobUtil.gitHubPullRequestTrigger(delegate, "pytorch/pytorch", pytorchbotAuthId, Users)
+  JobUtil.gitHubPullRequestTrigger(delegate, "pytorch/pytorch", pytorchbotAuthId, Users)
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate)
@@ -187,7 +187,7 @@ def masterBuildOnlyEnvironments = [
 
 // Runs on release build on master
 multiJob("caffe2-master") {
-  // JobUtil.masterTrigger(delegate, "pytorch/pytorch")
+  JobUtil.masterTrigger(delegate, "pytorch/pytorch")
 
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -225,7 +225,7 @@ multiJob("caffe2-master") {
 
 // Runs on debug build on master (triggered nightly)
 multiJob("caffe2-master-debug") {
-  // JobUtil.masterTrigger(delegate, "pytorch/pytorch", false)
+  JobUtil.masterTrigger(delegate, "pytorch/pytorch", false)
 
   triggers {
     cron('@daily')

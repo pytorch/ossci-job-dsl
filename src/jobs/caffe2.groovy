@@ -324,7 +324,7 @@ dockerBuildEnvironments.each {
     def runTests = it
 
     def jobName = "${buildBasePath}/${buildEnvironment}-trigger"
-    def gitHubName = "${buildEnvironment}"
+    def gitHubName = "caffe2-${buildEnvironment}"
     if (!runTests) {
       jobName += "-build"
       gitHubName += "-build"
@@ -786,7 +786,7 @@ macOsBuildEnvironments.each {
     def runTests = it
 
     def jobName = "${buildBasePath}/${buildEnvironment}-trigger"
-    def gitHubName = "${buildEnvironment}"
+    def gitHubName = "caffe2-${buildEnvironment}"
     if (!runTests) {
       jobName += "-build"
       gitHubName += "-build"
@@ -992,7 +992,7 @@ windowsBuildEnvironments.each {
   // TODO this is a verbatim copy paste from another trigger job in this file.
   // These should be consolidated
   def jobName = "${buildBasePath}/${buildEnvironment}-trigger-build"
-  def gitHubName = "${buildEnvironment}-build"
+  def gitHubName = "caffe2-${buildEnvironment}-build"
 
   multiJob(jobName) {
     JobUtil.commonTrigger(delegate)

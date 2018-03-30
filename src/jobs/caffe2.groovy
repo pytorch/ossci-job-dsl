@@ -131,7 +131,7 @@ multiJob("caffe2-pull-request") {
             // Pass parameters of this job
             currentBuild()
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            predefinedProp('ghprbCredentialsId', 'e8c3034a-549f-432f-b811-ec4bbc4b3d62')
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }

@@ -69,6 +69,10 @@ multiJob("caffe2-pull-request") {
     GitUtil.mergeStep(delegate)
     GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
+    environmentVariables {
+      propertiesFile(gitPropertiesFile)
+    }
+
     phase("Build") {
       def buildAndTestEnvironments = [
         'py2-cuda8.0-cudnn6-ubuntu16.04',

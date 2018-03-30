@@ -477,12 +477,7 @@ rm -rf caffe2_source || true
 git clone https://github.com/caffe2/caffe2 caffe2_source
 pushd caffe2_source
 
-# The NCCL external build keeps stuff around in third_party/nccl
-rm -rf third_party
-
 # Reinitialize submodules
-git submodule sync
-git submodule foreach git fetch
 git submodule update --init --recursive
 
 # Ensure jenkins can write to the ccache root dir.
@@ -599,17 +594,11 @@ git status
               script: '''
 set -ex
 
-# The NCCL external build keeps stuff around in third_party/nccl
-rm -rf third_party
-
-# Reinitialize submodules
-git submodule sync
-git submodule foreach git fetch
-
 # Need to checkout fetch PRs for onnxbot tracking PRs
 git submodule update --init third_party/onnx || true
 cd third_party/onnx && git fetch --tags --progress origin +refs/pull/*:refs/remotes/origin/pr/* && cd -
 
+# Reinitialize submodules
 git submodule update --init --recursive
 
 # Ensure jenkins can write to the ccache root dir.
@@ -932,17 +921,11 @@ macOsBuildEnvironments.each {
         MacOSUtil.sandboxShell delegate, '''
 set -ex
 
-# The NCCL external build keeps stuff around in third_party/nccl
-rm -rf third_party
-
-# Reinitialize submodules
-git submodule sync
-git submodule foreach git fetch
-
 # Need to checkout fetch PRs for onnxbot tracking PRs
 git submodule update --init third_party/onnx || true
 cd third_party/onnx && git fetch --tags --progress origin +refs/pull/*:refs/remotes/origin/pr/* && cd -
 
+# Reinitialize submodules
 git submodule update --init --recursive
 
 # Reinitialize path (see man page for path_helper(8))
@@ -1115,12 +1098,9 @@ dockerCondaBuildEnvironments.each {
               workspaceSource: "host-mount",
               script: '''
 set -ex
-rm -rf third_party
-
 # Please don't make any changes to the conda-build process here. Instead, edit
 # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
 # use that script
-
 PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh
 '''
     }

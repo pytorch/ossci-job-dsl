@@ -7,7 +7,8 @@ import ossci.WindowsUtil
 import ossci.GitUtil
 import ossci.EmailUtil
 import ossci.pytorch.Users
-import ossci.pytorch.DockerVersion
+import ossci.pytorch.DockerVersion as PyTorchDockerVersion
+import ossci.caffe2.DockerVersion as Caffe2DockerVersion
 
 def buildBasePath = 'pytorch-builds'
 
@@ -82,7 +83,10 @@ def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 multiJob("pytorch-pull-request") {
   JobUtil.gitHubPullRequestTrigger(delegate, 'pytorch/pytorch', pytorchbotAuthId, Users)
   parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.PYTORCH_DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
+    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    ParametersUtil.CMAKE_ARGS(delegate)
+    ParametersUtil.HYPOTHESIS_SEED(delegate)
   }
   steps {
     def gitPropertiesFile = './git.properties'
@@ -95,6 +99,7 @@ multiJob("pytorch-pull-request") {
     }
 
     phase("Build and test") {
+      // PyTorch jobs
       buildEnvironments.each {
         phaseJob("${buildBasePath}/${it}-trigger") {
           parameters {
@@ -103,11 +108,86 @@ multiJob("pytorch-pull-request") {
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
             predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             predefinedProp('COMMIT_SOURCE', 'pull-request')
+            predefinedProp('DOCKER_IMAGE_TAG', '${PYTORCH_DOCKER_IMAGE_TAG}')
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
           PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
         }
+      }
+
+      // Caffe2 jobs
+      def caffe2BuildAndTestEnvironments = [
+        'py2-cuda8.0-cudnn6-ubuntu16.04',
+        'py2-cuda9.0-cudnn7-ubuntu16.04',
+        'py2-mkl-ubuntu16.04',
+
+        // Vanilla Ubuntu 16.04 (Python 2/3)
+        'py2-gcc5-ubuntu16.04',
+        //'py3-gcc5-ubuntu16.04',
+
+        // Vanilla Ubuntu 14.04
+        'py2-gcc4.8-ubuntu14.04',
+
+        // Builds for Anaconda
+        //'conda2-cuda8.0-cudnn7-ubuntu16.04',
+      ]
+
+      def caffe2BuildOnlyEnvironments = [
+        // Compatibility check for CUDA 8 / cuDNN 7 (build only)
+        'py2-cuda8.0-cudnn7-ubuntu16.04',
+        'py2-cuda8.0-cudnn5-ubuntu16.04',
+
+        // Compiler compatibility for 14.04 (build only)
+        'py2-gcc4.9-ubuntu14.04',
+
+        // Compiler compatibility for 16.04 (build only)
+        'py2-clang3.8-ubuntu16.04',
+        'py2-clang3.9-ubuntu16.04',
+        'py2-gcc6-ubuntu16.04',
+        'py2-gcc7-ubuntu16.04',
+
+        // Build for Android
+        'py2-android-ubuntu16.04',
+
+        // Build for iOS
+        'py2-ios-macos10.13',
+
+        // macOS builds
+        'py2-system-macos10.13',
+
+        // Windows builds
+        'py2-cuda9.0-cudnn7-windows',
+
+        // Builds for Anaconda
+        'conda2-ubuntu16.04',
+        'conda3-ubuntu16.04',
+        'conda2-macos10.13',
+
+        // Run a CentOS build (verifies compatibility with CMake 2.8.12)
+        'py2-cuda9.0-cudnn7-centos7',
+      ]
+
+      def definePhaseJob = { name ->
+        phaseJob("caffe2-builds/${name}") {
+          parameters {
+            // Pass parameters of this job
+            currentBuild()
+            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+            // Ensure consistent merge behavior in downstream builds.
+            propertiesFile(gitPropertiesFile)
+          }
+          PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
+        }
+      }
+
+      caffe2BuildAndTestEnvironments.each {
+        definePhaseJob(it + "-trigger-test")
+      }
+
+      caffe2BuildOnlyEnvironments.each {
+        definePhaseJob(it + "-trigger-build")
       }
     }
   }
@@ -171,7 +251,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
       ParametersUtil.COMMIT_SOURCE(delegate)
 
       booleanParam(
@@ -275,7 +355,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
 
       stringParam(
         'DOCKER_IMAGE_COMMIT_TAG',
@@ -349,7 +429,7 @@ exit 0
       concurrentBuild(false)
       parameters {
         // TODO: Accept GIT_COMMIT, eliminate race, small profit
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
         booleanParam(
           'DOC_PUSH',
           false,
@@ -440,7 +520,7 @@ git status
       JobUtil.common delegate, 'cpu-perf-test'
 
       parameters {
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, PytorchDockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
@@ -480,7 +560,7 @@ fi
       JobUtil.common delegate, 'docker && gpu'
 
       parameters {
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
@@ -524,7 +604,7 @@ fi
     JobUtil.timeoutAndFailAfter(delegate, 40)
 
     parameters {
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
 
       // TODO: Using this parameter is a bit wasteful because Jenkins
       // still has to schedule the job and load the docker image
@@ -604,7 +684,7 @@ exit 0
     JobUtil.timeoutAndFailAfter(delegate, 15)
 
     parameters {
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, PyTorchDockerVersion.version)
     }
 
     steps {

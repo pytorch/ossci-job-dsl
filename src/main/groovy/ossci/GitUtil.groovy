@@ -55,9 +55,10 @@ class GitUtil {
     context.with {
       // Merge GIT_COMMIT into GIT_MERGE_TARGET, if set
       shell '''
+set -ex
 if [ -n "${GIT_MERGE_TARGET}" ]; then
   git reset --hard ${GIT_COMMIT}
-  git merge --no-ff ${GIT_MERGE_TARGET} || git merge --abort
+  git merge --no-ff ${GIT_MERGE_TARGET}
 fi
 '''
     }

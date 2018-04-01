@@ -122,7 +122,7 @@ class JobUtil {
   // This configures a GitHub job to handle GitHub pull requests under multiple
   // configurations (thus it's MultiJob only; DON'T use this for a freestyle
   // job, it's not setup to do that).
-  static void gitHubPullRequestTrigger(MultiJob context, String ownerAndProject, String githubAuthIdValue, Class users, boolean reportStatus = true) {
+  static void gitHubPullRequestTrigger(MultiJob context, String ownerAndProject, String githubAuthIdValue, Class users, boolean reportStatus = false) {
     context.with {
       parameters {
         // This defaults to ${ghprbActualCommit} so that the Git SCM plugin

@@ -159,7 +159,9 @@ class JobUtil {
       triggers {
         githubPullRequest {
           admins(users.githubAdmins)
-          userWhitelist(users.githubUserWhitelist)
+          // userWhitelist(users.githubUserWhitelist)
+          // Below: An experiment in LIVING DANGEROUSLY!
+          permitAll()
           useGitHubHooks()
           // If labeled with skip-tests, don't run tests.  This is
           // currently only being used by caffe2

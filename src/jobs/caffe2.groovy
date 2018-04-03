@@ -1009,6 +1009,7 @@ windowsBuildEnvironments.each {
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'windows && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+    JobUtil.timeoutAndFailAfter(delegate, 40)
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)

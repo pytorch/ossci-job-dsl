@@ -25,7 +25,7 @@ class DockerUtil {
 
 set -ex
 
-# Turn off CPU frequency scaling and GPU autoboost for GPU instances, so that we get consistent performance numbers
+# Turn off GPU autoboost for GPU instances, so that we get consistent performance numbers
 if [ -n "${CUDA_VERSION:-}" ]; then
     (sudo /usr/bin/set_gpu_autoboost_off.sh) || true
 fi
@@ -108,6 +108,10 @@ if [ -n "${CUDA_VERSION:-}" ]; then
     fi
 fi
 
+if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+  docker_args+=" --security-opt seccomp=/var/lib/jenkins/allow_perf_event_open.json"
+fi
+
 # Image
 docker_args+=" ${DOCKER_IMAGE}"
 
@@ -119,10 +123,14 @@ retry docker pull "${DOCKER_IMAGE}"
 # We start a container and detach it such that we can run
 # a series of commands without nuking the container
 echo "Starting container for image ${DOCKER_IMAGE}"
-id=$(docker run ${docker_args} /bin/cat)
+if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+  id=$(/usr/bin/cset shield --exec /usr/bin/numactl -- -C 4-7 docker run ${docker_args} /bin/cat)
+else
+  id=$(docker run ${docker_args} /bin/cat)
+fi
 
 trap "echo 'Stopping container...' &&
-# Turn on CPU frequency scaling and GPU autoboost for GPU instances again
+# Turn on GPU autoboost for GPU instances again
 if [ -n \\"${CUDA_VERSION:-}\\" ]; then
     (sudo /usr/bin/set_gpu_autoboost_on.sh) || true;
 fi &&

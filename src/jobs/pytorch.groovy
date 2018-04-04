@@ -456,6 +456,10 @@ git status
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
+          env(
+            'CPU_PERF_TEST',
+            true,
+          )
         }
 
         MacOSUtil.dockerShell context: delegate,

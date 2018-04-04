@@ -34,6 +34,10 @@ def dockerWorkers = [
   "worker-macos-high-sierra-3",
   "worker-macos-high-sierra-4",
   "worker-macos-high-sierra-5",
+  "worker-packet-type-0-00",
+  "worker-packet-type-0-01",
+  "worker-packet-type-0-02",
+  "worker-packet-type-0-03"
 ]
 
 def macOsWorkers = [

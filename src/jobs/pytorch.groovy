@@ -565,7 +565,7 @@ fi
     }
 
     steps {
-      // TODO: Will be obsolete once this is baked into docker image
+      // TODO: delete this when obsolete
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
@@ -612,7 +612,7 @@ exit 0
     }
 
     steps {
-      // TODO: Will be obsolete once this is baked into docker image
+      // TODO: delete this when obsolete
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
@@ -703,15 +703,6 @@ fi
 
       steps {
         GitUtil.mergeStep(delegate)
-
-        // Don't delete this envvar because we have Python script that uses it
-        environmentVariables {
-          env(
-            'BUILD_ENVIRONMENT',
-            "${buildEnvironment}",
-          )
-        }
-
         MacOSUtil.sandboxShell delegate, '''
 if test -x ".jenkins/pytorch/macos-build-test.sh"; then
   .jenkins/pytorch/macos-build-test.sh
@@ -749,7 +740,7 @@ fi
       steps {
         GitUtil.mergeStep(delegate)
 
-        // Don't delete this envvar because we have Python script that uses it
+        // TODO: delete usage of this envvar in .jenkins/win-build.sh and delete it
         environmentVariables {
           env(
             'BUILD_ENVIRONMENT',
@@ -793,7 +784,7 @@ fi
       steps {
         GitUtil.mergeStep(delegate)
 
-        // Don't delete this envvar because we have Python script that uses it
+        // TODO: delete usage of this envvar in .jenkins/win-test.sh and delete it
         environmentVariables {
           env(
             'BUILD_ENVIRONMENT',

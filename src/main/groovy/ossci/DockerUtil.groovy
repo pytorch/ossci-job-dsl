@@ -129,7 +129,7 @@ retry docker pull "${DOCKER_IMAGE}"
 # a series of commands without nuking the container
 echo "Starting container for image ${DOCKER_IMAGE}"
 if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
-  id=$(/usr/bin/cset proc --set /user --exec /usr/bin/numactl -- -C 4-7 docker run ${docker_args} /bin/cat)
+  id=$(/usr/bin/cset proc --set /user --exec /usr/bin/numactl -- -C 4-7 docker run ${docker_args} /bin/cat | tail -1)
 else
   id=$(docker run ${docker_args} /bin/cat)
 fi

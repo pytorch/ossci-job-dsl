@@ -30,7 +30,7 @@ if [ -n "${CUDA_VERSION:-}" ]; then
     (sudo /usr/bin/set_gpu_autoboost_off.sh) || true
 fi
 
-if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
   # Clean up old Docker containers, in case any of them are still running due to unclean exit
   (docker rm -f $(docker ps -aq) > /dev/null) || true
 fi
@@ -113,7 +113,7 @@ if [ -n "${CUDA_VERSION:-}" ]; then
     fi
 fi
 
-if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
   docker_args+=" --security-opt seccomp=/var/lib/jenkins/allow_perf_event_open.json"
 fi
 
@@ -128,7 +128,7 @@ retry docker pull "${DOCKER_IMAGE}"
 # We start a container and detach it such that we can run
 # a series of commands without nuking the container
 echo "Starting container for image ${DOCKER_IMAGE}"
-if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
   id=$(/usr/bin/cset shield --exec /usr/bin/numactl -- -C 4-7 docker run ${docker_args} /bin/cat)
 else
   id=$(docker run ${docker_args} /bin/cat)

@@ -104,7 +104,7 @@ DockerImages.images.each {
     scm {
       git {
         remote {
-          github('caffe2/caffe2')
+          github('pytorch/pytorch')
           refspec([
               // Fetch remote branches so we can merge the PR
               '+refs/heads/*:refs/remotes/origin/*',

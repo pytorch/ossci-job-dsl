@@ -30,6 +30,11 @@ if [ -n "${CUDA_VERSION:-}" ]; then
     (sudo /usr/bin/set_gpu_autoboost_off.sh) || true
 fi
 
+if [ -n "${CPU_PERF_TEST:-}" ] && [ $(/bin/hostname) == *packet* ]; then
+  # Clean up old Docker containers, in case any of them are still running due to unclean exit
+  (docker rm -f $(docker ps -aq) > /dev/null) || true
+fi
+
 retry () {
     $*  || (sleep 1 && $*) || (sleep 2 && $*) || (sleep 4 && $*) || (sleep 8 && $*)
 }

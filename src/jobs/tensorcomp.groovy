@@ -194,7 +194,7 @@ exit 0
   // The actual test job for this build environment
   job("${buildBasePath}/${buildEnvironment}-test") {
     // GPU tests only
-    JobUtil.common(delegate, 'docker && gpu')
+    JobUtil.common(delegate, '(docker && gpu) || tc_gpu')
     JobUtil.timeoutAndFailAfter(delegate, 60)
 
     parameters {

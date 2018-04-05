@@ -144,7 +144,7 @@ dockerBuildEnvironments.each {
 
   // The actual build job for this build environment
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, 'docker && cpu && ccache')
+    JobUtil.common(delegate, 'docker && (cpu_ccache || (cpu && ccache))')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'facebookresearch/TensorComprehensions')
 
     parameters {

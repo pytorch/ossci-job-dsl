@@ -543,7 +543,7 @@ git status
   }
 
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu')
+    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu && !ccache')
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     parameters {

@@ -265,7 +265,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   if (buildEnvironment.contains('linux')) {
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu';
+    JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu && !ccache';
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     // Hack to make nvcc-using builds go on the ccache nodes.  Autoscaler

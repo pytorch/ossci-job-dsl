@@ -242,6 +242,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
                 predefinedProp('DOC_PUSH', '${DOC_PUSH}')
               }
+              PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
@@ -265,7 +266,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   if (buildEnvironment.contains('linux')) {
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && cpu && ccache' : 'docker && cpu';
+    JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && ((cpu && ccache) || cpu_ccache)' : 'docker && cpu';
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     // Hack to make nvcc-using builds go on the ccache nodes.  Autoscaler
@@ -344,7 +345,7 @@ exit 0
 
   if (buildEnvironment == docEnvironment) {
     job("${buildBasePath}/doc-push") {
-      JobUtil.common delegate, 'docker && cpu && ccache'
+      JobUtil.common delegate, 'docker && cpu'
       // Explicitly disable concurrent build because this job is racy.
       concurrentBuild(false)
       parameters {

@@ -19,7 +19,8 @@ def dockerWorkers = [
   "worker-c5-xlarge-05",
   "worker-c5-xlarge-06",
   "worker-c5-xlarge-07",
-  "worker-c5-xlarge-08",
+  // "worker-c5-xlarge-08", // (dead as a doornail; starts but not
+  // ssh'able)
   "worker-c5-xlarge-09",
   //"worker-c5-xlarge-10",
   "worker-c5-xlarge-11",

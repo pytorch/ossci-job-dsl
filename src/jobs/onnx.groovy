@@ -73,8 +73,7 @@ buildEnvironments.each {
   }
 
   job("${buildBasePath}/${buildEnvironment}") {
-    // TODO: Get this off ccache
-    JobUtil.common(delegate, 'docker && cpu && ccache')
+    JobUtil.common(delegate, 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'onnx/onnx')
 
     parameters {

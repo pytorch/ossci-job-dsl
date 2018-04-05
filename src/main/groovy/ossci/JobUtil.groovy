@@ -30,6 +30,9 @@ class JobUtil {
   static void commonTrigger(Job context) {
     context.with {
       common delegate, 'simple'
+      // Trigger jobs can be blocked due to queueing issues, so give
+      // them a much longer timeout
+      timeoutAndFailAfter(context, 1440)
     }
   }
 

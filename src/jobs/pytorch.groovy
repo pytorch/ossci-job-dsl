@@ -463,8 +463,9 @@ git status
           )
         }
 
-        MacOSUtil.dockerShell context: delegate,
+        DockerUtil.shell context: delegate,
                 image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                workspaceSource: "docker",
                 script: '''
 if test -x ".jenkins/pytorch/short-perf-test-cpu.sh"; then
   .jenkins/pytorch/short-perf-test-cpu.sh

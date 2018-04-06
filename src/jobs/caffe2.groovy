@@ -473,7 +473,7 @@ set -ex
 sudo apt-get update
 sudo apt-get install -y doxygen graphviz
 
-# Create folder to transfer docs from master to gh-pages
+# Create folder to transfer docs
 temp_dir=$(mktemp -d)
 trap "rm -rf ${temp_dir}" EXIT
 
@@ -539,7 +539,7 @@ git status
       publishers {
         git {
           pushOnlyIfSuccess()
-          branch('origin', 'gh-pages')
+          branch('origin', 'master')
         }
       }
     }

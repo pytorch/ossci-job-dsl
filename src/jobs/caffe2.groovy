@@ -190,6 +190,9 @@ def masterBuildOnlyEnvironments = [
 
   // Run a CentOS build (verifies compatibility with CMake 2.8.12)
   'py2-cuda9.0-cudnn7-centos7',
+
+  // windows build
+  "py2-cuda9.0-cudnn7-windows",
 ]
 
 // Runs on release build on master

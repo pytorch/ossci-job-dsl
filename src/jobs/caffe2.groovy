@@ -1135,8 +1135,8 @@ multiJob("nightly-conda-package-upload") {
     GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
     phase("Build") {
-      def definePhaseJob = { basePath, name ->
-        phaseJob("${basePath}/${name}-build-upload") {
+      def definePhaseJob = { name ->
+        phaseJob("${uploadBasePath}/${name}-build-upload") {
           parameters {
             // Pass parameters of this job
             currentBuild()
@@ -1147,11 +1147,11 @@ multiJob("nightly-conda-package-upload") {
       }
 
       macCondaBuildEnvironments.each {
-        definePhaseJob(buildBasePath, it)
+        definePhaseJob(it)
       }
 
       dockerCondaBuildEnvironments.each {
-        definePhaseJob(uploadBasePath, it)
+        definePhaseJob(it)
       }
     }
   }

@@ -118,7 +118,6 @@ multiJob("caffe2-pull-request") {
         'py2-cuda9.0-cudnn7-windows',
 
         // Builds for Anaconda
-        'conda2-ubuntu16.04',
         'conda3-ubuntu16.04',
         'conda2-macos10.13',
         'conda3-cuda9.0-cudnn7-ubuntu16.04',

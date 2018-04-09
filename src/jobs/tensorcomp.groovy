@@ -116,7 +116,7 @@ dockerBuildEnvironments.each {
       def builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-${BUILD_ID}'
 
       phase("Build") {
-        phaseJob("${buildBasePath}/${buildEnvironment}-build") {
+        phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
           parameters {
             currentBuild()
             predefinedProp('DOCKER_COMMIT_TAG', builtImageTag)
@@ -126,25 +126,12 @@ dockerBuildEnvironments.each {
         }
       }
 
-      // Also trigger test job if this is a build-and-test trigger
-      // Note that the DOCKER_IMAGE_TAG uses the tag that was
-      // produced by the build job above.
-      phase("Test") {
-        phaseJob("${buildBasePath}/${buildEnvironment}-test") {
-          parameters {
-            currentBuild()
-            predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-            predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-            predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-          }
-        }
-      }
     }
   }
 
-  // The actual build job for this build environment
-  job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, 'docker && (cpu_ccache || (cpu && ccache))')
+  // The actual build-test job for this build/test environment
+  job("${buildBasePath}/${buildEnvironment}-build-test") {
+    JobUtil.common(delegate, 'docker && gpu_ccache')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'facebookresearch/TensorComprehensions')
 
     parameters {
@@ -152,13 +139,6 @@ dockerBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
       dockerImageTagParameter(delegate)
-
-      stringParam(
-          'DOCKER_COMMIT_TAG',
-          '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
-          "Tag of the Docker image to commit and push upon completion " +
-              "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
-      )
     }
 
     wrappers {
@@ -171,48 +151,6 @@ dockerBuildEnvironments.each {
     steps {
       GitUtil.mergeStep(delegate)
 
-      DockerUtil.shell context: delegate,
-          image: dockerImage('${DOCKER_IMAGE_TAG}'),
-          commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
-          registryCredentials: ['${USERNAME}', '${PASSWORD}'],
-          workspaceSource: "host-copy",
-          importEnv: 0,  // we want to use the docker env and not import the outside env
-          script: '''
-set -ex
-
-# Reinitialize submodules
-git submodule update --init --recursive
-
-echo "Install TC"
-export MAX_JOBS=2
-.jenkins/build.sh
-exit 0
-'''
-    }
-  }
-
-  // The actual test job for this build environment
-  job("${buildBasePath}/${buildEnvironment}-test") {
-    // GPU tests only
-    // Temporary disable tc_gpu since they are disk full
-    // JobUtil.common(delegate, '(docker && gpu) || tc_gpu')
-    JobUtil.common(delegate, 'docker && gpu')
-    JobUtil.timeoutAndFailAfter(delegate, 60)
-
-    parameters {
-      ParametersUtil.GIT_COMMIT(delegate)
-      ParametersUtil.GIT_MERGE_TARGET(delegate)
-
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-    }
-
-    wrappers {
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
-    }
-
-    steps {
       def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
         // 'native' indicates to let the nvidia runtime figure out which version
@@ -225,10 +163,17 @@ exit 0
           image: dockerImage('${DOCKER_IMAGE_TAG}'),
           registryCredentials: ['${USERNAME}', '${PASSWORD}'],
           cudaVersion: cudaVersion,
-          workspaceSource: "docker",
-          importEnv: 0,
+          // workspaceSource: "host-copy",
+          importEnv: 0,  // we want to use the docker env and not import the outside env
           script: '''
 set -ex
+
+# Reinitialize submodules
+git submodule update --init --recursive
+
+echo "Install TC"
+export MAX_JOBS=2
+.jenkins/build.sh
 
 echo "Test TC"
 .jenkins/run_test.sh

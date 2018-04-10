@@ -209,6 +209,24 @@ exit 0
         env('IMPORT_ENV', attrs.getOrDefault("importEnv", 1))
       }
 
+      // If we're using Amazon ECR then we can't use fixed credentials
+      if (attrs.image.contains(".ecr.us-east-1.amazonaws.com")) {
+        shell """#!/bin/bash
+registry=\$(echo "\${DOCKER_IMAGE}" | awk -F/ '{print \$1}')
+echo "Logging into \${registry}"
+retry () {
+    \$*  || (sleep 1 && \$*) || (sleep 2 && \$*)
+}
+do_login () {
+  aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].authorizationToken' |
+    base64 -d |
+    cut -d: -f2 |
+    docker login -u AWS --password-stdin \${registry}
+}
+retry do_login
+"""
+      }
+
       // Optionally login with registry before doing anything
       def credentials = attrs.get("registryCredentials")
       if (credentials != null) {

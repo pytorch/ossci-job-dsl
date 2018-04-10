@@ -317,7 +317,7 @@ dockerBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "registry.pytorch.org/caffe2/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
   }
 
   // Create triggers for build-only and build-and-test.
@@ -409,16 +409,17 @@ dockerBuildEnvironments.each {
         }
       }
 
-      publishers {
-        groovyPostBuild '''
-def summary = manager.createSummary('terminal.png')
-def buildEnvironment = manager.getEnvVariable('BUILD_ENVIRONMENT')
-def builtImageTag = manager.getEnvVariable('BUILT_IMAGE_TAG')
-summary.appendText(""\"
-Run container with: <code>docker run -i -t registry.pytorch.org/caffe2/${buildEnvironment}:${builtImageTag} bash</code>
-""\", false)
-'''
-      }
+// This does not work since moving to Amazon ECR...
+//       publishers {
+//         groovyPostBuild '''
+// def summary = manager.createSummary('terminal.png')
+// def buildEnvironment = manager.getEnvVariable('BUILD_ENVIRONMENT')
+// def builtImageTag = manager.getEnvVariable('BUILT_IMAGE_TAG')
+// summary.appendText(""\"
+// Run container with: <code>docker run -i -t registry.pytorch.org/caffe2/${buildEnvironment}:${builtImageTag} bash</code>
+// ""\", false)
+// '''
+//       }
     }
   }
 
@@ -564,12 +565,6 @@ git status
       ParametersUtil.CMAKE_ARGS(delegate)
     }
 
-    wrappers {
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
-    }
-
     steps {
       GitUtil.mergeStep(delegate)
 
@@ -592,7 +587,6 @@ git status
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
               commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
-              registryCredentials: ['${USERNAME}', '${PASSWORD}'],
               // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
               workspaceSource: "host-mount",
               script: '''
@@ -667,12 +661,6 @@ fi
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
 
-    wrappers {
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
-    }
-
     steps {
       GitUtil.mergeStep(delegate)
 
@@ -694,7 +682,6 @@ fi
 
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              registryCredentials: ['${USERNAME}', '${PASSWORD}'],
               cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place
@@ -1046,7 +1033,7 @@ dockerCondaBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "registry.pytorch.org/caffe2/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
   }
 
   job("${uploadBasePath}/${buildEnvironment}-build-upload") {
@@ -1062,7 +1049,6 @@ dockerCondaBuildEnvironments.each {
 
     wrappers {
       credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
         usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
       }
     }
@@ -1096,7 +1082,6 @@ dockerCondaBuildEnvironments.each {
 
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              registryCredentials: ['${USERNAME}', '${PASSWORD}'],
               cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place

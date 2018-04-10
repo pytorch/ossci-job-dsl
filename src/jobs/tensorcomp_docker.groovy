@@ -118,10 +118,6 @@ DockerImages.images.each {
 
     wrappers {
       timestamps()
-
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
     }
 
     steps {
@@ -147,18 +143,21 @@ else
   tag="${UPSTREAM_BUILD_ID}"
 fi
 
-image="registry.pytorch.org/tensorcomp/${JOB_BASE_NAME}"
+registry="308535385114.dkr.ecr.us-east-1.amazonaws.com"
+image="${registry}/tensorcomp/${JOB_BASE_NAME}"
 
 login() {
-  echo "${PASSWORD}" | docker login -u "${USERNAME}"  --password-stdin registry.pytorch.org
+  aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].authorizationToken' |
+    base64 -d |
+    cut -d: -f2 |
+    docker login -u AWS --password-stdin "$1"
 }
 
-# Login to registry.pytorch.org (the credentials plugin masks these values).
 # Retry on timeouts (can happen on job stampede).
-retry login
+retry login "${registry}"
 
 # Logout on exit
-trap 'docker logout registry.pytorch.org' EXIT
+trap "docker logout ${registry}" EXIT
 
 export EC2=1
 export JENKINS=1
@@ -214,14 +213,22 @@ docker push "${image}:${tag}"
       shell '''#!/bin/bash
 set -x
 
+registry="308535385114.dkr.ecr.us-east-1.amazonaws.com"
+
 # Login to DockerHub (the credentials plugin masks these values)
 echo "${PASSWORD}" | docker login -u "${USERNAME}" --password-stdin
+
+# Login to our own registry
+aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].authorizationToken' |
+  base64 -d |
+  cut -d: -f2 |
+  docker login -u AWS --password-stdin "$registry"
 
 # Logout on exit
 trap 'docker logout' EXIT
 
 # Pull, tag, and push the specified image
-local_image="registry.pytorch.org/tensorcomp/${BUILD_ENVIRONMENT}:${DOCKER_IMAGE_TAG}"
+local_image="${registry}/tensorcomp/${BUILD_ENVIRONMENT}:${DOCKER_IMAGE_TAG}"
 remote_image="tensorcomp/tensorcomp-base:${BUILD_ENVIRONMENT}"
 docker pull "${local_image}"
 docker tag "${local_image}" "${remote_image}"

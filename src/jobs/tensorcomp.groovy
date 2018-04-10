@@ -97,7 +97,7 @@ dockerBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "registry.pytorch.org/tensorcomp/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/tensorcomp/${buildEnvironment}:${tag}"
   }
 
   // Trigger jobs are multi jobs (it may trigger both a build and a test job)
@@ -143,9 +143,6 @@ dockerBuildEnvironments.each {
 
     wrappers {
       timestamps()
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
     }
 
     steps {
@@ -161,7 +158,6 @@ dockerBuildEnvironments.each {
 
       DockerUtil.shell context: delegate,
           image: dockerImage('${DOCKER_IMAGE_TAG}'),
-          registryCredentials: ['${USERNAME}', '${PASSWORD}'],
           cudaVersion: cudaVersion,
           // workspaceSource: "host-copy",
           importEnv: 0,  // we want to use the docker env and not import the outside env

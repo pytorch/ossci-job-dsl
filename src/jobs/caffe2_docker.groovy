@@ -198,6 +198,10 @@ docker push "${image}:${tag}"
 
     wrappers {
       timestamps()
+
+      credentialsBinding {
+        usernamePassword('USERNAME', 'PASSWORD', 'dockerhub-caffe2bot')
+      }
     }
 
     steps {

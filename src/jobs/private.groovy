@@ -364,18 +364,18 @@ def ignoreTags = [
     }
     wrappers {
       credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins-gc')
+        usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'ecr-gc')
       }
     }
     steps {
+      shell '''
+docker build -t ecr-gc resources/ecr-gc
+'''
+
       shell """
-echo "\${PASSWORD}" | \
-  python resources/docker-gc.py \
-    --username "\${USERNAME}" \
-    --password-stdin \
+docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${project} \
-    --ignore-tags ${ignoreTags[project]} \
-    https://registry.pytorch.org/
+    --ignore-tags ${ignoreTags[project]}
 """
     }
   }

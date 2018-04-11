@@ -50,7 +50,7 @@ parser.add_argument('--ignore-tags',
 args = parser.parse_args()
 client = boto3.client('ecr', region_name='us-east-1')
 stable_window = datetime.timedelta(days=args.keep_stable_days)
-unstable_window = datetime.timedelta(hours=16) #days=args.keep_unstable_days)
+unstable_window = datetime.timedelta(days=args.keep_unstable_days)
 now = datetime.datetime.now(pytz.UTC)
 ignore_tags = args.ignore_tags.split(',')
 

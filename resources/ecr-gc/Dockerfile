@@ -8,4 +8,4 @@ RUN pip install -r /requirements.txt
 
 ADD gc.py /usr/bin/gc.py
 
-ENTRYPOINT /usr/bin/gc.py
+ENTRYPOINT ["/usr/bin/gc.py"]

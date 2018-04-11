@@ -49,7 +49,7 @@ def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
-  return "registry.pytorch.org/pytorch/${buildEnvironment}:${tag}"
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
 }
 
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
@@ -303,12 +303,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       )
     }
 
-    wrappers {
-      credentialsBinding {
-        usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-      }
-    }
-
     steps {
       GitUtil.mergeStep(delegate)
 
@@ -331,7 +325,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       DockerUtil.shell context: delegate,
               image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}'),
               commitImage: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}'),
-              registryCredentials: ['${USERNAME}', '${PASSWORD}'],
               workspaceSource: "host-copy",
               script: '''
 set -ex

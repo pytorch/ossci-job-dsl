@@ -381,27 +381,6 @@ echo "\${PASSWORD}" | \
   }
 }
 
-job("${buildBasePath}/docker-registry-gc") {
-  triggers {
-    cron('@hourly')
-  }
-
-  label('simple')
-
-  logRotator(14)
-
-  steps {
-    shell '''
-docker run \
-  --rm \
-  -v /data/registry:/var/lib/registry \
-  -v /etc/docker/registry:/etc/docker/registry \
-  registry:2 \
-  garbage-collect /etc/docker/registry/config.yml
-'''
-  }
-}
-
 multiJob("${buildBasePath}/fix-authorized-keys-trigger") {
   label('simple')
   steps {

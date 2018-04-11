@@ -73,7 +73,7 @@ buildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "registry.pytorch.org/caffe2/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
   }
 
   job("${buildBasePath}/${buildEnvironment}") {
@@ -137,7 +137,7 @@ job("${buildBasePath}/onnx-model-zoo-update-caffe2-models") {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "registry.pytorch.org/caffe2/${docEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${docEnvironment}:${tag}"
   }
 
   parameters {

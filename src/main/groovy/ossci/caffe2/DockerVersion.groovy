@@ -5,5 +5,5 @@
 // to the same version
 package ossci.caffe2
 class DockerVersion {
-  static final String version = "104";
+  static final String version = "105";
 }

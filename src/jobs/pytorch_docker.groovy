@@ -189,18 +189,21 @@ else
   tag="${UPSTREAM_BUILD_ID}"
 fi
 
-image="registry.pytorch.org/pytorch/${JOB_BASE_NAME}"
+registry="308535385114.dkr.ecr.us-east-1.amazonaws.com"
+image="${registry}/pytorch/${JOB_BASE_NAME}"
 
 login() {
-  echo "${PASSWORD}" | docker login -u "${USERNAME}"  --password-stdin registry.pytorch.org
+  aws ecr get-authorization-token --region us-east-1 --output text --query 'authorizationData[].authorizationToken' |
+    base64 -d |
+    cut -d: -f2 |
+    docker login -u AWS --password-stdin "$1"
 }
 
-# Login to registry.pytorch.org (the credentials plugin masks these values).
 # Retry on timeouts (can happen on job stampede).
-retry login
+retry login "${registry}"
 
 # Logout on exit
-trap 'docker logout registry.pytorch.org' EXIT
+trap "docker logout ${registry}" EXIT
 
 export EC2=1
 export JENKINS=1

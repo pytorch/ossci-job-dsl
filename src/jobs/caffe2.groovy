@@ -1150,7 +1150,7 @@ job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/conda2-cuda9.0-cudnn7-ubuntu16.04}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/conda2-cuda9.0-cudnn7-ubuntu16.04:${tag}"
   }
 
   parameters {

@@ -1187,7 +1187,7 @@ job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
             script: '''
 set -ex
 git submodule update --init --recursive
-PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh --integrated
+PATH=/opt/conda/bin:$PATH PACKAGE_CUDA_LIBS=1 ./scripts/build_anaconda.sh --integrated
 '''
   }
 }

@@ -115,6 +115,7 @@ multiJob("caffe2-pull-request") {
         'py2-system-macos10.13',
 
         // Windows builds
+        // The python part is actually ignored by build_windows.bat
         'py2-cuda9.0-cudnn7-windows',
 
         // Builds for Anaconda
@@ -1140,3 +1141,54 @@ multiJob("nightly-conda-package-upload") {
     }
   }
 }
+
+
+// Experimental by jesse
+job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
+  JobUtil.common(delegate, 'docker && gpu')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+
+  // Every build environment has its own Docker image
+  def dockerImage = { tag ->
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/conda2-cuda9.0-cudnn7-ubuntu16.04}:${tag}"
+  }
+
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.UPLOAD_TO_CONDA(delegate)
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+  }
+
+  wrappers {
+    credentialsBinding {
+      usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
+    }
+  }
+
+  steps {
+    GitUtil.mergeStep(delegate)
+
+    environmentVariables {
+      env(
+        'BUILD_ENVIRONMENT',
+        "conda2-cuda9.0-cudnn7-ubuntu16.04",
+      )
+      env('CUDA_VERSION', '9.0')
+      env('CUDNN_VERSION', '7.1')
+    }
+
+    DockerUtil.shell context: delegate,
+            image: dockerImage('${DOCKER_IMAGE_TAG}'),
+            cudaVersion: 'native',
+            // TODO: use 'docker'. Make sure you copy out the test result XML
+            // to the right place
+            workspaceSource: "host-mount",
+            script: '''
+set -ex
+git submodule update --init --recursive
+PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh --integrated
+'''
+  }
+}
+

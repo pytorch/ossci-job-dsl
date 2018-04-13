@@ -146,15 +146,6 @@ if [ "$WORKSPACE_SOURCE" = "host-copy" ]; then
     # Pick this if you want the source code to persist into a saved
     # docker image
     docker cp $WORKSPACE/. "$id:/var/lib/jenkins/workspace"
-
-    # Commit and push the source only image (to be overwritten when
-    # the build completes.)  (But don't bother doing this if it's
-    # not a host-copy, because then there won't be any useful
-    # source anyhow.)
-    #
-    # NB: Do this before env copy, in case env has private data.
-    docker commit "$id" "${COMMIT_DOCKER_IMAGE}" > "$output"
-    retry docker push "${COMMIT_DOCKER_IMAGE}" > "$output"
 fi
 
 if [ "$IMPORT_ENV" == 1 ]; then

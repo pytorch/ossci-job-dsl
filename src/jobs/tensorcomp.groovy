@@ -159,7 +159,7 @@ dockerBuildEnvironments.each {
       DockerUtil.shell context: delegate,
           image: dockerImage('${DOCKER_IMAGE_TAG}'),
           cudaVersion: cudaVersion,
-          workspaceSource: "host-copy",
+          workspaceSource: "host-mount",
           importEnv: 0,  // we want to use the docker env and not import the outside env
           script: '''
 set -ex

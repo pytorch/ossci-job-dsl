@@ -71,7 +71,7 @@ multiJob("tensorcomp-master") {
   }
 
   steps {
-    phase("Build") {
+    phase("Build and Test") {
       def definePhaseJob = { name ->
         phaseJob("${buildBasePath}/${name}") {
           parameters {
@@ -115,7 +115,7 @@ dockerBuildEnvironments.each {
     steps {
       def builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-${BUILD_ID}'
 
-      phase("Build") {
+      phase("Build and Test") {
         phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
           parameters {
             currentBuild()

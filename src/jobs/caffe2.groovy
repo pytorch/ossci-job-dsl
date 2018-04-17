@@ -1013,6 +1013,7 @@ windowsBuildEnvironments.each {
       shell('''
 git submodule update --init
 export PATH="$PATH:/c/Program Files/CMake/bin:"
+export USE_CUDA=ON
 ./scripts/build_windows.bat
 ''')
     }

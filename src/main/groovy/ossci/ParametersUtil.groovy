@@ -56,6 +56,16 @@ class ParametersUtil {
     }
   }
 
+  static void CONDA_PACKAGE_NAME(BuildParametersContext context, defaultValue = 'caffe2') {
+    context.with {
+      stringParam(
+          'CONDA_PACKAGE_NAME',
+          defaultValue,
+          "The name of the package to upload to Anaconda"
+      )
+    }
+  }
+
   static void GIT_COMMIT(BuildParametersContext context, String defaultValue = 'origin/master') {
     context.with {
       stringParam(

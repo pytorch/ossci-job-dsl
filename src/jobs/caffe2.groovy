@@ -32,7 +32,6 @@ def macOsBuildEnvironments = [
 
   // Anaconda build environments
   'conda2-macos10.13',
-  // This is actually hardcoded to 3.6 inside scripts/build_anaconda.sh
   'conda3-macos10.13',
 ]
 
@@ -48,7 +47,6 @@ def dockerCondaBuildEnvironments =
 // macOsBuildEnvironments above
 def macCondaBuildEnvironments = [
   'conda2-macos10.13',
-  // This is actually hardcoded to 3.6 inside scripts/build_anaconda.sh
   'conda3-macos10.13',
 ]
 
@@ -1046,6 +1044,7 @@ dockerCondaBuildEnvironments.each {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.UPLOAD_TO_CONDA(delegate)
+      ParametersUtil.CONDA_PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
 
@@ -1094,7 +1093,10 @@ git submodule update --init --recursive
 # Please don't make any changes to the conda-build process here. Instead, edit
 # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
 # use that script
-PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh
+if [[ -z $CONDA_PACKAGE_NAME ]]; then
+  package_name="--name $CONDA_PACKAGE_NAME"
+fi
+PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
 '''
     }
   }
@@ -1158,6 +1160,7 @@ job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.UPLOAD_TO_CONDA(delegate)
+    ParametersUtil.CONDA_PACKAGE_NAME(delegate)
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
   }
 
@@ -1188,7 +1191,10 @@ job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
             script: '''
 set -ex
 git submodule update --init --recursive
-PATH=/opt/conda/bin:$PATH PACKAGE_CUDA_LIBS=1 ./scripts/build_anaconda.sh --integrated
+if [[ -n $CONDA_PACKAGE_NAME ]]; then
+  package_name="--name $CONDA_PACKAGE_NAME"
+fi
+PATH=/opt/conda/bin:$PATH PACKAGE_CUDA_LIBS=1 ./scripts/build_anaconda.sh --integrated $package_name
 '''
   }
 }

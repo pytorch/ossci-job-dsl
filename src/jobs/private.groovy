@@ -38,7 +38,10 @@ def dockerWorkers = [
   // "worker-packet-type-1-00",
   "worker-packet-type-1-01",
   "worker-packet-type-1-02",
-  "worker-packet-type-1-03"
+  "worker-packet-type-1-03",
+  // TC gpu workers
+  "worker-g3-4xlarge-01",
+  "worker-g3-4xlarge-00"
 ]
 
 def macOsWorkers = [

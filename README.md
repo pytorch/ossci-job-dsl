@@ -9,15 +9,31 @@ Some day we will move this repo.
 
 ## CI failed, but my local build is fine. What should I do?!
 
-Instructions vary by platform.
+### Cheat sheet
 
-If you want to log into our actual CI machines, you will need to get
-permissions on them: go to
-[ossci-infra](https://github.com/pietern/ossci-infra) submit a PR adding
-your public key to `config/keys` and bug @pietern or @ezyang to reimage
-the machines.
+If this is your first time, see "Getting setup".
 
-### Linux
+- Search for `docker pull` in your build log and search for something
+  like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:173-5910`;
+  this is your docker image.  (If the tag is `###-####`, it comes with
+  a build of your source; if it's `###` that's the stock image.)
+- Run `docker run -it $DOCKER_IMAGE`
+
+### Getting setup
+
+You will need to get authorized for the docker registry.  Contact
+@ezyang, @pietern or @pmenglund for authorization.
+
+For the admins:
+
+- Create a new user for the person in IAM
+- Issue them an access key, and send it to them
+
+You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
+access key.  Use them as username/password for `docker login $REGISTRY_DOMAIN`.
+Then run the commands in "cheat sheet"
+
+### Advanced tricks
 
 **Summary for CPU:**
 

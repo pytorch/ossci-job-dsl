@@ -264,20 +264,18 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
-            // Currently broken due to Docker registry move  -- ezyang 4/11/18
-            //
-            //phaseJob("${buildBasePath}/short-perf-test-cpu") {
-            // parameters {
-            //   predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-            //   predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
-            // }
-            //}
-            //phaseJob("${buildBasePath}/short-perf-test-gpu") {
-            //  parameters {
-            //    predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-            //    predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
-            //  }
-            //}
+            phaseJob("${buildBasePath}/short-perf-test-cpu") {
+              parameters {
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
+              }
+            }
+            phaseJob("${buildBasePath}/short-perf-test-gpu") {
+              parameters {
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
+              }
+            }
           }
         } // phase("Test and Push")
       } // else (buildEnvironment.contains("macos") || buildEnvironment.contains("docker"))

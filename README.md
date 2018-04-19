@@ -17,6 +17,8 @@ If this is your first time, see "Getting setup".
   like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:173-5910`;
   this is your docker image.  (If the tag is `###-####`, it comes with
   a build of your source; if it's `###` that's the stock image.)
+- Run `aws ecr get-login` with your AWS credentials to get your Docker
+  login.  Login with `docker login $REGISTRY_DOMAIN`
 - Run `docker run -it $DOCKER_IMAGE`
 
 ### Getting setup
@@ -30,8 +32,8 @@ For the admins:
 - Issue them an access key, and send it to them
 
 You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
-access key.  Use them as username/password for `docker login $REGISTRY_DOMAIN`.
-Then run the commands in "cheat sheet"
+access key.  Use them as username/password for `aws ecr get-login`.
+Go to the "cheat sheet"
 
 ### Advanced tricks
 

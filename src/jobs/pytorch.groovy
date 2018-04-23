@@ -264,12 +264,13 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
-            phaseJob("${buildBasePath}/short-perf-test-cpu") {
-              parameters {
-                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-                predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
-              }
-            }
+            // yf225: CPU perf test is flaky
+            // phaseJob("${buildBasePath}/short-perf-test-cpu") {
+            //   parameters {
+            //     predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+            //     predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
+            //   }
+            // }
             phaseJob("${buildBasePath}/short-perf-test-gpu") {
               parameters {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)

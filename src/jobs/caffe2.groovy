@@ -849,6 +849,7 @@ macOsBuildEnvironments.each {
 
         if (makeACondaUploadBuild) {
           ParametersUtil.UPLOAD_TO_CONDA(delegate)
+          ParametersUtil.CONDA_PACKAGE_NAME(delegate)
         }
       }
 
@@ -1093,7 +1094,7 @@ git submodule update --init --recursive
 # Please don't make any changes to the conda-build process here. Instead, edit
 # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
 # use that script
-if [[ -z $CONDA_PACKAGE_NAME ]]; then
+if [[ -n $CONDA_PACKAGE_NAME ]]; then
   package_name="--name $CONDA_PACKAGE_NAME"
 fi
 PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
@@ -1113,6 +1114,7 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_TO_CONDA(delegate, true)
+    ParametersUtil.CONDA_PACKAGE_NAME(delegate)
   }
   triggers {
     cron('@daily')

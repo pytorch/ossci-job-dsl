@@ -56,7 +56,7 @@ class ParametersUtil {
     }
   }
 
-  static void CONDA_PACKAGE_NAME(BuildParametersContext context, defaultValue = 'caffe2') {
+  static void CONDA_PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
           'CONDA_PACKAGE_NAME',

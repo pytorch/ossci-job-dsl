@@ -5,13 +5,13 @@ class Users {
   // of a user that is not an admin or present in the whitelist.
   static final List<String> githubAdmins = [
     "prigoyal",
-    "ftynse",
-    "zdevito",
-    "wsmoses",
-    "nicolasvasilache",
-    "ttheodor",
-    "skimo-openhub",
-    "orionr",
+    //"ftynse",
+    //"zdevito",
+    //"wsmoses",
+    //"nicolasvasilache",
+    //"ttheodor",
+    //"skimo-openhub",
+    //"orionr",
   ]
 
   // GitHub users for who pull request builds are automatically started.

@@ -828,6 +828,7 @@ macOsBuildEnvironments.each {
     condaUploadBuild.push(true)
   }
 
+  // This loop will occur once for non-conda and twice for conda
   condaUploadBuild.each {
     def makeACondaUploadBuild = it
 
@@ -862,12 +863,27 @@ macOsBuildEnvironments.each {
       steps {
         GitUtil.mergeStep(delegate)
 
-        if (buildEnvironment.contains('ios')) {
-          environmentVariables {
-            env(
-              'BUILD_IOS',
-              "1",
-            )
+        environmentVariables {
+          if (buildEnvironment.contains('ios')) {
+            env('BUILD_IOS', "1")
+          }
+
+          // Anaconda environment variables
+          if (buildEnvironment.contains('conda')) {
+            env('CAFFE2_USE_ANACONDA', 1)
+            if (buildEnvironment.contains('integrated')) {
+              env('INTEGRATED', 1)
+            }
+            if (!makeACondaUploadBuild) {
+              env('SKIP_CONDA_TESTS', 1)
+            }
+          }
+
+          // Homebrew or system python
+          if (buildEnvironment ==~ /^py[0-9]-brew-.*/) {
+            env('PYTHON_INSTALLATION', 'homebrew')
+          } else {
+            env('PYTHON_INSTALLATION', 'system')
           }
         }
 
@@ -875,39 +891,15 @@ macOsBuildEnvironments.each {
         if (buildEnvironment ==~ /^py[0-9].*/) {
           def pyVersion = buildEnvironment =~ /^py([0-9])/
           environmentVariables {
-            env(
-              'PYTHON_VERSION',
-              pyVersion[0][1],
-            )
+            env('PYTHON_VERSION', pyVersion[0][1])
           }
         } else {
           def condaVersion = buildEnvironment =~ /^conda([0-9])/
           environmentVariables {
             env('ANACONDA_VERSION', condaVersion[0][1])
-            env('CAFFE2_USE_ANACONDA', 1)
-            if (!makeACondaUploadBuild) {
-              env('SKIP_CONDA_TESTS', 1)
-            }
           }
         }
 
-        if (buildEnvironment ==~ /^py[0-9]-brew-.*/) {
-          // Use Homebrew Python
-          environmentVariables {
-            env(
-              'PYTHON_INSTALLATION',
-              'homebrew',
-            )
-          }
-        } else {
-          // Fall back to system Python
-          environmentVariables {
-            env(
-              'PYTHON_INSTALLATION',
-              'system',
-            )
-          }
-        }
 
         MacOSUtil.sandboxShell delegate, '''
 set -ex
@@ -944,10 +936,16 @@ fi
 if [ "${BUILD_IOS:-0}" -eq 1 ]; then
   scripts/build_ios.sh
 elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
+  if [[ -n $CONDA_PACKAGE_NAME ]]; then
+    package_name="--name $CONDA_PACKAGE_NAME"
+  fi
+  if [[ -n $INTEGRATED ]]; then
+    integrated="--integrated"
+  fi
   # Please don't make any changes to the conda-build process here. Instead, edit
   # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
   # use that script
-  scripts/build_anaconda.sh
+  scripts/build_anaconda.sh $package_name $integrated
 else
   scripts/build_local.sh
 fi
@@ -1063,22 +1061,25 @@ dockerCondaBuildEnvironments.each {
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
+        if (buildEnvironment.contains('integrated')) {
+          env('INTEGRATED', 1)
+        }
       }
 
       def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
-        // 'native' indicates to let the nvidia runtime
-        // figure out which version of CUDA to use.
-        // This is only possible when using the nvidia/cuda
-        // Docker images.
-
+        // 'native' indicates to let the nvidia runtime figure out which
+        // version of CUDA to use. This is only possible when using the
+        // nvidia/cuda Docker images.
         cudaVersion = 'native';
-        // Populate CUDA and cuDNN versions for conda to label packages with
-        def caffe2CudaVersion = buildEnvironment =~ /cuda(\d.\d)/
-        def caffe2CudnnVersion = buildEnvironment =~ /cudnn(\d)/
+
+        // Populate CUDA and cuDNN versions in case we're building pytorch too,
+        // which expects these variables to be set
+        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
+        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
         environmentVariables {
-          env('CAFFE2_CUDA_VERSION', caffe2CudaVersion[0][1])
-          env('CAFFE2_CUDNN_VERSION', caffe2CudnnVersion[0][1])
+          env('CUDA_VERSION', cudaVer[0][1])
+          env('CUDNN_VERSION', cudnnVer[0][1])
         }
       }
 
@@ -1097,7 +1098,10 @@ git submodule update --init --recursive
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
   package_name="--name $CONDA_PACKAGE_NAME"
 fi
-PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
+if [[ -n $INTEGRATED ]]; then
+  integrated="--integrated"
+fi
+PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name $integrated
 '''
     }
   }

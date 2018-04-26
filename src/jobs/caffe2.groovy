@@ -1197,13 +1197,27 @@ testIntegratedBuilds.each {
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}"
         )
-        env('CUDA_VERSION', '9.0')
-        env('CUDNN_VERSION', '7.1')
       }
-  
+      def cudaVersion = ''
+      if (buildEnvironment.contains('cuda')) {
+        // 'native' indicates to let the nvidia runtime figure out which
+        // version of CUDA to use. This is only possible when using the
+        // nvidia/cuda Docker images.
+        cudaVersion = 'native';
+
+        // Populate CUDA and cuDNN versions in case we're building pytorch too,
+        // which expects these variables to be set
+        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
+        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
+        environmentVariables {
+          env('CUDA_VERSION', cudaVer[0][1])
+          env('CUDNN_VERSION', cudnnVer[0][1])
+        }
+      }
+
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              cudaVersion: 'native',
+              cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place
               workspaceSource: "host-mount",

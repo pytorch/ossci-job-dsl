@@ -936,10 +936,10 @@ fi
 if [ "${BUILD_IOS:-0}" -eq 1 ]; then
   scripts/build_ios.sh
 elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
-  if [[ -n $CONDA_PACKAGE_NAME ]]; then
+  if [ -n "$CONDA_PACKAGE_NAME" ]; then
     package_name="--name $CONDA_PACKAGE_NAME"
   fi
-  if [[ -n $INTEGRATED ]]; then
+  if [ -n "$INTEGRATED" ]; then
     integrated="--integrated"
   fi
   # Please don't make any changes to the conda-build process here. Instead, edit

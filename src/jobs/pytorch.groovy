@@ -539,7 +539,7 @@ fi
 
   job("${buildBasePath}/${buildEnvironment}-test") {
     JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
-    JobUtil.timeoutAndFailAfter(delegate, 40)
+    JobUtil.timeoutAndFailAfter(delegate, 55)
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)

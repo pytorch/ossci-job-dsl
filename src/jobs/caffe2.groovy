@@ -33,6 +33,7 @@ def macOsBuildEnvironments = [
   // Anaconda build environments
   'conda2-macos10.13',
   'conda3-macos10.13',
+  'conda2-integrated-macos10.13',
 ]
 
 def windowsBuildEnvironments = [
@@ -1152,19 +1153,13 @@ multiJob("nightly-conda-package-upload") {
 }
 
 def testIntegratedBuilds = [
-  'conda2-cuda9.0-cudnn7-ubuntu16.05',
   'conda2-ubuntu16.04',
+  'conda2-cuda9.0-cudnn7-ubuntu16.05',
 ]
 
 // Experimental by jesse
 testIntegratedBuilds.each {
-  // Capture variable for delayed evaluation
   def buildEnvironment = it
-  if (buildEnvironment.contains('cuda')) {
-    buildEnvironment='conda2-cuda9.0-cudnn7-ubuntu16.04'
-  } else {
-    buildEnvironment='conda2-ubuntu16.04'
-  }
 
   job("${uploadBasePath}/${buildEnvironment}-integrated") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')

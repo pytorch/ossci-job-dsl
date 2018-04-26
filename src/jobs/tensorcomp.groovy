@@ -172,13 +172,6 @@ export MAX_JOBS=2
 .jenkins/build.sh
 
 echo "Test TC"
-
-//these instructions are added to the run_test.sh
-//if [[ $(conda --version | wc -c) -ne 0 ]]; then
-//  echo "Activating the conda tc-env"
-//  source activate tc-env
-//fi
-
 .jenkins/run_test.sh
 exit 0
 '''

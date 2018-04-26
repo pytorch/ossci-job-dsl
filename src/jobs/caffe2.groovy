@@ -1151,50 +1151,63 @@ multiJob("nightly-conda-package-upload") {
   }
 }
 
+def testIntegratedBuilds = [
+  'conda2-cuda9.0-cudnn7-ubuntu16.05',
+  'conda2-ubuntu16.04',
+]
 
 // Experimental by jesse
-job("${uploadBasePath}/test-pytorch-caffe2-integrated-conda") {
-  JobUtil.common(delegate, 'docker && gpu')
-  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
-
-  // Every build environment has its own Docker image
-  def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/conda2-cuda9.0-cudnn7-ubuntu16.04:${tag}"
+testIntegratedBuilds.each {
+  // Capture variable for delayed evaluation
+  def buildEnvironment = it
+  if (buildEnvironment.contains('cuda')) {
+    buildEnvironment='conda2-cuda9.0-cudnn7-ubuntu16.04'
+  } else {
+    buildEnvironment='conda2-ubuntu16.04'
   }
 
-  parameters {
-    ParametersUtil.GIT_COMMIT(delegate)
-    ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.UPLOAD_TO_CONDA(delegate)
-    ParametersUtil.CONDA_PACKAGE_NAME(delegate)
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-  }
-
-  wrappers {
-    credentialsBinding {
-      usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
+  job("${uploadBasePath}/${buildEnvironment}-integrated") {
+    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+  
+    // Every build environment has its own Docker image
+    def dockerImage = { tag ->
+      return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
     }
-  }
-
-  steps {
-    GitUtil.mergeStep(delegate)
-
-    environmentVariables {
-      env(
-        'BUILD_ENVIRONMENT',
-        "conda2-cuda9.0-cudnn7-ubuntu16.04",
-      )
-      env('CUDA_VERSION', '9.0')
-      env('CUDNN_VERSION', '7.1')
+  
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.UPLOAD_TO_CONDA(delegate)
+      ParametersUtil.CONDA_PACKAGE_NAME(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
-
-    DockerUtil.shell context: delegate,
-            image: dockerImage('${DOCKER_IMAGE_TAG}'),
-            cudaVersion: 'native',
-            // TODO: use 'docker'. Make sure you copy out the test result XML
-            // to the right place
-            workspaceSource: "host-mount",
-            script: '''
+  
+    wrappers {
+      credentialsBinding {
+        usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
+      }
+    }
+  
+    steps {
+      GitUtil.mergeStep(delegate)
+  
+      environmentVariables {
+        env(
+          'BUILD_ENVIRONMENT',
+          "${buildEnvironment}"
+        )
+        env('CUDA_VERSION', '9.0')
+        env('CUDNN_VERSION', '7.1')
+      }
+  
+      DockerUtil.shell context: delegate,
+              image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              cudaVersion: 'native',
+              // TODO: use 'docker'. Make sure you copy out the test result XML
+              // to the right place
+              workspaceSource: "host-mount",
+              script: '''
 set -ex
 git submodule update --init --recursive
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
@@ -1202,6 +1215,6 @@ if [[ -n $CONDA_PACKAGE_NAME ]]; then
 fi
 PATH=/opt/conda/bin:$PATH PACKAGE_CUDA_LIBS=1 ./scripts/build_anaconda.sh --integrated $package_name
 '''
+    }
   }
 }
-

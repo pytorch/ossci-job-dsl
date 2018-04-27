@@ -942,6 +942,9 @@ elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
   fi
   if [ -n "$INTEGRATED" ]; then
     integrated="--integrated"
+    echo $integrated
+    scripts/build_anaconda.sh $package_name --integrated
+    exit 0
   fi
   # Please don't make any changes to the conda-build process here. Instead, edit
   # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also

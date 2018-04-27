@@ -941,8 +941,8 @@ elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
     package_name="--name $CONDA_PACKAGE_NAME"
   fi
   if [ -n "$INTEGRATED" ]; then
-    integrated="--integrated"
-    echo $integrated
+    build_integrated="--integrated"
+    echo $build_integrated
     scripts/build_anaconda.sh $package_name --integrated
     exit 0
   fi

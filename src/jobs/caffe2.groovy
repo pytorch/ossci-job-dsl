@@ -938,20 +938,16 @@ if [ "${BUILD_IOS:-0}" -eq 1 ]; then
   scripts/build_ios.sh
 elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
   if [ -n "$CONDA_PACKAGE_NAME" ]; then
+    # TODO don't know if this actually works yet
     package_name="--name $CONDA_PACKAGE_NAME"
   fi
+
+  # All conda build logic should be in scripts/build_anaconda.sh
   if [ -n "$INTEGRATED" ]; then
-    CAPS_INTEGRATED="--integrated"
-    echo $CAPS_INTEGRATED
-    echo "$CAPS_INTEGRATED"
-    echo "${CAPS_INTEGRATED}"
     scripts/build_anaconda.sh $package_name --integrated
-    exit 0
+  else
+    scripts/build_anaconda.sh $package_name $integrated
   fi
-  # Please don't make any changes to the conda-build process here. Instead, edit
-  # scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
-  # use that script
-  scripts/build_anaconda.sh $package_name $integrated
 else
   scripts/build_local.sh
 fi
@@ -1098,16 +1094,17 @@ dockerCondaBuildEnvironments.each {
               script: '''
 set -ex
 git submodule update --init --recursive
-# Please don't make any changes to the conda-build process here. Instead, edit
-# scripts/build_anaconda.sh since conda docker builds in caffe2-builds also
-# use that script
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
+  # TODO don't know if this actually works yet
   package_name="--name $CONDA_PACKAGE_NAME"
 fi
+
+# All conda build logic should be in scripts/build_anaconda.sh
 if [[ -n $INTEGRATED ]]; then
-  integrated="--integrated"
+  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated
+else
+  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
 fi
-PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name $integrated
 '''
     }
   }
@@ -1153,82 +1150,6 @@ multiJob("nightly-conda-package-upload") {
       dockerCondaBuildEnvironments.each {
         definePhaseJob(it)
       }
-    }
-  }
-}
-
-def testIntegratedBuilds = [
-  'conda2-ubuntu16.04',
-  'conda2-cuda9.0-cudnn7-ubuntu16.05',
-]
-
-// Experimental by jesse
-testIntegratedBuilds.each {
-  def buildEnvironment = it
-
-  job("${uploadBasePath}/${buildEnvironment}-integrated") {
-    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
-  
-    // Every build environment has its own Docker image
-    def dockerImage = { tag ->
-      return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
-    }
-  
-    parameters {
-      ParametersUtil.GIT_COMMIT(delegate)
-      ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_TO_CONDA(delegate)
-      ParametersUtil.CONDA_PACKAGE_NAME(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    }
-  
-    wrappers {
-      credentialsBinding {
-        usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
-      }
-    }
-  
-    steps {
-      GitUtil.mergeStep(delegate)
-  
-      environmentVariables {
-        env(
-          'BUILD_ENVIRONMENT',
-          "${buildEnvironment}"
-        )
-      }
-      def cudaVersion = ''
-      if (buildEnvironment.contains('cuda')) {
-        // 'native' indicates to let the nvidia runtime figure out which
-        // version of CUDA to use. This is only possible when using the
-        // nvidia/cuda Docker images.
-        cudaVersion = 'native';
-
-        // Populate CUDA and cuDNN versions in case we're building pytorch too,
-        // which expects these variables to be set
-        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
-        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
-        environmentVariables {
-          env('CUDA_VERSION', cudaVer[0][1])
-          env('CUDNN_VERSION', cudnnVer[0][1])
-        }
-      }
-
-      DockerUtil.shell context: delegate,
-              image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              cudaVersion: cudaVersion,
-              // TODO: use 'docker'. Make sure you copy out the test result XML
-              // to the right place
-              workspaceSource: "host-mount",
-              script: '''
-set -ex
-git submodule update --init --recursive
-if [[ -n $CONDA_PACKAGE_NAME ]]; then
-  package_name="--name $CONDA_PACKAGE_NAME"
-fi
-PATH=/opt/conda/bin:$PATH PACKAGE_CUDA_LIBS=1 ./scripts/build_anaconda.sh --integrated $package_name
-'''
     }
   }
 }

@@ -62,6 +62,7 @@ class DockerImages {
     'conda3-cuda8.0-cudnn7-gcc4.8-ubuntu16.04',
 
     'conda2-integrated-ubuntu16.04',
+    'conda2-cuda8.0-cudnn7-integrated-ubuntu16.04',
     'conda2-cuda9.0-cudnn7-integrated-ubuntu16.04',
 
     // CentOS images (Python 2 only)

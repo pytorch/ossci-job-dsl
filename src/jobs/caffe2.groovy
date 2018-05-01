@@ -314,10 +314,11 @@ multiJob("caffe2-master-doc") {
 dockerBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
+  def buildDockerName = (buildEnvironment - "integrated-")
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildDockerName}:${tag}"
   }
 
   // Create triggers for build-only and build-and-test.
@@ -1031,10 +1032,11 @@ folder(uploadBasePath) {
 dockerCondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
+  def buildDockerName = (buildEnvironment - "integrated-")
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildDockerName}:${tag}"
   }
 
   job("${uploadBasePath}/${buildEnvironment}-build-upload") {

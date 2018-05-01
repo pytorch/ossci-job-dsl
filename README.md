@@ -305,6 +305,31 @@ Jenkins.instance.slaves.each {
 null
 ```
 
+### Pruning stale queued jobs
+
+```groovy
+import hudson.model.*
+  
+def queue = Hudson.instance.queue
+  
+def cancel = queue.items.findAll {
+  if (it.task.name.startsWith('ccache-cleanup')) {
+    return true;
+  }
+  if (it.task.name.startsWith('docker-image-cleanup')) {
+    return true;
+  }
+  if (it.task.name.startsWith('workspace-cleanup')) {
+    return true;
+  }
+  return false;
+}
+
+cancel.each {
+  queue.cancel(it.task)
+}
+```
+
 ### Developing using IntelliJ
 
 A more pleasant Java development experience can be attained by working

@@ -51,7 +51,10 @@ For the admins:
 
 You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
 access key.  Use them as username/password for `aws ecr get-login`.
-Go to the "cheat sheet"
+The aws command comes with awscli; see https://aws.amazon.com/cli/
+for more guidance.
+
+You are ready now; go to the "cheat sheet"
 
 By the way, to log into AWS Console itself (not useful for pulling
 a Docker image, but maybe you want to know), go to

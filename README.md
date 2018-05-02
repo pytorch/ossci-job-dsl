@@ -50,7 +50,8 @@ For the admins:
 - Issue them an access key, and send it to them
 
 You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
-access key.  Use them as username/password for `aws ecr get-login`.
+access key.  Use them as username/password for `aws ecr get-login`
+(our region is `us-east-1`).
 The aws command comes with awscli; see https://aws.amazon.com/cli/
 for more guidance.
 

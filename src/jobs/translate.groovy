@@ -82,9 +82,9 @@ mkdir -p build_caffe2 && pushd build_caffe2
 cmake \
   -DPYTHON_INCLUDE_DIR=$(python -c 'from distutils import sysconfig; print(sysconfig.get_python_inc())') \
   -DPYTHON_EXECUTABLE=$(which python) \
-  -DUSE_ATEN=ON -DUSE_OPENCV=OFF -DUSE_LEVELDB=OFF -DUSE_LMDB=OFF \
+  -DUSE_ATEN=ON -DUSE_OPENCV=OFF -DUSE_LEVELDB=OFF -DUSE_LMDB=OFF -DBUILD_TEST=OFF \
   -DCMAKE_PREFIX_PATH=/opt/conda -DCMAKE_INSTALL_PREFIX=/opt/conda ..
-make install -j8 2>&1
+make install "-j$(nproc)"
 popd
 popd
 

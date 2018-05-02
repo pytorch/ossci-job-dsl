@@ -23,7 +23,21 @@ If this is your first time, see "Getting setup".
   the command line.
 - Run `docker run -it $DOCKER_IMAGE`
 
-Try prepending sudo if you get the `permission denied` error for the docker commands.
+Try prepending sudo if you get the `permission denied` error for the docker commands
+(and later figure out why your user doesn't have permissions to connect
+to the Docker socket; maybe you need to add yourself to the docker
+group).
+
+Want to run a Docker image on a GPU?  Standard issue devgpus don't
+allow use of Docker, so you will have to either (1) run docker
+on devfair, (2) get a GPU-enabled AWS instance (the OSS CI
+team has a few allocated, get in touch with them to see how
+to connect), (3) find a GPU machine that you're managing yourself.
+All of these will require some time to provision, so don't try to
+do this last minute.
+
+Want to know more about what Docker images are available? See
+"Available docker images."
 
 ### Getting setup
 
@@ -38,6 +52,32 @@ For the admins:
 You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
 access key.  Use them as username/password for `aws ecr get-login`.
 Go to the "cheat sheet"
+
+By the way, to log into AWS Console itself (not useful for pulling
+a Docker image, but maybe you want to know), go to
+https://console.aws.amazon.com/console/home?region=us-east-1
+and type 'caffe2' (no quotes) into the text box and click "Next".
+This will take you to the true login window where you can type
+in your username and password.
+
+### Available Docker images
+
+If you just want to reproduce a test error, there is the particular
+Docker image for your job which you should pull and test.  But if you're
+interested in repurposing our CI Docker images for other purposes,
+it helps to know about the general structure of the Docker images our
+CI exposes and how they are built (so you can find the URL for a base
+image you might be interested in.)
+
+For historical reasons, there are two sets of Docker images, one for
+PyTorch and one for Caffe2 (we intend to merge these at some point, but
+we haven't finished yet.
+
+PyTorch Dockerfiles source lives at https://github.com/pietern/pytorch-dockerfiles
+and are built every week at https://ci.pytorch.org/jenkins/job/pytorch-docker-master/
+
+Caffe2 Dockerfiles source lives at https://github.com/pytorch/pytorch/tree/master/docker/caffe2/jenkins
+and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-trigger/
 
 ### Advanced tricks
 

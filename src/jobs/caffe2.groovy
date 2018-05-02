@@ -1032,7 +1032,7 @@ folder(uploadBasePath) {
 dockerCondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = (buildEnvironment - "integrated-")
+  def buildDockerName = ((buildEnvironment - "integrated-") - "slim-")
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
@@ -1067,6 +1067,9 @@ dockerCondaBuildEnvironments.each {
         )
         if (buildEnvironment.contains('integrated')) {
           env('INTEGRATED', 1)
+        }
+        if (buildEnvironment.contains('slim')) {
+          env('SLIM', 1)
         }
       }
 
@@ -1103,7 +1106,11 @@ fi
 
 # All conda build logic should be in scripts/build_anaconda.sh
 if [[ -n $INTEGRATED ]]; then
-  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated
+  if [[ -n $SLIM ]]; then
+    PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated --slim
+  else
+    PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated
+  fi
 else
   PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
 fi

@@ -77,7 +77,7 @@ python3 setup.py install
 
 
 # Install Caffe2
-pip install -y future
+yes | pip install future
 mkdir -p build_caffe2 && pushd build_caffe2
 cmake \
   -DPYTHON_INCLUDE_DIR=$(python -c 'from distutils import sysconfig; print(sysconfig.get_python_inc())') \

@@ -170,6 +170,10 @@ popd
               script: '''
 set -ex
 
+# These are needed to get Python 3 working correctly
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+
 
 # Ensure jenkins can write to the ccache root dir.
 sudo chown jenkins:jenkins "${HOME}/.ccache"
@@ -180,12 +184,6 @@ export PATH=/opt/conda/bin:$PATH
 mkdir -p build
 ccache -o log_file=$PWD/build/ccache.log
 
-echo "$(which python)"
-echo "$(which python3)"
-echo "$(python --version)"
-# Install translate
-git clone --recursive https://github.com/pytorch/translate.git && pushd translate
-python3 setup.py build develop
 
 # Install Caffe2 and Pytorch
 if [[ $CUDA_VERSION == 8* ]]; then
@@ -202,6 +200,9 @@ git clone --recursive https://github.com/onnx/onnx.git
 PROTOBUF_INCDIR=/opt/conda/include pip install ./onnx
 
 
+# Install translate
+git clone --recursive https://github.com/pytorch/translate.git && pushd translate
+python3 setup.py build develop
 
 pushd pytorch_translate/cpp
 # If you need to specify a compiler other than the default one cmake is picking

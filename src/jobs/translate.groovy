@@ -32,9 +32,12 @@ translateDockerBuildEnvironments.each {
 
   // Job to build translate from source, and also build Pytorch and Caffe2
   // from source. These builds are only temporary, as they should either
-  //   1. be replaced by binary installs for much-faster build times or
+  //   1. be replaced by binary installs for much-faster build times (but can't
+  //      run on every PR this way)
   //   2. be integrated into the rest of CI so as to use the outputs of other
-  //      Caffe2/pytorch builds
+  //      Caffe2/pytorch builds, such as taking the results of e.g.
+  //      conda3-cuda9.0-cudnn7-integrated-ubuntu16.04 and building Pytorch in
+  //      it
   job("${translateBasePath}/${buildEnvironment}-source") {
     JobUtil.common(delegate, 'docker && ((cpu && ccache) || cpu_ccache)')
 
@@ -63,7 +66,6 @@ translateDockerBuildEnvironments.each {
 
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              cudaVersion: 'native',
               commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
               // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
               workspaceSource: "host-mount",
@@ -84,7 +86,7 @@ ccache -o log_file=$PWD/build/ccache.log
 git clone --recursive https://github.com/pytorch/pytorch.git && pushd pytorch
 
 
-# Install pytorch
+# Install Pytorch if it has changed
 yes | conda install numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 if [[ $CUDA_VERSION == 9 ]]; then
   conda install -yc pytorch magma-cuda80

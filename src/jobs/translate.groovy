@@ -27,7 +27,15 @@ translateDockerBuildEnvironments.each {
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
   }
 
-  job("${translateBasePath}/${buildEnvironment}") {
+  // WARNING that both of these jobs produce the same outputs, and so will
+  // probably overwrite each other if all run together.
+
+  // Job to build translate from source, and also build Pytorch and Caffe2
+  // from source. These builds are only temporary, as they should either
+  //   1. be replaced by binary installs for much-faster build times or
+  //   2. be integrated into the rest of CI so as to use the outputs of other
+  //      Caffe2/pytorch builds
+  job("${translateBasePath}/${buildEnvironment}-source") {
     JobUtil.common(delegate, 'docker && ((cpu && ccache) || cpu_ccache)')
 
     parameters {
@@ -48,8 +56,14 @@ translateDockerBuildEnvironments.each {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}")
       }
 
+      def cudaVersion = buildEnvironment =~ /cuda(\d.\d)/
+      environmentVariables {
+        env('CUDA_VERSION', cudaVersion[0][1])
+      }
+
       DockerUtil.shell context: delegate,
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              cudaVersion: 'native',
               commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
               // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
               workspaceSource: "host-mount",
@@ -72,7 +86,11 @@ git clone --recursive https://github.com/pytorch/pytorch.git && pushd pytorch
 
 # Install pytorch
 yes | conda install numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-yes | conda install -c pytorch magma-cuda80 # or magma-cuda90 if CUDA 9
+if [[ $CUDA_VERSION == 9 ]]; then
+  conda install -yc pytorch magma-cuda80
+else
+  conda install -yc pytorch magma-cuda90
+fi
 python3 setup.py install
 
 
@@ -117,5 +135,88 @@ popd
         pattern('build*/CMakeFiles/*.log')
       }
     }
-  } // job
-}
+  } // source installs
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Jobs that builds translate with binary installs of Pytorch and Caffe2
+  ////////////////////////////////////////////////////////////////////////////
+  job("${translateBasePath}/${buildEnvironment}-binary") {
+    JobUtil.common(delegate, 'docker && ((cpu && ccache) || cpu_ccache)')
+
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CMAKE_ARGS(delegate)
+
+      stringParam(
+        'DOCKER_COMMIT_TAG',
+        '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
+        "Tag of the Docker image to commit and push upon completion " +
+          "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
+      )
+    }
+
+    steps {
+
+      environmentVariables {
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}")
+      }
+
+      DockerUtil.shell context: delegate,
+              image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
+              // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
+              workspaceSource: "host-mount",
+              script: '''
+set -ex
+
+
+# Ensure jenkins can write to the ccache root dir.
+sudo chown jenkins:jenkins "${HOME}/.ccache"
+sudo chown -R jenkins:jenkins '/opt/conda'
+export PATH=/opt/conda/bin:$PATH
+
+# Make ccache log to the workspace, so we can archive it after the build
+mkdir -p build
+ccache -o log_file=$PWD/build/ccache.log
+
+# Install Caffe2 and Pytorch
+if [[ $CUDA_VERSION == 8* ]]; then
+  conda install -y -c pytorch magma-cuda80
+  conda install -y -c caffe2 pytorch-caffe2_cuda8.0_cudnn7
+else
+  conda install -y -c pytorch magma-cuda90
+  conda install -y -c caffe2 pytorch-caffe2_cuda9.0_cudnn7
+fi
+
+
+# Install ONNX
+git clone --recursive https://github.com/onnx/onnx.git
+PROTOBUF_INCDIR=/opt/conda/include pip install ./onnx
+
+
+# Install translate
+git clone --recursive https://github.com/pytorch/translate.git && pushd translate
+python3 setup.py build develop
+
+pushd pytorch_translate/cpp
+# If you need to specify a compiler other than the default one cmake is picking
+# up, you can use the -DCMAKE_C_COMPILER and -DCMAKE_CXX_COMPILER flags.
+cmake -DCMAKE_PREFIX_PATH=/opt/conda/usr/local -DCMAKE_INSTALL_PREFIX=/opt/conda .
+make
+popd
+'''
+    }
+
+    publishers {
+      archiveArtifacts {
+        allowEmpty()
+        pattern('build*/CMakeCache.txt')
+      }
+      archiveArtifacts {
+        allowEmpty()
+        pattern('build*/CMakeFiles/*.log')
+      }
+    }
+  } // binary-installs
+} // all build environments

@@ -1106,6 +1106,21 @@ dockerCondaBuildEnvironments.each {
               workspaceSource: "host-mount",
               script: '''
 set -ex
+
+some_variable='string'
+SOME_CAPS_VARIABLE='STRING'
+echo $some_variable
+echo "$some_variable"
+echo "${some_variable}"
+echo $SOME_CAPS_VARIABLE
+echo "$SOME_CAPS_VARIABLE"
+echo "${SOME_CAPS_VARIABLE}"
+cmake_args=()
+cmake_args+=("$CMAKE_ARGS")
+echo $cmake_args
+echo "${cmake_args[0]}"
+echo "${cmake_args[@]}"
+
 git submodule update --init --recursive
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
   # TODO don't know if this actually works yet

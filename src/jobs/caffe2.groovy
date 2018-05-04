@@ -104,6 +104,9 @@ multiJob("caffe2-pull-request") {
         'py2-gcc6-ubuntu16.04',
         'py2-gcc7-ubuntu16.04',
 
+        // Aten
+        'py3.5-mkl-aten-ubuntu16.04',
+
         // Build for Android
         'py2-android-ubuntu16.04',
 
@@ -314,7 +317,7 @@ multiJob("caffe2-master-doc") {
 dockerBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = (buildEnvironment - "integrated-")
+  def buildDockerName = ((buildEnvironment - "integrated-") - "aten-")
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
@@ -608,7 +611,12 @@ mkdir -p build
 ccache -o log_file=$PWD/build/ccache.log
 
 # Configure additional cmake arguments
-cmake_args="$CMAKE_ARGS"
+cmake_args=()
+cmake_args+=("$CMAKE_ARGS")
+
+if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
+  cmake_args+=("-DUSE_ATEN=ON")
+fi
 
 # conda must be added to the path for Anaconda builds (this location must be
 # the same as that in install_anaconda.sh used to build the docker image)
@@ -621,7 +629,7 @@ fi
 if test -x ".jenkins/caffe2/build.sh"; then
   ./.jenkins/caffe2/build.sh ${cmake_args}
 else
-  ./.jenkins/build.sh ${cmake_args}
+  ./.jenkins/build.sh ${cmake_args[@]}
 fi
 
 # Show sccache stats if it is running

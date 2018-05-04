@@ -16,6 +16,11 @@ class DockerImages {
     'py3.5-gcc5-ubuntu16.04',
     'py3.5-mkl-ubuntu16.04',
 
+    // To test that aten works throughout the build merge
+    // TODO the aten build does not use a docker base image of this name,
+    // rather it uses the py3.5-mkl-ubuntu16.04 base image
+    'py3.5-mkl-aten-ubuntu16.04',
+
     // Python compatibility (Python 3.6 is not default)
     'py3.6-gcc5-ubuntu16.04',
 

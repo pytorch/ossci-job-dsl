@@ -313,14 +313,10 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
-        // Only try to enable sccache if this is NOT a CUDA build
-        // NVCC support for sccache is underway.
-        if (!buildEnvironment.contains('cuda')) {
-          env(
-            'SCCACHE_BUCKET',
-            'ossci-compiler-cache',
-          )
-        }
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
       }
 
       DockerUtil.shell context: delegate,

@@ -765,6 +765,10 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
+          env(
+            'SCCACHE_BUCKET',
+            'ossci-compiler-cache',
+          )
         }
 
         WindowsUtil.shell delegate, '''

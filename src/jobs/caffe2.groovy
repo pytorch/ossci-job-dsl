@@ -577,15 +577,10 @@ git status
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
-
-        // Only try to enable sccache if this is NOT a CUDA build
-        // NVCC support for sccache is underway.
-        if (!buildEnvironment.contains('cuda')) {
-          env(
-            'SCCACHE_BUCKET',
-            'ossci-compiler-cache',
-          )
-        }
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
       }
 
       DockerUtil.shell context: delegate,
@@ -1022,6 +1017,14 @@ windowsBuildEnvironments.each {
 
     steps {
       GitUtil.mergeStep(delegate)
+
+      environmentVariables {
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
+      }
+
       // TODO use WindowsUtil
       shell('''
 git submodule update --init

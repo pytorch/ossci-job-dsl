@@ -657,8 +657,16 @@ fi
   }
 
   job("${buildBasePath}/${buildEnvironment}-test") {
-    // Run tests on GPU machine if built with CUDA support
-    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
+    def label = 'docker'
+    if (buildEnvironment.contains('cuda')) {
+       // Run tests on GPU machine if built with CUDA support
+       label += ' && gpu'
+    } else if (buildEnvironment.contains('rocm')) {
+       label += ' && rocm'
+    } else {
+       label += ' && cpu'
+    }
+    JobUtil.common(delegate, label)
     JobUtil.timeoutAndFailAfter(delegate, 45)
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 

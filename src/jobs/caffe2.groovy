@@ -622,9 +622,9 @@ fi
 
 # Build
 if test -x ".jenkins/caffe2/build.sh"; then
-  ./.jenkins/caffe2/build.sh "${cmake_args[@]}"
+  ./.jenkins/caffe2/build.sh ${cmake_args[@]}
 else
-  ./.jenkins/build.sh "${cmake_args[@]}"
+  ./.jenkins/build.sh ${cmake_args[@]}
 fi
 
 # Show sccache stats if it is running

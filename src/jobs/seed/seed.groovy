@@ -24,13 +24,9 @@ job('seed') {
     githubPush()
   }
   steps {
-    gradle 'clean test'
     dsl {
       external 'jobs/*.groovy'
       additionalClasspath 'src/main/groovy'
     }
-  }
-  publishers {
-    archiveJunit 'build/test-results/**/*.xml'
   }
 }

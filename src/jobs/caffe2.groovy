@@ -105,7 +105,7 @@ multiJob("caffe2-pull-request") {
         'py2-gcc7-ubuntu16.04',
 
         // Aten
-        //'py3.5-mkl-aten-ubuntu16.04',
+        //'py2-mkl-aten-ubuntu16.04',
 
         // Build for Android
         'py2-android-ubuntu16.04',

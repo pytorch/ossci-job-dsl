@@ -611,11 +611,6 @@ cmake_args+=("$CMAKE_ARGS")
 
 if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
   cmake_args+=("-DUSE_ATEN=ON")
-  echo 'echoing cmake_args'
-  echo $cmake_args
-  echo "${cmake_args}"
-  echo "${cmake_args[@]}"
-  echo "${cmake_args[0]}"
 fi
 
 # conda must be added to the path for Anaconda builds (this location must be
@@ -627,9 +622,9 @@ fi
 
 # Build
 if test -x ".jenkins/caffe2/build.sh"; then
-  ./.jenkins/caffe2/build.sh ${cmake_args}
+  ./.jenkins/caffe2/build.sh "${cmake_args[@]}"
 else
-  ./.jenkins/build.sh ${cmake_args[@]}
+  ./.jenkins/build.sh "${cmake_args[@]}"
 fi
 
 # Show sccache stats if it is running

@@ -86,7 +86,7 @@ multiJob("caffe2-pull-request") {
         'py2-gcc4.8-ubuntu14.04',
 
         // Builds for Anaconda
-        'conda2-ubuntu16.04',
+        //'conda2-ubuntu16.04',
         //'conda3-ubuntu16.04',
       ]
 

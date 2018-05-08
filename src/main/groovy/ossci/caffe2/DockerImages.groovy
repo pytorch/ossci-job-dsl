@@ -82,7 +82,7 @@ class DockerImages {
     'py2-cuda9.0-cudnn7-centos7',
 
      // AMD ROCM builds
-     'py2-clang-3.8-rocm-1.7.1-ubuntu16.04',
-     'py3.6-clang-3.8-rocm-1.7.1-ubuntu16.04',
+     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
+     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
 }

@@ -86,7 +86,7 @@ multiJob("caffe2-pull-request") {
         'py2-gcc4.8-ubuntu14.04',
 
         // Builds for Anaconda
-        //'conda2-ubuntu16.04',
+        'conda2-ubuntu16.04',
         //'conda3-ubuntu16.04',
       ]
 
@@ -616,6 +616,7 @@ cmake_args+=("$CMAKE_ARGS")
 
 if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
   cmake_args+=("-DUSE_ATEN=ON")
+  cmake_args+=("-DBLAS=Eigen")
 fi
 
 # conda must be added to the path for Anaconda builds (this location must be

@@ -329,6 +329,12 @@ set -ex
 # Reinitialize submodules
 git submodule update --init
 
+# sccache will fail for CUDA builds if all cores are used for compiling
+# TODO: move this into build.sh (https://github.com/pytorch/pytorch/pull/7361)
+if [[ "$BUILD_ENVIRONMENT" == *cuda* ]] && which sccache > /dev/null; then
+  export MAX_JOBS=`expr $(nproc) - 1`
+fi
+
 if test -x ".jenkins/pytorch/build.sh"; then
   .jenkins/pytorch/build.sh
 else

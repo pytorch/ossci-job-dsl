@@ -1175,7 +1175,9 @@ multiJob("nightly-conda-package-upload") {
       }
 
       dockerCondaBuildEnvironments.each {
-        definePhaseJob(it)
+        if (!it.contains('gcc4.8')) {
+          definePhaseJob(it)
+        }
       }
     }
   }

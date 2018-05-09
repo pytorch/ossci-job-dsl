@@ -81,4 +81,27 @@ class DockerImages {
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
+
+  // Maps (BUILD_ENVIRONMENT == jenkins build name) --> dockerImage
+  static final Map<String, String> imageOf = [:]
+  static {
+    // By default populated by all dockerImages pointing to themselves
+    for (String dockerImage : images) {
+      imageOf.put(dockerImage, dockerImage);
+    }
+    // Additional builds that re-use dockerImages below
+    imageOf.put("conda2-integrated-ubuntu16.04", "conda2-ubuntu16.04")
+    imageOf.put("conda3-integrated-ubuntu16.04", "conda3-ubuntu16.04")
+    imageOf.put("conda2-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
+    imageOf.put("conda2-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
+    imageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
+    imageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
+    imageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")
+    imageOf.put("py2-cuda9.0-cudnn7-aten-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
+
+    // Verify that all docker images (values) in the map are valid
+    for (String dockerImage : imageOf.values()) {
+      assert dockerImage in images
+    }
+  }
 }

@@ -321,7 +321,8 @@ multiJob("caffe2-master-doc") {
 dockerBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = ((buildEnvironment - "integrated-") - "aten-")
+  def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
+  assert buildDockerName in DockerImages.images
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->

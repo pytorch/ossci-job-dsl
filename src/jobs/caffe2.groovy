@@ -88,6 +88,9 @@ multiJob("caffe2-pull-request") {
         // Builds for Anaconda
         'conda2-ubuntu16.04',
         //'conda3-ubuntu16.04',
+
+        // Aten build during all the merging-cmake changes
+        'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
       ]
 
       def buildOnlyEnvironments = [
@@ -615,6 +618,9 @@ cmake_args=()
 cmake_args+=("$CMAKE_ARGS")
 
 if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
+  # TODO this is needed until docker version is bumped, but that is blocked on
+  # master tests that are currently failing
+  sudo pip install pyyaml
   cmake_args+=("-DUSE_ATEN=ON")
 fi
 

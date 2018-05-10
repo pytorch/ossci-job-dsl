@@ -21,6 +21,7 @@ class DockerImages {
     // rather it uses the py2-mkl-ubuntu16.04 base image
     'py2-aten-ubuntu16.04',
     'py2-mkl-aten-ubuntu16.04',
+    'py2-cuda8.0-cudnn7-aten-ubuntu16.04',
     'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
 
     // Python compatibility (Python 3.6 is not default)

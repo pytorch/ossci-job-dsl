@@ -744,10 +744,10 @@ rm -f ./crash/core.logging_test.*
     }
 
     publishers {
-      archiveArtifacts {
-        allowEmpty()
-        pattern('crash/*')
-      }
+      //archiveArtifacts {
+      //  allowEmpty()
+      //  pattern('crash/*')
+      //}
       archiveXUnit {
         googleTest {
           pattern('test/cpp/*.xml')

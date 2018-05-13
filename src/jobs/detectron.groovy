@@ -222,10 +222,10 @@ cd lib && make ops && cd ..
     }
 
     publishers {
-      archiveArtifacts {
-        allowEmpty()
-        pattern('crash/*')
-      }
+      //archiveArtifacts {
+      //  allowEmpty()
+      //  pattern('crash/*')
+      //}
     }
   }
 }

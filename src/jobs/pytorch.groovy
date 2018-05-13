@@ -750,6 +750,13 @@ fi
       JobUtil.common delegate, 'windows && cpu'
       JobUtil.gitCommitFromPublicGitHub delegate, "pytorch/pytorch"
       JobUtil.timeoutAndFailAfter(delegate, 40)
+      // Windows builds are something like 9M a pop, so keep less of
+      // them.
+      publishers {
+        publishBuild {
+          discardOldBuilds(30)
+        }
+      }
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)

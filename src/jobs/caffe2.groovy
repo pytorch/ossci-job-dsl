@@ -887,13 +887,12 @@ macOsBuildEnvironments.each {
           if (buildEnvironment.contains('ios')) {
             env('BUILD_IOS', "1")
           }
-
+          if (buildEnvironment.contains('integrated')) {
+            env('INTEGRATED', 1)
+          }
           // Anaconda environment variables
           if (buildEnvironment.contains('conda')) {
             env('CAFFE2_USE_ANACONDA', 1)
-            if (buildEnvironment.contains('integrated')) {
-              env('INTEGRATED', 1)
-            }
             if (!makeACondaUploadBuild) {
               env('SKIP_CONDA_TESTS', 1)
             }
@@ -962,11 +961,7 @@ elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
   fi
 
   # All conda build logic should be in scripts/build_anaconda.sh
-  if [ -n "$INTEGRATED" ]; then
-    scripts/build_anaconda.sh $package_name --integrated
-  else
-    scripts/build_anaconda.sh $package_name $integrated
-  fi
+  scripts/build_anaconda.sh $package_name
 else
   scripts/build_local.sh
 fi
@@ -1124,12 +1119,8 @@ if [[ -n $CONDA_PACKAGE_NAME ]]; then
 fi
 
 # All conda build logic should be in scripts/build_anaconda.sh
-if [[ -n $INTEGRATED ]]; then
-  if [[ -n $SLIM ]]; then
-    PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated --slim
-  else
-    PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated
-  fi
+if [[ -n $SLIM ]]; then
+  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --slim
 else
   PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
 fi

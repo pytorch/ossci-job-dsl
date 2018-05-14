@@ -570,6 +570,13 @@ git status
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )
 
+      // DEBUG
+      stringParam(
+        'SCCACHE_BUCKET_TEST',
+        '',
+        "SCCACHE_BUCKET_TEST",
+      )
+
       ParametersUtil.CMAKE_ARGS(delegate)
     }
 
@@ -588,6 +595,11 @@ git status
           env(
             'SCCACHE_BUCKET',
             'ossci-compiler-cache',
+          )
+        } else {
+          env(
+            'SCCACHE_BUCKET_TEST',
+            '${SCCACHE_BUCKET_TEST}',
           )
         }
       }

@@ -554,7 +554,7 @@ git status
   }
 
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && ((cpu && ccache) || cpu_ccache)' : 'docker && cpu')
+    JobUtil.common(delegate, 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     parameters {
@@ -570,13 +570,6 @@ git status
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )
 
-      // DEBUG
-      stringParam(
-        'SCCACHE_BUCKET',
-        '',
-        "SCCACHE_BUCKET",
-      )
-
       ParametersUtil.CMAKE_ARGS(delegate)
     }
 
@@ -588,20 +581,10 @@ git status
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
-
-        // Only try to enable sccache if this is NOT a CUDA build
-        // NVCC support for sccache is underway.
-        if (!buildEnvironment.contains('cuda')) {
-          env(
-            'SCCACHE_BUCKET',
-            'ossci-compiler-cache',
-          )
-        } else {
-          env(
-            'SCCACHE_BUCKET',
-            '${SCCACHE_BUCKET}',
-          )
-        }
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
       }
 
       DockerUtil.shell context: delegate,

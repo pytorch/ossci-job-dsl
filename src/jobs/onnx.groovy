@@ -115,9 +115,9 @@ set -ex
 
 git submodule update --init --recursive
 
-export TOP_DIR=$(dirname $(dirname $(readlink -e "${BASH_SOURCE[0]}")))
+TOP_DIR="$PWD"
 
-export OS="$(uname)"
+OS="$(uname)"
 
 compilers=(
     cc
@@ -141,7 +141,7 @@ else
         for compiler in "${compilers[@]}"; do
             (
                 echo "#!/bin/sh"
-                echo "exec $(which sccache) $(which $compiler) \"\$@\""
+                echo "exec $(which sccache) $(which $compiler) \\\"\\\$@\\\""
             ) > "$SCCACHE_BIN_DIR/$compiler"
             chmod +x "$SCCACHE_BIN_DIR/$compiler"
         done
@@ -166,7 +166,7 @@ VENV_DIR=/tmp/venv
 
 if [[ "${BUILD_ENVIRONMENT}" == py2-* ]]; then
     python2 -m virtualenv "$VENV_DIR"
-Elif [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
+elif [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
     python3 -m venv "$VENV_DIR"
 else
     echo "Unable to detect Python version from BUILD_ENVIRONMENT='$BUILD_ENVIRONMENT'" >&2

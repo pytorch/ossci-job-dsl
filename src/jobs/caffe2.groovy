@@ -1120,9 +1120,9 @@ fi
 
 # All conda build logic should be in scripts/build_anaconda.sh
 if [[ -n $SLIM ]]; then
-  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated --slim
+  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --slim
 else
-  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --integrated
+  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
 fi
 '''
     }

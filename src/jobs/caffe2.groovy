@@ -572,9 +572,9 @@ git status
 
       // DEBUG
       stringParam(
-        'SCCACHE_BUCKET_TEST',
+        'SCCACHE_BUCKET',
         '',
-        "SCCACHE_BUCKET_TEST",
+        "SCCACHE_BUCKET",
       )
 
       ParametersUtil.CMAKE_ARGS(delegate)
@@ -598,8 +598,8 @@ git status
           )
         } else {
           env(
-            'SCCACHE_BUCKET_TEST',
-            '${SCCACHE_BUCKET_TEST}',
+            'SCCACHE_BUCKET',
+            '${SCCACHE_BUCKET}',
           )
         }
       }

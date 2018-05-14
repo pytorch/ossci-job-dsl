@@ -193,7 +193,7 @@ cd "$PYTORCH_DIR"
 cd "$ONNX_DIR" && pytest && cd -
 
 # run integration tests
-./scripts/onnx/test.sh
+./scripts/onnx/test.sh -p
 
 '''
     }

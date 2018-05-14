@@ -43,7 +43,6 @@ def buildEnvironments = [
 def experimentalBuildEnvironments = [
 ]
 
-def firstPhaseEnvironment = "pytorch-linux-trusty-py3.6-gcc5.4"
 def docEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
@@ -96,36 +95,19 @@ multiJob("pytorch-pull-request") {
       propertiesFile(gitPropertiesFile)
     }
 
-    phase("Build and test (${firstPhaseEnvironment})") {
-      phaseJob("${buildBasePath}/${firstPhaseEnvironment}-trigger") {
-        parameters {
-          // Pass parameters of this job
-          currentBuild()
-          // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-          predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-          predefinedProp('COMMIT_SOURCE', 'pull-request')
-          // Ensure consistent merge behavior in downstream builds.
-          propertiesFile(gitPropertiesFile)
-        }
-        PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
-      }
-    }
-
-    phase("Build and test (others)") {
+    phase("Build and test") {
       buildEnvironments.each {
-        if ( it != firstPhaseEnvironment ) {
-          phaseJob("${buildBasePath}/${it}-trigger") {
-            parameters {
-              // Pass parameters of this job
-              currentBuild()
-              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-              predefinedProp('COMMIT_SOURCE', 'pull-request')
-              // Ensure consistent merge behavior in downstream builds.
-              propertiesFile(gitPropertiesFile)
-            }
-            PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
+        phaseJob("${buildBasePath}/${it}-trigger") {
+          parameters {
+            // Pass parameters of this job
+            currentBuild()
+            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+            predefinedProp('COMMIT_SOURCE', 'pull-request')
+            // Ensure consistent merge behavior in downstream builds.
+            propertiesFile(gitPropertiesFile)
           }
+          PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
         }
       }
     }

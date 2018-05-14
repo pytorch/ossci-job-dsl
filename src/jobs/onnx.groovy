@@ -1,6 +1,7 @@
 import ossci.DockerUtil
 import ossci.JobUtil
 import ossci.ParametersUtil
+import ossci.GitUtil
 import ossci.onnx.Users
 // TODO: give onnx its own dockerfiles repo and then stop using caffe2's
 // images
@@ -89,10 +90,20 @@ buildEnvironments.each {
     }
 
     steps {
+      GitUtil.mergeStep(delegate)
+
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
+        )
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
+        env(
+          "CI",
+          "true",
         )
       }
 
@@ -104,38 +115,85 @@ set -ex
 
 git submodule update --init --recursive
 
+export TOP_DIR=$(dirname $(dirname $(readlink -e "${BASH_SOURCE[0]}")))
+
+export OS="$(uname)"
+
+compilers=(
+    cc
+    c++
+    gcc
+    g++
+    x86_64-linux-gnu-gcc
+)
+
+# setup ccache
+if [[ "$OS" == "Darwin" ]]; then
+    export PATH="/usr/local/opt/ccache/libexec:$PATH"
+else
+    if [[ -n "${SCCACHE_BUCKET}" ]]; then
+        if ! hash sccache 2>/dev/null; then
+            echo "SCCACHE_BUCKET is set but sccache executable is not found"
+            exit 1
+        fi
+        SCCACHE_BIN_DIR="$TOP_DIR/sccache"
+        mkdir -p "$SCCACHE_BIN_DIR"
+        for compiler in "${compilers[@]}"; do
+            (
+                echo "#!/bin/sh"
+                echo "exec $(which sccache) $(which $compiler) \"\$@\""
+            ) > "$SCCACHE_BIN_DIR/$compiler"
+            chmod +x "$SCCACHE_BIN_DIR/$compiler"
+        done
+        export PATH="$SCCACHE_BIN_DIR:$PATH"
+    else
+        if [[ -d "/usr/lib/ccache" ]]; then
+            export PATH="/usr/lib/ccache:$PATH"
+        elif hash ccache 2>/dev/null; then
+            CCACHE_BIN_DIR="$TOP_DIR/ccache"
+            mkdir -p "$CCACHE_BIN_DIR"
+            for compiler in "${compilers[@]}"; do
+                ln -sf "$(which ccache)" "$CCACHE_BIN_DIR/$compiler"
+            done
+            export PATH="$CCACHE_BIN_DIR:$PATH"
+        fi
+    fi
+fi
+
+
+# setup virtualenv
+VENV_DIR=/tmp/venv
+
 if [[ "${BUILD_ENVIRONMENT}" == py2-* ]]; then
-  PYTHON=python2
+    python2 -m virtualenv "$VENV_DIR"
+Elif [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
+    python3 -m venv "$VENV_DIR"
+else
+    echo "Unable to detect Python version from BUILD_ENVIRONMENT='$BUILD_ENVIRONMENT'" >&2
+    exit 1
 fi
-
-if [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
-  PYTHON=python3
-fi
-
-echo "Python version:"
-which $PYTHON
-$PYTHON --version
-
-# create virtualenv
-$PYTHON -m virtualenv venv && source venv/bin/activate
+source "$VENV_DIR/bin/activate"
 pip install -U pip setuptools
 
-# install
-pip install ninja
-pip install -e .
-
-# run tests
+# install test requirements
 pip install pytest-cov nbval
-pytest
 
-# check auto-gen files up-to-date
-$PYTHON onnx/defs/gen_doc.py -o docs/Operators.md
-$PYTHON onnx/gen_proto.py
-git diff --exit-code
+# checkout pytorch to run integration tests
+PYTORCH_DIR=/tmp/pytorch
+ONNX_DIR="$PYTORCH_DIR/third_party/onnx"
+git clone --recursive https://github.com/pytorch/pytorch.git "$PYTORCH_DIR"
+rm -rf "$ONNX_DIR"
+cp -r "$PWD" "$ONNX_DIR"
 
-deactivate
+# install everything
+"$PYTORCH_DIR/scripts/onnx/install-develop.sh"
 
-echo "ALL CHECKS PASSED"
+# run onnx tests
+cd "$ONNX_DIR" && pytest && cd -
+
+# run integration tests
+"$PYTORCH_DIR/scripts/onnx/test.sh" -p
+
 '''
     }
   }

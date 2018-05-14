@@ -167,7 +167,7 @@ VENV_DIR=/tmp/venv
 if [[ "${BUILD_ENVIRONMENT}" == py2-* ]]; then
     python2 -m virtualenv "$VENV_DIR"
 elif [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
-    python3 -m venv "$VENV_DIR"
+    python3 -m virtualenv "$VENV_DIR"
 else
     echo "Unable to detect Python version from BUILD_ENVIRONMENT='$BUILD_ENVIRONMENT'" >&2
     exit 1

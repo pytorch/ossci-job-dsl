@@ -1,6 +1,12 @@
 package ossci.caffe2
 
 class DockerImages {
+
+  // NOTE this is the list of dockerImages, but not the list of all Jenkins
+  // build jobs, as some jobs use the same dockerImage. The real source of all
+  // possible jenkins jobs is the keys of the map
+  //   imageOf<jenkinsBuildName, dockerImageName>
+  // that is defined below
   static final List<String> images = [
     // Primary builds
     'py2-cuda8.0-cudnn7-ubuntu16.04',
@@ -15,14 +21,6 @@ class DockerImages {
     'py3.5-cuda9.1-cudnn7-ubuntu16.04',
     'py3.5-gcc5-ubuntu16.04',
     'py3.5-mkl-ubuntu16.04',
-
-    // To test that aten works throughout the build merge
-    // TODO the aten build does not use a docker base image of this name,
-    // rather it uses the py2-mkl-ubuntu16.04 base image
-    'py2-aten-ubuntu16.04',
-    'py2-mkl-aten-ubuntu16.04',
-    'py2-cuda8.0-cudnn7-aten-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
 
     // Python compatibility (Python 3.6 is not default)
     'py3.6-gcc5-ubuntu16.04',
@@ -65,13 +63,6 @@ class DockerImages {
     'conda2-gcc4.8-ubuntu16.04',
     'conda3-gcc4.8-ubuntu16.04',
 
-    'conda2-integrated-ubuntu16.04',
-    'conda2-cuda8.0-cudnn7-integrated-ubuntu16.04',
-    'conda2-cuda9.0-cudnn7-integrated-ubuntu16.04',
-
-    'conda3-cuda8.0-cudnn7-integrated-slim-ubuntu16.04',
-    'conda3-cuda9.0-cudnn7-integrated-slim-ubuntu16.04',
-
     // CentOS images (Python 2 only)
     'py2-centos7',
     'py2-cuda8.0-cudnn7-centos7',
@@ -97,6 +88,7 @@ class DockerImages {
     imageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
     imageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
     imageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")
+    imageOf.put("py2-cuda8.0-cudnn7-aten-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
     imageOf.put("py2-cuda9.0-cudnn7-aten-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
 
     // Verify that all docker images (values) in the map are valid
@@ -104,4 +96,6 @@ class DockerImages {
       assert dockerImage in images
     }
   }
+
+  static final Collection<String> allJenkinsDockerJobs = imageOf.keySet();
 }

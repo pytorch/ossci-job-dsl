@@ -19,7 +19,7 @@ folder(buildBasePath) {
 // on if you have a master build or just pull-request, which explains
 // the duplication
 
-def dockerBuildEnvironments = DockerImages.images
+def dockerBuildEnvironments = DockerImages.allJenkinsDockerJobs
 
 def macOsBuildEnvironments = [
   // Basic macOS builds
@@ -41,7 +41,7 @@ def windowsBuildEnvironments = [
 ]
 
 def dockerCondaBuildEnvironments =
-  DockerImages.images.findAll { it.startsWith("conda") }
+  dockerBuildEnvironments.findAll { it.startsWith("conda") }
 
 // macOs conda-builds referred to by the nightly upload job
 // These jobs are actually defined along with the rest of the

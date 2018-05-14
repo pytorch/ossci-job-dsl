@@ -184,15 +184,16 @@ ONNX_DIR="$PYTORCH_DIR/third_party/onnx"
 git clone --recursive https://github.com/pytorch/pytorch.git "$PYTORCH_DIR"
 rm -rf "$ONNX_DIR"
 cp -r "$PWD" "$ONNX_DIR"
+cd "$PYTORCH_DIR"
 
 # install everything
-"$PYTORCH_DIR/scripts/onnx/install-develop.sh"
+./scripts/onnx/install-develop.sh
 
 # run onnx tests
 cd "$ONNX_DIR" && pytest && cd -
 
 # run integration tests
-"$PYTORCH_DIR/scripts/onnx/test.sh" -p
+./scripts/onnx/test.sh
 
 '''
     }

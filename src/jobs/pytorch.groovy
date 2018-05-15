@@ -602,7 +602,7 @@ exit 0
 
   job("${buildBasePath}/${buildEnvironment}-multigpu-test") {
     JobUtil.common delegate, 'docker && multigpu'
-    JobUtil.timeoutAndFailAfter(delegate, 15)
+    JobUtil.timeoutAndFailAfter(delegate, 30)
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)

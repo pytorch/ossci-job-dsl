@@ -19,7 +19,7 @@ folder(buildBasePath) {
 // on if you have a master build or just pull-request, which explains
 // the duplication
 
-def dockerBuildEnvironments = DockerImages.images
+def dockerBuildEnvironments = DockerImages.allJenkinsDockerJobs
 
 def integratedEnvironments = [
     'py2-gcc5-ubuntu16.04',
@@ -47,7 +47,7 @@ def windowsBuildEnvironments = [
 ]
 
 def dockerCondaBuildEnvironments =
-  DockerImages.images.findAll { it.startsWith("conda") }
+  dockerBuildEnvironments.findAll { it.startsWith("conda") }
 
 // macOs conda-builds referred to by the nightly upload job
 // These jobs are actually defined along with the rest of the
@@ -327,7 +327,8 @@ multiJob("caffe2-master-doc") {
 dockerBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = ((buildEnvironment - "integrated-") - "aten-")
+  def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
+  assert buildDockerName in DockerImages.images
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->

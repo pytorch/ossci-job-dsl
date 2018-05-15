@@ -328,7 +328,6 @@ dockerBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
   def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
-  assert buildDockerName in DockerImages.images
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
@@ -560,6 +559,7 @@ git status
     }
   }
 
+  // All docker builds
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
@@ -668,6 +668,7 @@ fi
     }
   }
 
+  // All docker builds with tests
   job("${buildBasePath}/${buildEnvironment}-test") {
     def label = 'docker'
     if (buildEnvironment.contains('cuda')) {
@@ -900,7 +901,7 @@ macOsBuildEnvironments.each {
           if (buildEnvironment.contains('ios')) {
             env('BUILD_IOS', "1")
           }
-          if (integratedEnvironments.contains(buildEnvironment)) {
+          if (buildEnvironment.contains('integrated') || integratedEnvironments.contains(buildEnvironment)) {
             env('INTEGRATED', 1)
           }
           // Anaconda environment variables
@@ -1087,7 +1088,7 @@ folder(uploadBasePath) {
 dockerCondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = ((buildEnvironment - "integrated-") - "slim-")
+  def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->

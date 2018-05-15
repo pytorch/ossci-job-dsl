@@ -146,7 +146,7 @@ multiJob("caffe2-pull-request") {
 
         // Will turn on rocm tests soon
         'py2-clang3.8-rocm1.7.1-ubuntu16.04',
-        'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
+        // 'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
       ]
 
       def definePhaseJob = { name ->

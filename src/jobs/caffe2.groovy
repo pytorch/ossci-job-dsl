@@ -1046,7 +1046,11 @@ export CUDA_NVCC_EXECUTABLE=$(pwd)/tmp_bin/nvcc
 sccache --stop-server || true
 sccache --start-server
 
+sccache --zero-stats
+
 ./scripts/build_windows.bat
+
+sccache --show-stats
 ''')
     }
   } // Windows build jobs

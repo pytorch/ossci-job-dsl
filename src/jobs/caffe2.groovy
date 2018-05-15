@@ -1022,11 +1022,30 @@ windowsBuildEnvironments.each {
 
     steps {
       GitUtil.mergeStep(delegate)
+
+      environmentVariables {
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
+      }
+
       // TODO use WindowsUtil
       shell('''
 git submodule update --init
 export PATH="$PATH:/c/Program Files/CMake/bin:"
 export USE_CUDA=ON
+
+mkdir ./tmp_bin
+curl https://s3.amazonaws.com/ossci-windows/sccache.exe -o tmp_bin/sccache.exe
+copy tmp_bin/sccache.exe tmp_bin/nvcc.exe
+export PATH="$(pwd)/tmp_bin:$PATH"
+
+export CUDA_NVCC_EXECUTABLE=$(pwd)/tmp_bin/nvcc
+
+sccache --stop-server || true
+sccache --start-server
+
 ./scripts/build_windows.bat
 ''')
     }

@@ -25,6 +25,12 @@ def integratedEnvironments = [
     'py2-gcc5-ubuntu16.04',
     // 'py3.6-gcc5-ubuntu16.04',
     'conda2-integrated-macos10.13',
+    "conda2-integrated-ubuntu16.04",
+    "conda3-integrated-ubuntu16.04",
+    "conda2-cuda8.0-cudnn7-integrated-ubuntu16.04",
+    "conda2-cuda9.0-cudnn7-integrated-ubuntu16.04",
+    "conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04",
+    "conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04",
 ]
 
 def macOsBuildEnvironments = [
@@ -592,7 +598,7 @@ git status
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
-        if (buildEnvironment.contains('integrated') || integratedEnvironments.contains(buildEnvironment)) {
+        if (integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
       }
@@ -901,7 +907,7 @@ macOsBuildEnvironments.each {
           if (buildEnvironment.contains('ios')) {
             env('BUILD_IOS', "1")
           }
-          if (buildEnvironment.contains('integrated') || integratedEnvironments.contains(buildEnvironment)) {
+          if (integratedEnvironments.contains(buildEnvironment)) {
             env('INTEGRATED', 1)
           }
           // Anaconda environment variables

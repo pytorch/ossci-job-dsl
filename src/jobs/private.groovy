@@ -15,7 +15,7 @@ def dockerWorkers = [
   //"worker-c5-xlarge-01",
   "worker-c5-xlarge-02",
   "worker-c5-xlarge-03",
-  "worker-c5-xlarge-04",
+  //"worker-c5-xlarge-04",
   "worker-c5-xlarge-05",
   "worker-c5-xlarge-06",
   "worker-c5-xlarge-07",

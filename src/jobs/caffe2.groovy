@@ -591,7 +591,7 @@ git status
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
-        if (integratedEnvironments.contains(buildEnvironment)) {
+        if (buildEnvironment.contains('integrated') || integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
       }

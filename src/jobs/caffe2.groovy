@@ -21,6 +21,12 @@ folder(buildBasePath) {
 
 def dockerBuildEnvironments = DockerImages.images
 
+def integratedEnvironments = [
+    'py2-gcc5-ubuntu16.04',
+    // 'py3.6-gcc5-ubuntu16.04',
+    'conda2-integrated-macos10.13',
+]
+
 def macOsBuildEnvironments = [
   // Basic macOS builds
   'py2-system-macos10.13',
@@ -585,6 +591,9 @@ git status
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
+        if (integratedEnvironments.contains(buildEnvironment)) {
+          env('INTEGRATED', 1)
+        }
       }
 
       DockerUtil.shell context: delegate,
@@ -688,6 +697,9 @@ fi
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
+        if (integratedEnvironments.contains(buildEnvironment)) {
+          env('INTEGRATED', 1)
+        }
       }
 
       def cudaVersion = ''
@@ -887,7 +899,7 @@ macOsBuildEnvironments.each {
           if (buildEnvironment.contains('ios')) {
             env('BUILD_IOS', "1")
           }
-          if (buildEnvironment.contains('integrated')) {
+          if (integratedEnvironments.contains(buildEnvironment)) {
             env('INTEGRATED', 1)
           }
           // Anaconda environment variables
@@ -1025,11 +1037,17 @@ windowsBuildEnvironments.each {
 
       environmentVariables {
         env(
+          'BUILD_ENVIRONMENT',
+          "${buildEnvironment}",
+        )
+        env(
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
+        if (integratedEnvironments.contains(buildEnvironment)) {
+          env('INTEGRATED', 1)
+        }
       }
-
       // TODO use WindowsUtil
       shell('''
 git submodule update --init
@@ -1096,8 +1114,8 @@ dockerCondaBuildEnvironments.each {
         env(
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
-        )
-        if (buildEnvironment.contains('integrated')) {
+                )
+        if (integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
         if (buildEnvironment.contains('slim')) {

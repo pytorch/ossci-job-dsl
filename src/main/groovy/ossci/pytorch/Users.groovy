@@ -24,6 +24,7 @@ class Users {
     "yf225",
     "goldsborough",
     "theweiho",
+    "Jorghi12",
     "orionr",
     'ajtulloch', // Andrew Tulloch
     'andrewwdye', // Andrew Dye

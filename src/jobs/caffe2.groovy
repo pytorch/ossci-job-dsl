@@ -165,7 +165,8 @@ multiJob("caffe2-pull-request") {
         }
       }
 
-      def integrated = integratedEnvironments.contains(it)
+      def buildEnvironment = it
+      def integrated = integratedEnvironments.contains(buildEnvironment)
       buildAndTestEnvironments.each {
         definePhaseJob(it + "-trigger-test", !integrated)
       }

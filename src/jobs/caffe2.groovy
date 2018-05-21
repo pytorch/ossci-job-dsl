@@ -165,13 +165,13 @@ multiJob("caffe2-pull-request") {
         }
       }
 
-      def caffe2_only = !integratedEnvironments.contains(it)
+      def integrated = integratedEnvironments.contains(it)
       buildAndTestEnvironments.each {
-        definePhaseJob(it + "-trigger-test", caffe2_only)
+        definePhaseJob(it + "-trigger-test", !integrated)
       }
 
       buildOnlyEnvironments.each {
-        definePhaseJob(it + "-trigger-build", caffe2_only)
+        definePhaseJob(it + "-trigger-build", !integrated)
       }
     }
   }

@@ -149,7 +149,7 @@ multiJob("caffe2-pull-request") {
         'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
       ]
 
-      def definePhaseJob = { name ->
+      def definePhaseJob = { name, caffe2_only ->
         phaseJob("${buildBasePath}/${name}") {
           parameters {
             // Pass parameters of this job
@@ -159,16 +159,19 @@ multiJob("caffe2-pull-request") {
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
-          PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
+          if (caffe2_only) {
+            PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
+          }
         }
       }
 
+      def caffe2_only = !integratedEnvironments.contains(it)
       buildAndTestEnvironments.each {
-        definePhaseJob(it + "-trigger-test")
+        definePhaseJob(it + "-trigger-test", caffe2_only)
       }
 
       buildOnlyEnvironments.each {
-        definePhaseJob(it + "-trigger-build")
+        definePhaseJob(it + "-trigger-build", caffe2_only)
       }
     }
   }

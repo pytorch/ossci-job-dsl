@@ -166,12 +166,12 @@ multiJob("caffe2-pull-request") {
       }
 
       buildAndTestEnvironments.each {
-        def caffe2_only = integratedEnvironments.contains(it);
+        def caffe2_only = !integratedEnvironments.contains(it);
         definePhaseJob(it + "-trigger-test", caffe2_only)
       }
 
       buildOnlyEnvironments.each {
-        def caffe2_only = integratedEnvironments.contains(it);
+        def caffe2_only = !integratedEnvironments.contains(it);
         definePhaseJob(it + "-trigger-build", caffe2_only)
       }
     }

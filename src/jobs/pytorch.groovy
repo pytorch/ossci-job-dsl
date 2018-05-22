@@ -270,6 +270,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   if (buildEnvironment.contains('linux')) {
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common delegate, 'docker && cpu'
+    JobUtil.timeoutAndFailAfter(delegate, 300)
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
     parameters {

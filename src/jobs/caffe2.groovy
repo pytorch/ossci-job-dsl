@@ -43,7 +43,7 @@ def macOsBuildEnvironments = [
   'py2-ios-macos10.13',
 
   // Anaconda build environments
-  'conda2-macos10.13',
+  //'conda2-macos10.13',
   'conda3-macos10.13',
   'conda2-integrated-macos10.13',
 ]
@@ -98,7 +98,7 @@ multiJob("caffe2-pull-request") {
         'py2-gcc4.8-ubuntu14.04',
 
         // Builds for Anaconda
-        //'conda2-ubuntu16.04',
+        'conda2-ubuntu16.04',
         //'conda3-ubuntu16.04',
 
         // Aten build during all the merging-cmake changes

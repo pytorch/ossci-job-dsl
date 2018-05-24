@@ -31,6 +31,7 @@ cat >ci_scripts/sandbox_rules.sb << EOL
     (require-all
         (require-not (subpath "$PWD"))
         (require-not (subpath "$HOME/.ccache"))
+        (require-not (subpath "$HOME/pytorch-ci-env"))
         (require-not (subpath "$TMPDIR"))
         (require-not (subpath "/private/tmp"))
         (require-not (subpath "/private/var"))

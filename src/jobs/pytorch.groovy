@@ -62,6 +62,7 @@ if (manager.build.result.toString().contains("FAILURE")) {
     || it.contains("fatal: reference is not a tree") /* Submodule commit doesn't exist, Linux */ \
     || it.contains("Server does not allow request for unadvertised object") /* Submodule commit doesn't exist, Windows */
   } > 0)
+  isFalsePositive = isFalsePositive || logLines.size() == 0 /* If there is no log in the build, it means the build is cancelled by a newer commit */
   def isFalseNegative = (logLines.count {
     it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */ \
     || it.contains("No space left on device") /* OOD error */ \

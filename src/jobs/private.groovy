@@ -28,13 +28,6 @@ def dockerWorkers = [
   "worker-c5-xlarge-13",
   "worker-c5-xlarge-14",
   "worker-c5-xlarge-15",
-  // These OS X machines run our performance tests by pulling
-  // Docker images, that means that they must run our docker image
-  // cleanup scripts (or run out of disk space.)
-  "worker-macos-high-sierra-2",
-  "worker-macos-high-sierra-3",
-  "worker-macos-high-sierra-4",
-  "worker-macos-high-sierra-5",
   // "worker-packet-type-1-00",
   "worker-packet-type-1-01",
   "worker-packet-type-1-02",
@@ -53,6 +46,9 @@ def macOsWorkers = [
   "worker-macos-high-sierra-5",
   "worker-macos-high-sierra-6",
   "worker-macos-high-sierra-7",
+  "worker-macos-high-sierra-8",
+  "worker-macos-high-sierra-9",
+  "worker-macos-high-sierra-10",
 ]
 
 job("${buildBasePath}/ccachesync") {

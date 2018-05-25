@@ -725,6 +725,12 @@ fi
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
+        stringParam(
+          'IMAGE_COMMIT_ID',
+          '',
+          "Identifier for built torch package"
+        )
+
         if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
           booleanParam(
             'SPLIT_TESTS',

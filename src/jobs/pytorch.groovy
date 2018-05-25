@@ -52,6 +52,7 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
 ]
+def testList = [1, 2, 3]
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
@@ -724,6 +725,14 @@ fi
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
+
+        if (testList.contains(1)) {
+          booleanParam(
+            'TEST_VAR',
+            false,
+            '',
+          )
+        }
 
         if (splitTestEnvironments.contains("${buildEnvironment}")) {
           booleanParam(

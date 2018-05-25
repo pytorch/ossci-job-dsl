@@ -641,7 +641,7 @@ if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
   # TODO this is needed until docker version is bumped, but that is blocked on
   # master tests that are currently failing
   sudo pip install pyyaml
-  cmake_args+=("-DUSE_ATEN=ON")
+  cmake_args+=("-DBUILD_ATEN=ON")
 fi
 
 # conda must be added to the path for Anaconda builds (this location must be

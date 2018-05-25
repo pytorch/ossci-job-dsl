@@ -52,7 +52,6 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
 ]
-def testList = [1, 2, 3]
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
@@ -556,7 +555,7 @@ fi
         'Whether to run tests or not',
       )
 
-      if (splitTestEnvironments.contains("${buildEnvironment}")) {
+      if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
         booleanParam(
           'SPLIT_TESTS',
           false,
@@ -726,15 +725,7 @@ fi
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-        if (testList.contains(1)) {
-          booleanParam(
-            'TEST_VAR',
-            false,
-            '',
-          )
-        }
-
-        if (splitTestEnvironments.contains("${buildEnvironment}")) {
+        if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
           booleanParam(
             'SPLIT_TESTS',
             false,
@@ -842,7 +833,7 @@ fi
           "Identifier for built torch package"
         )
 
-        if (splitTestEnvironments.contains("${buildEnvironment}")) {
+        if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
           booleanParam(
             'SPLIT_TESTS',
             false,

@@ -554,6 +554,14 @@ fi
         true,
         'Whether to run tests or not',
       )
+
+      if (splitTestEnvironments.contains("${buildEnvironment}")) {
+        booleanParam(
+          'SPLIT_TESTS',
+          false,
+          'Whether to split and run tests in parallel or not',
+        )
+      }
     }
 
     publishers {
@@ -588,13 +596,6 @@ fi
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
-        if (splitTestEnvironments.contains("${buildEnvironment}")) {
-          // Split and run tests in parallel
-          env(
-            'SPLIT_TESTS',
-            "false",
-          )
-        }
       }
 
       DockerUtil.shell context: delegate,
@@ -723,6 +724,14 @@ fi
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
+
+        if (splitTestEnvironments.contains("${buildEnvironment}")) {
+          booleanParam(
+            'SPLIT_TESTS',
+            false,
+            'Whether to split and run tests in parallel or not',
+          )
+        }
       }
 
       steps {
@@ -734,13 +743,6 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
-          if (splitTestEnvironments.contains("${buildEnvironment}")) {
-            // Split and run tests in parallel
-            env(
-              'SPLIT_TESTS',
-              "false",
-            )
-          }
         }
 
         MacOSUtil.sandboxShell delegate, '''
@@ -830,6 +832,14 @@ fi
           '',
           "Identifier for built torch package"
         )
+
+        if (splitTestEnvironments.contains("${buildEnvironment}")) {
+          booleanParam(
+            'SPLIT_TESTS',
+            false,
+            'Whether to split and run tests in parallel or not',
+          )
+        }
       }
 
       steps {
@@ -841,13 +851,6 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
-          if (splitTestEnvironments.contains("${buildEnvironment}")) {
-            // Split and run tests in parallel
-            env(
-              'SPLIT_TESTS',
-              "false",
-            )
-          }
         }
 
         WindowsUtil.shell delegate, '''

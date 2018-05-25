@@ -45,6 +45,13 @@ def experimentalBuildEnvironments = [
 
 def docEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
+def splitTestEnvironments = [
+  "pytorch-macos-10.13-py3",
+  "pytorch-win-ws2016-cuda9-cudnn7-py3",
+  "pytorch-linux-xenial-cuda8-cudnn6-py3",
+  "pytorch-linux-xenial-cuda9-cudnn7-py2",
+  "pytorch-linux-xenial-cuda9-cudnn7-py3",
+]
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
@@ -194,13 +201,24 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       def builtImageTag = '${DOCKER_IMAGE_TAG}-${BUILD_ID}'
       def builtImageId = '${BUILD_ID}'
 
-      if (buildEnvironment.contains("macos") || buildEnvironment.contains("docker")) {
+      if (buildEnvironment.contains("docker")) {
         phase("Build and Test") {
           phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
             parameters {
               currentBuild()
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+            }
+          }
+        }
+      } else if (buildEnvironment.contains("macos")) {
+        phase("Build and Test") {
+          phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
+            parameters {
+              currentBuild()
+              predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+              predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+              predefinedProp('IMAGE_COMMIT_ID', builtImageId)
             }
           }
         }
@@ -570,6 +588,13 @@ fi
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
+        if (splitTestEnvironments.contains("${buildEnvironment}")) {
+          // Split and run tests in parallel
+          env(
+            'SPLIT_TESTS',
+            "false",
+          )
+        }
       }
 
       DockerUtil.shell context: delegate,
@@ -709,6 +734,13 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
+          if (splitTestEnvironments.contains("${buildEnvironment}")) {
+            // Split and run tests in parallel
+            env(
+              'SPLIT_TESTS',
+              "false",
+            )
+          }
         }
 
         MacOSUtil.sandboxShell delegate, '''
@@ -809,6 +841,13 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
+          if (splitTestEnvironments.contains("${buildEnvironment}")) {
+            // Split and run tests in parallel
+            env(
+              'SPLIT_TESTS',
+              "false",
+            )
+          }
         }
 
         WindowsUtil.shell delegate, '''

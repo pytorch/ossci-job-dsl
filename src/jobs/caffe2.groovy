@@ -776,10 +776,10 @@ rm -f ./crash/core.logging_test.*
           pattern('caffe2_tests/cpp/*.xml')
           skipNoTestFiles()
         }
-        jUnit {
-          pattern('caffe2_tests/junit_reports/*.xml')
-          skipNoTestFiles()
-        }
+        // jUnit {
+        //   pattern('caffe2_tests/junit_reports/*.xml')
+        //   skipNoTestFiles()
+        // }
         jUnit {
           pattern('caffe2_tests/python/*.xml')
           skipNoTestFiles()

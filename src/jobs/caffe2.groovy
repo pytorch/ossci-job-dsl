@@ -773,11 +773,15 @@ rm -f ./crash/core.logging_test.*
       //}
       archiveXUnit {
         googleTest {
-          pattern('test/cpp/*.xml')
+          pattern('caffe2_tests/cpp/*.xml')
           skipNoTestFiles()
         }
         jUnit {
-          pattern('test/python/*.xml')
+          pattern('caffe2_tests/junit_reports/*.xml')
+          skipNoTestFiles()
+        }
+        jUnit {
+          pattern('caffe2_tests/python/*.xml')
           skipNoTestFiles()
         }
         // There should be no failed tests

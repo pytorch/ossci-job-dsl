@@ -3,8 +3,6 @@ import ossci.JobUtil
 import ossci.ParametersUtil
 import ossci.GitUtil
 import ossci.onnx.Users
-// TODO: give onnx its own dockerfiles repo and then stop using caffe2's
-// images
 import ossci.caffe2.DockerVersion
 
 def buildBasePath = 'onnx-builds'

@@ -75,6 +75,10 @@ class Images {
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
+  
+  static final List<String> dockerCondaBuildEnvironments =
+    dockerImages.findAll { it.startsWith("conda") }
+
 
   ///////////////////////////////////////////////////////////////////////////////
   // Mac environments
@@ -95,13 +99,6 @@ class Images {
     'conda2-integrated-macos10.13',
   ];
   
-  static final List<String>  windowsBuildEnvironments = [
-    'py2-cuda9.0-cudnn7-windows'
-  ];
-  
-  static final List<String> dockerCondaBuildEnvironments =
-    dockerImages.findAll { it.startsWith("conda") }
-  
   // macOs conda-builds referred to by the nightly upload job
   // These jobs are actually defined along with the rest of the
   // macOsBuildEnvironments above
@@ -109,6 +106,7 @@ class Images {
     'conda2-macos10.13',
     'conda3-macos10.13',
   ];
+
   
   ///////////////////////////////////////////////////////////////////////////////
   // PR environments
@@ -178,6 +176,7 @@ class Images {
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
   
+
   ///////////////////////////////////////////////////////////////////////////////
   // Master build environments
   ///////////////////////////////////////////////////////////////////////////////
@@ -225,6 +224,16 @@ class Images {
     "py2-cuda9.0-cudnn7-windows",
   ];
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  // The windows environment
+  /////////////////////////////////////////////////////////////////////////////
+  
+  static final List<String>  windowsBuildEnvironments = [
+    'py2-cuda9.0-cudnn7-windows'
+  ];
+
+
   /////////////////////////////////////////////////////////////////////////////
   // Integrated environments
   /////////////////////////////////////////////////////////////////////////////
@@ -239,6 +248,7 @@ class Images {
       "conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04",
       "conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04",
   ];
+
 
 
   /////////////////////////////////////////////////////////////////////////////

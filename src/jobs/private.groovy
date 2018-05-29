@@ -29,9 +29,9 @@ def dockerWorkers = [
   "worker-c5-xlarge-14",
   "worker-c5-xlarge-15",
   // "worker-packet-type-1-00",
-  "worker-packet-type-1-01",
-  "worker-packet-type-1-02",
-  "worker-packet-type-1-03",
+  // "worker-packet-type-1-01",
+  // "worker-packet-type-1-02",
+  // "worker-packet-type-1-03",
   // TC gpu workers
   "worker-g3-4xlarge-01",
   "worker-g3-4xlarge-00"

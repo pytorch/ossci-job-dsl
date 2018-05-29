@@ -1,4 +1,4 @@
-import ossci.caffe2.DockerImages
+import ossci.caffe2.Images
 
 def dockerBasePath = 'caffe2-docker'
 
@@ -20,7 +20,7 @@ multiJob("caffe2-docker-trigger") {
 
   steps {
     phase("Build images") {
-      DockerImages.images.each {
+      Images.dockerImages.each {
         phaseJob("caffe2-docker/${it}") {
           parameters {
             currentBuild()
@@ -65,7 +65,7 @@ Push base images with specified tag (see parameters) to DockerHub at <b>caffe2/c
 
   steps {
     phase('Push images') {
-      DockerImages.images.each {
+      Images.dockerImages.each {
         phaseJob("caffe2-docker/${it}-push") {
           parameters {
             currentBuild()
@@ -76,7 +76,7 @@ Push base images with specified tag (see parameters) to DockerHub at <b>caffe2/c
   }
 }
 
-DockerImages.images.each {
+Images.dockerImages.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 

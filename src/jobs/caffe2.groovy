@@ -5,7 +5,7 @@ import ossci.MacOSUtil
 import ossci.ParametersUtil
 import ossci.PhaseJobUtil
 import ossci.pytorch.Users
-import ossci.caffe2.DockerImages
+import ossci.caffe2.Images
 import ossci.caffe2.DockerVersion
 
 def buildBasePath = 'caffe2-builds'
@@ -14,56 +14,6 @@ def uploadBasePath = 'caffe2-packages'
 folder(buildBasePath) {
   description 'Jobs for all Caffe2 build environments'
 }
-
-// Caffe2 is setup to have different build environments depending
-// on if you have a master build or just pull-request, which explains
-// the duplication
-
-def dockerBuildEnvironments = DockerImages.allJenkinsDockerJobs
-
-def integratedEnvironments = [
-    'py2-gcc5-ubuntu16.04',
-    // 'py3.6-gcc5-ubuntu16.04',
-    'conda2-integrated-macos10.13',
-    "conda2-integrated-ubuntu16.04",
-    "conda3-integrated-ubuntu16.04",
-    "conda2-cuda8.0-cudnn7-integrated-ubuntu16.04",
-    "conda2-cuda9.0-cudnn7-integrated-ubuntu16.04",
-    "conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04",
-    "conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04",
-]
-
-def macOsBuildEnvironments = [
-  // Basic macOS builds
-  'py2-system-macos10.13',
-  'py2-brew-macos10.13',
-
-  // iOS builds (hosted on macOS)
-  // No need for py2/py3 since we don't care about Python for iOS build
-  'py2-ios-macos10.13',
-
-  // Anaconda build environments
-  'conda2-macos10.13',
-  'conda3-macos10.13',
-  'conda2-integrated-macos10.13',
-]
-
-def windowsBuildEnvironments = [
-  'py2-cuda9.0-cudnn7-windows'
-]
-
-def dockerCondaBuildEnvironments =
-  dockerBuildEnvironments.findAll { it.startsWith("conda") }
-
-// macOs conda-builds referred to by the nightly upload job
-// These jobs are actually defined along with the rest of the
-// macOsBuildEnvironments above
-def macCondaBuildEnvironments = [
-  'conda2-macos10.13',
-  'conda3-macos10.13',
-]
-
-def docEnvironment = 'py2-gcc5-ubuntu16.04'
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 // Runs on pull requests
@@ -85,69 +35,6 @@ multiJob("caffe2-pull-request") {
     }
 
     phase("Build") {
-      def buildAndTestEnvironments = [
-        'py2-cuda8.0-cudnn6-ubuntu16.04',
-        'py2-cuda9.0-cudnn7-ubuntu16.04',
-        'py2-mkl-ubuntu16.04',
-
-        // Vanilla Ubuntu 16.04 (Python 2/3)
-        'py2-gcc5-ubuntu16.04',
-        //'py3-gcc5-ubuntu16.04',
-
-        // Vanilla Ubuntu 14.04
-        'py2-gcc4.8-ubuntu14.04',
-
-        // Builds for Anaconda
-        //'conda2-ubuntu16.04',
-        //'conda3-ubuntu16.04',
-
-        // Aten build during all the merging-cmake changes
-        'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
-      ]
-
-      def buildOnlyEnvironments = [
-        // Compatibility check for CUDA 8 / cuDNN 7 (build only)
-        'py2-cuda8.0-cudnn7-ubuntu16.04',
-        'py2-cuda8.0-cudnn5-ubuntu16.04',
-
-        // Compiler compatibility for 14.04 (build only)
-        'py2-gcc4.9-ubuntu14.04',
-
-        // Compiler compatibility for 16.04 (build only)
-        'py2-clang3.8-ubuntu16.04',
-        'py2-clang3.9-ubuntu16.04',
-        'py2-gcc6-ubuntu16.04',
-        'py2-gcc7-ubuntu16.04',
-
-        // Aten
-        //'py2-mkl-aten-ubuntu16.04',
-        'py2-cuda8.0-cudnn7-aten-ubuntu16.04',
-
-        // Build for Android
-        'py2-android-ubuntu16.04',
-
-        // Build for iOS
-        'py2-ios-macos10.13',
-
-        // macOS builds
-        'py2-system-macos10.13',
-
-        // Windows builds
-        // The python part is actually ignored by build_windows.bat
-        'py2-cuda9.0-cudnn7-windows',
-
-        // Builds for Anaconda
-        'conda2-ubuntu16.04',
-        'conda2-macos10.13',
-        'conda3-cuda9.0-cudnn7-ubuntu16.04',
-
-        // Run a CentOS build (verifies compatibility with CMake 2.8.12)
-        'py2-cuda9.0-cudnn7-centos7',
-
-        // Will turn on rocm tests soon
-        'py2-clang3.8-rocm1.7.1-ubuntu16.04',
-        'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
-      ]
 
       def definePhaseJob = { name, caffe2_only ->
         phaseJob("${buildBasePath}/${name}") {
@@ -165,61 +52,18 @@ multiJob("caffe2-pull-request") {
         }
       }
 
-      buildAndTestEnvironments.each {
-        def caffe2_only = !integratedEnvironments.contains(it);
+      Images.buildAndTestEnvironments.each {
+        def caffe2_only = !Images.integratedEnvironments.contains(it);
         definePhaseJob(it + "-trigger-test", caffe2_only)
       }
 
-      buildOnlyEnvironments.each {
-        def caffe2_only = !integratedEnvironments.contains(it);
+      Images.buildOnlyEnvironments.each {
+        def caffe2_only = !Images.integratedEnvironments.contains(it);
         definePhaseJob(it + "-trigger-build", caffe2_only)
       }
     }
   }
 }
-
-def masterBuildAndTestEnvironments = [
-  'py2-cuda8.0-cudnn6-ubuntu16.04',
-  'py2-cuda9.0-cudnn7-ubuntu16.04',
-  'py2-mkl-ubuntu16.04',
-
-  // Vanilla Ubuntu 16.04 (Python 2/3)
-  'py2-gcc5-ubuntu16.04',
-  //'py3-gcc5-ubuntu16.04',
-
-  // Vanilla Ubuntu 14.04
-  'py2-gcc4.8-ubuntu14.04',
-]
-
-def masterBuildOnlyEnvironments = [
-  // Compatibility check for CUDA 8 / cuDNN 7 (build only)
-  'py2-cuda8.0-cudnn7-ubuntu16.04',
-  'py2-cuda8.0-cudnn5-ubuntu16.04',
-
-  // Compiler compatibility for 14.04 (build only)
-  'py2-gcc4.9-ubuntu14.04',
-
-  // Compiler compatibility for 16.04 (build only)
-  'py2-clang3.8-ubuntu16.04',
-  'py2-clang3.9-ubuntu16.04',
-  'py2-gcc6-ubuntu16.04',
-  'py2-gcc7-ubuntu16.04',
-
-  // Build for Android
-  'py2-android-ubuntu16.04',
-
-  // Build for iOS
-  'py2-ios-macos10.13',
-
-  // macOS builds
-  'py2-system-macos10.13',
-
-  // Run a CentOS build (verifies compatibility with CMake 2.8.12)
-  'py2-cuda9.0-cudnn7-centos7',
-
-  // windows build
-  "py2-cuda9.0-cudnn7-windows",
-]
 
 // Runs on release build on master
 multiJob("caffe2-master") {
@@ -248,11 +92,11 @@ multiJob("caffe2-master") {
         }
       }
 
-      masterBuildAndTestEnvironments.each {
+      Images.masterBuildAndTestEnvironments.each {
         definePhaseJob(it + "-trigger-test")
       }
 
-      masterBuildOnlyEnvironments.each {
+      Images.masterBuildOnlyEnvironments.each {
         definePhaseJob(it + "-trigger-build")
       }
     }
@@ -286,11 +130,11 @@ multiJob("caffe2-master-debug") {
         }
       }
 
-      masterBuildAndTestEnvironments.each {
+      Images.masterBuildAndTestEnvironments.each {
         definePhaseJob(it + "-trigger-test")
       }
 
-      masterBuildOnlyEnvironments.each {
+      Images.masterBuildOnlyEnvironments.each {
         definePhaseJob(it + "-trigger-build")
       }
     }
@@ -298,6 +142,7 @@ multiJob("caffe2-master-debug") {
 }
 
 // Runs doc build on master (triggered nightly)
+def docEnvironment = 'py2-gcc5-ubuntu16.04'
 multiJob("caffe2-master-doc") {
   JobUtil.commonTrigger(delegate)
 
@@ -338,10 +183,10 @@ multiJob("caffe2-master-doc") {
 }
 
 // One job per build environment
-dockerBuildEnvironments.each {
+Images.dockerImages.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
+  def buildDockerName = Images.imageOf[(buildEnvironment)]
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
@@ -606,7 +451,7 @@ git status
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
-        if (integratedEnvironments.contains(buildEnvironment)) {
+        if (Images.integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
       }
@@ -713,7 +558,7 @@ fi
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
         )
-        if (integratedEnvironments.contains(buildEnvironment)) {
+        if (Images.integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
       }
@@ -805,7 +650,7 @@ rm -f ./crash/core.logging_test.*
 }
 
 // One job per build environment
-macOsBuildEnvironments.each {
+Images.macOsBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 
@@ -919,7 +764,7 @@ macOsBuildEnvironments.each {
           if (buildEnvironment.contains('ios')) {
             env('BUILD_IOS', "1")
           }
-          if (integratedEnvironments.contains(buildEnvironment)) {
+          if (Images.integratedEnvironments.contains(buildEnvironment)) {
             env('INTEGRATED', 1)
           }
           // Anaconda environment variables
@@ -1004,7 +849,7 @@ fi
   }
 }
 
-windowsBuildEnvironments.each {
+Images.windowsBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 
@@ -1064,7 +909,7 @@ windowsBuildEnvironments.each {
           'SCCACHE_BUCKET',
           'ossci-compiler-cache',
         )
-        if (integratedEnvironments.contains(buildEnvironment)) {
+        if (Images.integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
       }
@@ -1103,10 +948,10 @@ folder(uploadBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'
 }
 
-dockerCondaBuildEnvironments.each {
+Images.dockerCondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def buildDockerName = DockerImages.imageOf[(buildEnvironment)]
+  def buildDockerName = Images.imageOf[(buildEnvironment)]
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
@@ -1139,7 +984,7 @@ dockerCondaBuildEnvironments.each {
           'BUILD_ENVIRONMENT',
           "${buildEnvironment}",
                 )
-        if (integratedEnvironments.contains(buildEnvironment)) {
+        if (Images.integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
         if (buildEnvironment.contains('slim')) {
@@ -1223,11 +1068,11 @@ multiJob("nightly-conda-package-upload") {
         }
       }
 
-      macCondaBuildEnvironments.each {
+      Images.macCondaBuildEnvironments.each {
         definePhaseJob(it)
       }
 
-      dockerCondaBuildEnvironments.each {
+      Images.dockerCondaBuildEnvironments.each {
         if (!it.contains('gcc4.8')) {
           definePhaseJob(it)
         }

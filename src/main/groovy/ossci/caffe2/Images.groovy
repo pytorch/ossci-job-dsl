@@ -5,12 +5,12 @@ class Images {
   /////////////////////////////////////////////////////////////////////////////
   // Docker images
   /////////////////////////////////////////////////////////////////////////////
-  // NOTE this is the list of dockerImages, but not the list of all Jenkins
+  // NOTE this is the list of dockerBaseImages, but not the list of all Jenkins
   // build jobs that use Docker. The real source of all possible jenkins jobs
   // is the keys of the map
-  //   imageOf<jenkinsBuildName, dockerImageName>
+  //   baseImageOf<jenkinsBuildName, dockerImageName>
   // that is defined below
-  static final List<String> dockerImages = [
+  static final List<String> dockerBaseImages = [
     // Primary builds
     'py2-cuda8.0-cudnn7-ubuntu16.04',
     'py2-cuda9.0-cudnn7-ubuntu16.04',
@@ -75,9 +75,45 @@ class Images {
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Map (BUILD_ENVIRONMENT == jenkins build name) --> dockerImage
+  static final Map<String, String> baseImageOf = [:]
+  static {
+    // By default populated by all dockerBaseImages pointing to themselves
+    for (String baseImage : dockerBaseImages) {
+      baseImageOf.put(baseImage, baseImage);
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Additional builds that re-use dockerBaseImages below
+    // Conda integrated builds
+    baseImageOf.put("conda2-integrated-ubuntu16.04", "conda2-ubuntu16.04")
+    baseImageOf.put("conda3-integrated-ubuntu16.04", "conda3-ubuntu16.04")
+    baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
+
+    // Aten builds
+    baseImageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")
+    baseImageOf.put("py2-cuda8.0-cudnn7-aten-ubuntu16.04", "py2-cuda8.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("py2-cuda9.0-cudnn7-aten-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
+
+    // Caffe2 setup.py builds
+    baseImageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
+
+    // Verify that all docker images (values) in the map are valid
+    for (String baseImage : baseImageOf.values()) {
+      assert baseImage in dockerBaseImages
+    }
+  }
+
+  // Actual list of all Docker jenkins-builds that will be defined
+  static final Collection<String> allDockerBuildEnvironments = baseImageOf.keySet();
   
-  static final List<String> dockerCondaBuildEnvironments =
-    dockerImages.findAll { it.startsWith("conda") }
+  static final Collection<String> dockerCondaBuildEnvironments =
+    allDockerBuildEnvironments.findAll { it.startsWith("conda") }
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -251,40 +287,4 @@ class Images {
 
 
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Maps (BUILD_ENVIRONMENT == jenkins build name) --> dockerImage
-  /////////////////////////////////////////////////////////////////////////////
-  static final Map<String, String> imageOf = [:]
-  static {
-    // By default populated by all dockerImages pointing to themselves
-    for (String dockerImage : dockerImages) {
-      imageOf.put(dockerImage, dockerImage);
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Additional builds that re-use dockerImages below
-    //////////////////////////////////////////////////////////////////////////
-    // Conda integrated builds
-    imageOf.put("conda2-integrated-ubuntu16.04", "conda2-ubuntu16.04")
-    imageOf.put("conda3-integrated-ubuntu16.04", "conda3-ubuntu16.04")
-    imageOf.put("conda2-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
-    imageOf.put("conda2-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
-    imageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
-    imageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
-
-    // Aten builds
-    imageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")
-    imageOf.put("py2-cuda8.0-cudnn7-aten-ubuntu16.04", "py2-cuda8.0-cudnn7-ubuntu16.04")
-    imageOf.put("py2-cuda9.0-cudnn7-aten-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
-
-    // Caffe2 setup.py builds
-    imageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
-
-    // Verify that all docker images (values) in the map are valid
-    for (String dockerImage : imageOf.values()) {
-      assert dockerImage in dockerImages
-    }
-  }
-
-  static final Collection<String> allJenkinsDockerJobs = imageOf.keySet();
 }

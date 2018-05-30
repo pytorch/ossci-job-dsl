@@ -20,7 +20,7 @@ multiJob("caffe2-docker-trigger") {
 
   steps {
     phase("Build images") {
-      Images.dockerImages.each {
+      Images.dockerBaseImages.each {
         phaseJob("caffe2-docker/${it}") {
           parameters {
             currentBuild()
@@ -65,7 +65,7 @@ Push base images with specified tag (see parameters) to DockerHub at <b>caffe2/c
 
   steps {
     phase('Push images') {
-      Images.dockerImages.each {
+      Images.dockerBaseImages.each {
         phaseJob("caffe2-docker/${it}-push") {
           parameters {
             currentBuild()
@@ -76,7 +76,7 @@ Push base images with specified tag (see parameters) to DockerHub at <b>caffe2/c
   }
 }
 
-Images.dockerImages.each {
+Images.dockerBaseImages.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 

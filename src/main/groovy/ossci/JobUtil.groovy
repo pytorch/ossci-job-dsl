@@ -13,9 +13,9 @@ class JobUtil {
       concurrentBuild()
       publishers {
         publishBuild {
-          // 60 was determined by looking at how many days of builds we were carrying
-          // when we last ran out of space, and then picking something below it
-          discardOldBuilds(60)
+          // 30 was determined by looking at how many days of builds we were carrying
+          // when we last ran out of space, and then halving it
+          discardOldBuilds(30)
         }
       }
       wrappers {

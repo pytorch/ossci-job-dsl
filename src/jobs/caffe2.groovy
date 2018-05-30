@@ -1072,6 +1072,7 @@ multiJob("nightly-conda-package-upload") {
         definePhaseJob(it)
       }
 
+      assert 'conda2-ubuntu16.04' in Images.dockerCondaBuildEnvironments
       Images.dockerCondaBuildEnvironments.each {
         if (!it.contains('gcc4.8')) {
           definePhaseJob(it)

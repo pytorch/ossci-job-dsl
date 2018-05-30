@@ -107,13 +107,22 @@ class Images {
     for (String baseImage : baseImageOf.values()) {
       assert baseImage in dockerBaseImages
     }
+    // Verify that all base images are in the map
+    for (String baseImage : dockerBaseImages) {
+      assert baseImage in baseImageOf.keySet()
+    }
   }
 
   // Actual list of all Docker jenkins-builds that will be defined
   static final Collection<String> allDockerBuildEnvironments = baseImageOf.keySet();
   
-  static final Collection<String> dockerCondaBuildEnvironments =
-    allDockerBuildEnvironments.findAll { it.startsWith("conda") }
+  static final Collection<String> dockerCondaBuildEnvironments;
+  static {
+    dockerCondaBuildEnvironments = allDockerBuildEnvironments
+        .stream()
+        .filter { buildEnv -> buildEnv.startsWith("conda") }
+        .collect()
+  }
 
 
   ///////////////////////////////////////////////////////////////////////////////

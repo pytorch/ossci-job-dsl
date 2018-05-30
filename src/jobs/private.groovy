@@ -49,6 +49,11 @@ def macOsWorkers = [
   "worker-macos-high-sierra-8",
   "worker-macos-high-sierra-9",
   "worker-macos-high-sierra-10",
+  "worker-macos-high-sierra-11",
+  "worker-macos-high-sierra-12",
+  "worker-macos-high-sierra-13",
+  "worker-macos-high-sierra-14",
+  "worker-macos-high-sierra-15",
 ]
 
 job("${buildBasePath}/ccachesync") {

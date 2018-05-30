@@ -25,11 +25,12 @@ class JobUtil {
     }
   }
 
-  // This is the default job configuration for trigger jobs, where no real
-  // work is done.  This is why they can be triggered on 'simple' build.
+  // This is the default job configuration for trigger jobs.  These
+  // jobs have to do a git clone, checkout and merge, so they should be run
+  // on a machine with good IO and network performance
   static void commonTrigger(Job context) {
     context.with {
-      common delegate, 'docker && cpu'
+      common delegate, 'trigger'
       // Trigger jobs can be blocked due to queueing issues, so give
       // them a much longer timeout
       timeoutAndFailAfter(context, 1440)

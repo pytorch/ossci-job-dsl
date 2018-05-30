@@ -554,14 +554,6 @@ fi
         true,
         'Whether to run tests or not',
       )
-
-      if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
-        booleanParam(
-          'SPLIT_TESTS',
-          false,
-          'Whether to split and run tests in parallel or not',
-        )
-      }
     }
 
     publishers {
@@ -730,14 +722,6 @@ fi
           '',
           "Identifier for built torch package"
         )
-
-        if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
-          booleanParam(
-            'SPLIT_TESTS',
-            false,
-            'Whether to split and run tests in parallel or not',
-          )
-        }
       }
 
       steps {
@@ -838,14 +822,6 @@ fi
           '',
           "Identifier for built torch package"
         )
-
-        if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
-          booleanParam(
-            'SPLIT_TESTS',
-            false,
-            'Whether to split and run tests in parallel or not',
-          )
-        }
       }
 
       steps {

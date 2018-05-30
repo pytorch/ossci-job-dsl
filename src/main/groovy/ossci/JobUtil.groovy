@@ -29,7 +29,7 @@ class JobUtil {
   // work is done.  This is why they can be triggered on 'simple' build.
   static void commonTrigger(Job context) {
     context.with {
-      common delegate, 'simple'
+      common delegate, 'docker && cpu'
       // Trigger jobs can be blocked due to queueing issues, so give
       // them a much longer timeout
       timeoutAndFailAfter(context, 1440)

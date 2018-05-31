@@ -357,13 +357,7 @@ import hudson.model.*
 def queue = Hudson.instance.queue
   
 def cancel = queue.items.findAll {
-  if (it.task.name.startsWith('ccache-cleanup')) {
-    return true;
-  }
-  if (it.task.name.startsWith('docker-image-cleanup')) {
-    return true;
-  }
-  if (it.task.name.startsWith('workspace-cleanup')) {
+  if (it.task.name.startsWith('name-of-job-to-cleanup')) {
     return true;
   }
   return false;

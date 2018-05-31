@@ -81,9 +81,6 @@ docker_args+="-t"
 # Detach so we can use docker exec to run stuff
 docker_args+=" -d"
 
-# Refer to shared ccache directory
-docker_args+=" -v ccache:/var/lib/jenkins/.ccache"
-
 # Mount the workspace to another location so we can copy files to it
 docker_args+=" -v $WORKSPACE:/var/lib/jenkins/host-workspace"
 
@@ -168,7 +165,9 @@ fi
     # Override WORKSPACE environment variable. Every container build
     # uses /var/lib/jenkins/workspace for their $WORKSPACE and $PWD
     # instead of /var/lib/jenkins/workspace/some/build/name.
-    # This should improve the ccache hit rate.
+    # This might improve the sccache hit rate, if there is ever
+    # a component of the hash key that depends on the file system
+    # path (there shouldn't be, but you never know).
     echo 'declare -x WORKSPACE=$PWD'
 
     # Use everything below the '####' as script to run

@@ -212,13 +212,27 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
           }
         }
       } else if (buildEnvironment.contains("macos")) {
-        phase("Build and Test") {
-          phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
+        phase("Build") {
+          phaseJob("${buildBasePath}/${buildEnvironment}-build") {
             parameters {
               currentBuild()
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
               predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+            }
+          }
+        }
+        phase("Test") {
+          if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
+            for (i = 1; i <= 2; i++) {
+              phaseJob("${buildBasePath}/${buildEnvironment}-test" + i) {
+                parameters {
+                  currentBuild()
+                  predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                  predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                  predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+                }
+              }
             }
           }
         }

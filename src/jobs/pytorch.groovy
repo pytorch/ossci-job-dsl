@@ -737,6 +737,7 @@ fi
         }
 
         MacOSUtil.sandboxShell delegate, '''
+export PATH=/usr/local/bin:$PATH
 chmod +x .jenkins/pytorch/macos-build.sh
 if test -x ".jenkins/pytorch/macos-build.sh"; then
   .jenkins/pytorch/macos-build.sh
@@ -781,6 +782,7 @@ fi
           }
 
           MacOSUtil.sandboxShell delegate, '''
+export PATH=/usr/local/bin:$PATH
 chmod +x .jenkins/pytorch/macos-test.sh
 if test -x ".jenkins/pytorch/macos-test.sh"; then
   .jenkins/pytorch/macos-test.sh

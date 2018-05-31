@@ -56,53 +56,6 @@ def macOsWorkers = [
   "worker-macos-high-sierra-15",
 ]
 
-job("${buildBasePath}/ccachesync") {
-  wrappers {
-    timestamps()
-    credentialsBinding {
-      usernamePassword('USERNAME', 'PASSWORD', 'nexus-jenkins')
-    }
-  }
-
-  label('docker')
-
-  scm {
-    github('pietern/inotify-sync')
-  }
-
-  steps {
-    shell '''
-# Login to registry.pytorch.org (the credentials plugin masks these values)
-echo "${PASSWORD}" | docker login -u "${USERNAME}" --password-stdin registry.pytorch.org
-
-# Logout on exit
-trap 'docker logout registry.pytorch.org' EXIT
-
-# Build binary for Alpine Linux
-docker run \
-  --rm \
-  -v $PWD:/go/src/ccachesync \
-  -w /go/src/ccachesync \
-  golang:alpine \
-  go build -v .
-
-# Inline Dockerfile
-cat > Dockerfile <<EOS
-FROM alpine:latest
-ADD ./ccachesync /usr/bin
-RUN mkdir /ccache
-VOLUME /ccache
-USER 1014:1014
-WORKDIR /ccache
-EOS
-
-# Build and push final image
-docker build -t registry.pytorch.org/ccachesync:latest .
-docker push registry.pytorch.org/ccachesync:latest
-'''
-  }
-}
-
 // Builds container for ccache cleanup.
 // See ./docker/ccacheclean/README.md for more information.
 job("${buildBasePath}/ccacheclean") {

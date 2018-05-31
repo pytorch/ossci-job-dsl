@@ -231,7 +231,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         }
         phase("Test and Push") {
           for (i = 1; i <= numParallelTests; i++) {
-            phaseJob("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+            def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+            phaseJob("${buildBasePath}/${buildEnvironment}-test" + suffix) {
               parameters {
                 currentBuild()
                 predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
@@ -537,7 +538,8 @@ fi
   } // if (buildEnvironment == perfTestEnvironment)
 
   for (i = 1; i <= numParallelTests; i++) {
-    job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+    def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+    job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
       JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
       JobUtil.timeoutAndFailAfter(delegate, 55)
 
@@ -750,7 +752,8 @@ fi
       }
     }
     for (i = 1; i <= numParallelTests; i++) {
-      job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+      def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+      job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
         JobUtil.common delegate, 'osx'
         JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
@@ -852,7 +855,8 @@ fi
 
     // Windows
     for (i = 1; i <= numParallelTests; i++) {
-      job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+      def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+      job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
         JobUtil.common delegate, 'windows && gpu'
         JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
         JobUtil.timeoutAndFailAfter(delegate, 40)

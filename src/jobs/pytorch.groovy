@@ -750,6 +750,7 @@ fi
         }
 
         MacOSUtil.sandboxShell delegate, '''
+chmod +x .jenkins/pytorch/macos-build.sh
 if test -x ".jenkins/pytorch/macos-build.sh"; then
   .jenkins/pytorch/macos-build.sh
 else
@@ -792,6 +793,7 @@ fi
           }
 
           MacOSUtil.sandboxShell delegate, '''
+chmod +x .jenkins/pytorch/macos-test.sh
 if test -x ".jenkins/pytorch/macos-test.sh"; then
   .jenkins/pytorch/macos-test.sh
 else

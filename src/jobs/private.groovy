@@ -149,7 +149,7 @@ multiJob("${buildBasePath}/ccache-cleanup-trigger") {
     cron('@hourly')
   }
 
-  label('simple')
+  label('trigger')
 
   logRotator(14)
 
@@ -249,7 +249,7 @@ multiJob("${buildBasePath}/docker-image-cleanup-trigger") {
     cron('@hourly')
   }
 
-  label('simple')
+  label('trigger')
 
   logRotator(14)
 
@@ -274,7 +274,7 @@ multiJob("${buildBasePath}/workspace-cleanup-trigger") {
     cron('@daily')
   }
 
-  label('simple')
+  label('trigger')
 
   logRotator(14)
 
@@ -353,7 +353,7 @@ def ignoreTags = [
       cron('@hourly')
     }
 
-    label('simple')
+    label('trigger')
 
     logRotator(14)
 
@@ -388,7 +388,7 @@ docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
 }
 
 multiJob("${buildBasePath}/fix-authorized-keys-trigger") {
-  label('simple')
+  label('trigger')
   steps {
     phase('Fix') {
       dockerWorkers.each {

@@ -11,30 +11,30 @@ folder(buildBasePath) {
 
 // def workers = Jenkins.getActiveInstance().getLabel("docker").getNodes();
 def dockerWorkers = [
-  "worker-c5-xlarge-00",
+  //"worker-c5-xlarge-00",
   //"worker-c5-xlarge-01",
-  "worker-c5-xlarge-02",
-  "worker-c5-xlarge-03",
+  //"worker-c5-xlarge-02",
+  //"worker-c5-xlarge-03",
   //"worker-c5-xlarge-04",
-  "worker-c5-xlarge-05",
-  "worker-c5-xlarge-06",
-  "worker-c5-xlarge-07",
+  //"worker-c5-xlarge-05",
+  //"worker-c5-xlarge-06",
+  //"worker-c5-xlarge-07",
   // "worker-c5-xlarge-08", // (dead as a doornail; starts but not
   // ssh'able)
-  "worker-c5-xlarge-09",
+  //"worker-c5-xlarge-09",
   //"worker-c5-xlarge-10",
-  "worker-c5-xlarge-11",
-  "worker-c5-xlarge-12",
-  "worker-c5-xlarge-13",
-  "worker-c5-xlarge-14",
-  "worker-c5-xlarge-15",
+  //"worker-c5-xlarge-11",
+  //"worker-c5-xlarge-12",
+  //"worker-c5-xlarge-13",
+  //"worker-c5-xlarge-14",
+  //"worker-c5-xlarge-15",
   // "worker-packet-type-1-00",
   // "worker-packet-type-1-01",
   // "worker-packet-type-1-02",
   // "worker-packet-type-1-03",
   // TC gpu workers
-  "worker-g3-4xlarge-01",
-  "worker-g3-4xlarge-00"
+  //"worker-g3-4xlarge-01",
+  //"worker-g3-4xlarge-00"
 ]
 
 def macOsWorkers = [

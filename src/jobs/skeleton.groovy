@@ -331,7 +331,7 @@ dockerBuildEnvironments.each {
 
   // The actual build job for this build environment
   job("${buildBasePath}/${buildEnvironment}-build") {
-    label('docker && cpu && ccache')
+    label('docker && cpu')
 
     concurrentBuild()
 

@@ -38,7 +38,7 @@ translateDockerBuildEnvironments.each {
   //      conda3-cuda9.0-cudnn7-integrated-ubuntu16.04 and building Pytorch in
   //      it
   job("${translateBasePath}/${buildEnvironment}-source") {
-    JobUtil.common(delegate, 'docker && ((cpu && ccache) || cpu_ccache)')
+    JobUtil.common(delegate, 'docker && cpu')
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -143,7 +143,7 @@ popd
   // Jobs that builds translate with binary installs of Pytorch and Caffe2
   ////////////////////////////////////////////////////////////////////////////
   job("${translateBasePath}/${buildEnvironment}-binary") {
-    JobUtil.common(delegate, 'docker && ((cpu && ccache) || cpu_ccache)')
+    JobUtil.common(delegate, 'docker && cpu')
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)

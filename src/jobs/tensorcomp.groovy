@@ -131,7 +131,7 @@ dockerBuildEnvironments.each {
 
   // The actual build-test job for this build/test environment
   job("${buildBasePath}/${buildEnvironment}-build-test") {
-    JobUtil.common(delegate, 'docker && gpu_ccache')
+    JobUtil.common(delegate, 'docker && gpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'facebookresearch/TensorComprehensions')
 
     parameters {

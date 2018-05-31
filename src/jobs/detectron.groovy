@@ -148,7 +148,7 @@ Run container with: <code>docker run -i -t registry.pytorch.org/detectron/${buil
   }
 
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, 'docker && cpu && ccache')
+    JobUtil.common(delegate, 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'facebookresearch/detectron')
 
     parameters {

@@ -3,8 +3,6 @@ import ossci.GitUtil
 import ossci.JobUtil
 import ossci.ParametersUtil
 import ossci.tensorcomp.Users
-import ossci.tensorcomp.DockerImages
-import ossci.tensorcomp.DockerVersion
 
 def buildBasePath = 'tensorcomp-builds'
 
@@ -12,9 +10,9 @@ folder(buildBasePath) {
   description 'Jobs for all Tensor Comprehensions build environments'
 }
 
-def dockerBuildEnvironments = DockerImages.images
+def dockerBuildEnvironments = ["tc-cuda9.0-cudnn7.1-ubuntu16.04-devel"]
 
-def dockerImageTagParameter(context, defaultValue = DockerVersion.version) {
+def dockerImageTagParameter(context, defaultValue = 'latest') {
   context.with {
     stringParam(
       'DOCKER_IMAGE_TAG',
@@ -31,7 +29,7 @@ multiJob("tensorcomp-pull-request") {
   JobUtil.gitHubPullRequestTrigger(delegate, 'facebookresearch/TensorComprehensions', caffe2botAuthId, Users)
 
   parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, 'latest')
   }
 
   steps {
@@ -67,7 +65,7 @@ multiJob("tensorcomp-master") {
   JobUtil.masterTrigger(delegate, "facebookresearch/TensorComprehensions")
 
   parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, 'latest')
   }
 
   steps {
@@ -97,7 +95,7 @@ dockerBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/tensorcomp/${buildEnvironment}:${tag}"
+    return "tensorcomprehensions/${buildEnvironment}:${tag}"
   }
 
   // Trigger jobs are multi jobs (it may trigger both a build and a test job)

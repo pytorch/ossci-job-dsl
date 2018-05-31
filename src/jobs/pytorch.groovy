@@ -163,6 +163,11 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 
+  def numParallelTests = 1;
+  if (splitTestEnvironments.any { it.contains(buildEnvironment) }) {
+    numParallelTests = 2
+  }
+
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to
   // compute here
@@ -211,31 +216,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             }
           }
         }
-      } else if (buildEnvironment.contains("macos")) {
-        phase("Build") {
-          phaseJob("${buildBasePath}/${buildEnvironment}-build") {
-            parameters {
-              currentBuild()
-              predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-              predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-              predefinedProp('IMAGE_COMMIT_ID', builtImageId)
-            }
-          }
-        }
-        phase("Test") {
-          if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
-            for (i = 1; i <= 2; i++) {
-              phaseJob("${buildBasePath}/${buildEnvironment}-test" + i) {
-                parameters {
-                  currentBuild()
-                  predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-                  predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-                  predefinedProp('IMAGE_COMMIT_ID', builtImageId)
-                }
-              }
-            }
-          }
-        }
       } else {
         phase("Build") {
           phaseJob("${buildBasePath}/${buildEnvironment}-build") {
@@ -250,13 +230,15 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
           }
         }
         phase("Test and Push") {
-          phaseJob("${buildBasePath}/${buildEnvironment}-test") {
-            parameters {
-              currentBuild()
-              predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-              predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-              predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-              predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+          for (i = 1; i <= numParallelTests; i++) {
+            phaseJob("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+              parameters {
+                currentBuild()
+                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+              }
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
@@ -554,61 +536,62 @@ fi
     } // job(... + "short-perf-test-gpu")
   } // if (buildEnvironment == perfTestEnvironment)
 
-  job("${buildBasePath}/${buildEnvironment}-test") {
-    JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
-    JobUtil.timeoutAndFailAfter(delegate, 55)
+  for (i = 1; i <= numParallelTests; i++) {
+    job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+      JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
+      JobUtil.timeoutAndFailAfter(delegate, 55)
 
-    parameters {
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      parameters {
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
-      // TODO: Using this parameter is a bit wasteful because Jenkins
-      // still has to schedule the job and load the docker image
-      booleanParam(
-        'RUN_TESTS',
-        true,
-        'Whether to run tests or not',
-      )
-    }
-
-    publishers {
-      // NB: Dead at the moment (PyTorch test suite does not currently generate XMLs)
-      archiveXUnit {
-        jUnit {
-          pattern('test-*.xml')
-          skipNoTestFiles()
-        }
-        // There should be no failed tests
-        failedThresholds {
-          unstable(0)
-          unstableNew(0)
-          failure(0)
-          failureNew(0)
-        }
-        // Skipped tests are OK
-        skippedThresholds {
-          unstable(50)
-          unstableNew(50)
-          failure(50)
-          failureNew(50)
-        }
-        thresholdMode(ThresholdMode.PERCENT)
-      }
-    }
-
-    steps {
-      // TODO: Will be obsolete once this is baked into docker image
-      environmentVariables {
-        env(
-          'BUILD_ENVIRONMENT',
-          "${buildEnvironment}",
+        // TODO: Using this parameter is a bit wasteful because Jenkins
+        // still has to schedule the job and load the docker image
+        booleanParam(
+          'RUN_TESTS',
+          true,
+          'Whether to run tests or not',
         )
       }
 
-      DockerUtil.shell context: delegate,
-              cudaVersion: cudaVersion,
-              image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
-              workspaceSource: "docker",
-              script: '''
+      publishers {
+        // NB: Dead at the moment (PyTorch test suite does not currently generate XMLs)
+        archiveXUnit {
+          jUnit {
+            pattern('test-*.xml')
+            skipNoTestFiles()
+          }
+          // There should be no failed tests
+          failedThresholds {
+            unstable(0)
+            unstableNew(0)
+            failure(0)
+            failureNew(0)
+          }
+          // Skipped tests are OK
+          skippedThresholds {
+            unstable(50)
+            unstableNew(50)
+            failure(50)
+            failureNew(50)
+          }
+          thresholdMode(ThresholdMode.PERCENT)
+        }
+      }
+
+      steps {
+        // TODO: Will be obsolete once this is baked into docker image
+        environmentVariables {
+          env(
+            'BUILD_ENVIRONMENT',
+            "${buildEnvironment}",
+          )
+        }
+
+        DockerUtil.shell context: delegate,
+                cudaVersion: cudaVersion,
+                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                workspaceSource: "docker",
+                script: '''
 set -ex
 
 if [ "${RUN_TESTS:-true}" == "false" ]; then
@@ -632,6 +615,7 @@ exit 0
         }
       }
     } // job(... + "-test")
+  }
 
 
   job("${buildBasePath}/${buildEnvironment}-multigpu-test") {
@@ -765,8 +749,8 @@ fi
         }
       }
     }
-    for (i = 1; i <= 2; i++) {
-      job("${buildBasePath}/${buildEnvironment}-test" + i) {
+    for (i = 1; i <= numParallelTests; i++) {
+      job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
         JobUtil.common delegate, 'osx'
         JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
@@ -867,47 +851,49 @@ fi
     }
 
     // Windows
-    job("${buildBasePath}/${buildEnvironment}-test") {
-      JobUtil.common delegate, 'windows && gpu'
-      JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
-      JobUtil.timeoutAndFailAfter(delegate, 40)
+    for (i = 1; i <= numParallelTests; i++) {
+      job("${buildBasePath}/${buildEnvironment}-test" + (numParallelTests > 1) ? Integer.toString(i) : "") {
+        JobUtil.common delegate, 'windows && gpu'
+        JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+        JobUtil.timeoutAndFailAfter(delegate, 40)
 
-      parameters {
-        ParametersUtil.GIT_COMMIT(delegate)
-        ParametersUtil.GIT_MERGE_TARGET(delegate)
+        parameters {
+          ParametersUtil.GIT_COMMIT(delegate)
+          ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-        stringParam(
-          'IMAGE_COMMIT_ID',
-          '',
-          "Identifier for built torch package"
-        )
-      }
-
-      steps {
-        GitUtil.mergeStep(delegate)
-
-        // Don't delete this envvar because we have Python script that uses it
-        environmentVariables {
-          env(
-            'BUILD_ENVIRONMENT',
-            "${buildEnvironment}",
+          stringParam(
+            'IMAGE_COMMIT_ID',
+            '',
+            "Identifier for built torch package"
           )
         }
 
-        WindowsUtil.shell delegate, '''
-if test -x ".jenkins/pytorch/win-test.sh"; then
-  .jenkins/pytorch/win-test.sh
-else
-  .jenkins/win-test.sh
-fi
-''', cudaVersion
-      }
+        steps {
+          GitUtil.mergeStep(delegate)
 
-      publishers {
-        groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          // Don't delete this envvar because we have Python script that uses it
+          environmentVariables {
+            env(
+              'BUILD_ENVIRONMENT',
+              "${buildEnvironment}",
+            )
+          }
+
+          WindowsUtil.shell delegate, '''
+  if test -x ".jenkins/pytorch/win-test.sh"; then
+    .jenkins/pytorch/win-test.sh
+  else
+    .jenkins/win-test.sh
+  fi
+  ''', cudaVersion
         }
-      }
-    } // job("${buildBasePath}/${buildEnvironment}-test")
+
+        publishers {
+          groovyPostBuild {
+            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          }
+        }
+      } // job("${buildBasePath}/${buildEnvironment}-test")
+    }
   } // if (buildEnvironment.contains("win"))
 } // buildEnvironments.each

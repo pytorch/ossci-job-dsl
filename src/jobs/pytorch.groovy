@@ -212,13 +212,27 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
           }
         }
       } else if (buildEnvironment.contains("macos")) {
-        phase("Build and Test") {
-          phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
+        phase("Build") {
+          phaseJob("${buildBasePath}/${buildEnvironment}-build") {
             parameters {
               currentBuild()
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
               predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+            }
+          }
+        }
+        phase("Test") {
+          if (splitTestEnvironments.any { it.contains("${buildEnvironment}") }) {
+            for (i = 1; i <= 2; i++) {
+              phaseJob("${buildBasePath}/${buildEnvironment}-test" + i) {
+                parameters {
+                  currentBuild()
+                  predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                  predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                  predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+                }
+              }
             }
           }
         }
@@ -709,7 +723,7 @@ fi
   } // if (buildEnvironment.contains("docker"))
 
   if (buildEnvironment.contains("macos")) {
-    job("${buildBasePath}/${buildEnvironment}-build-test") {
+    job("${buildBasePath}/${buildEnvironment}-build") {
       JobUtil.common delegate, 'osx'
       JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
@@ -736,10 +750,10 @@ fi
         }
 
         MacOSUtil.sandboxShell delegate, '''
-if test -x ".jenkins/pytorch/macos-build-test.sh"; then
-  .jenkins/pytorch/macos-build-test.sh
+if test -x ".jenkins/pytorch/macos-build.sh"; then
+  .jenkins/pytorch/macos-build.sh
 else
-  .jenkins/macos-build-test.sh
+  .jenkins/macos-build.sh
 fi
 '''
       }
@@ -747,6 +761,49 @@ fi
       publishers {
         groovyPostBuild {
           script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+        }
+      }
+    }
+    for (i = 1; i <= 2; i++) {
+      job("${buildBasePath}/${buildEnvironment}-test" + i) {
+        JobUtil.common delegate, 'osx'
+        JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+
+        parameters {
+          ParametersUtil.GIT_COMMIT(delegate)
+          ParametersUtil.GIT_MERGE_TARGET(delegate)
+
+          stringParam(
+            'IMAGE_COMMIT_ID',
+            '',
+            "Identifier for built torch package"
+          )
+        }
+
+        steps {
+          GitUtil.mergeStep(delegate)
+
+          // Don't delete this envvar because we have Python script that uses it
+          environmentVariables {
+            env(
+              'BUILD_ENVIRONMENT',
+              "${buildEnvironment}",
+            )
+          }
+
+          MacOSUtil.sandboxShell delegate, '''
+if test -x ".jenkins/pytorch/macos-test.sh"; then
+  .jenkins/pytorch/macos-test.sh
+else
+  .jenkins/macos-test.sh
+fi
+'''
+        }
+
+        publishers {
+          groovyPostBuild {
+            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          }
         }
       }
     }

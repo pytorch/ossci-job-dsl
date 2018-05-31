@@ -169,8 +169,6 @@ echo "Install TC"
 export MAX_JOBS=2
 .jenkins/build.sh
 
-echo "Test TC"
-.jenkins/run_test.sh
 exit 0
 '''
     }

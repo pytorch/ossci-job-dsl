@@ -51,6 +51,7 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda8-cudnn6-py3",
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
+  "pytorch-linux-xenial-py3-clang5-asan",
 ]
 
 // Every build environment has its own Docker image

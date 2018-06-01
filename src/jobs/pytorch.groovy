@@ -53,6 +53,7 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
   "pytorch-linux-xenial-py3-clang5-asan",
 ]
+def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
@@ -169,6 +170,13 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     numParallelTests = 2
   }
 
+  def testConfigs = [""]  // "" is the default config
+  // TODO: turn it on after test.sh is updated
+  // if (buildEnvironment == avxConfigTestEnvironment) {
+  //   testConfigs.add("-NO_AVX2")
+  //   testConfigs.add("-NO_AVX_NO_AVX2")
+  // }
+
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to
   // compute here
@@ -231,15 +239,17 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
           }
         }
         phase("Test and Push") {
-          for (i = 1; i <= numParallelTests; i++) {
-            def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
-            phaseJob("${buildBasePath}/${buildEnvironment}-test" + suffix) {
-              parameters {
-                currentBuild()
-                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-                predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+          for (config in testConfigs) {
+            for (i = 1; i <= numParallelTests; i++) {
+              def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+              phaseJob("${buildBasePath}/${buildEnvironment}" + config + "-test" + suffix) {
+                parameters {
+                  currentBuild()
+                  predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                  predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                  predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                  predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+                }
               }
             }
           }
@@ -538,86 +548,88 @@ fi
     } // job(... + "short-perf-test-gpu")
   } // if (buildEnvironment == perfTestEnvironment)
 
-  for (i = 1; i <= numParallelTests; i++) {
-    def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
-    job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
-      JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
-      JobUtil.timeoutAndFailAfter(delegate, 55)
+  for (config in testConfigs) {
+    for (i = 1; i <= numParallelTests; i++) {
+      def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+      job("${buildBasePath}/${buildEnvironment}" + config + "-test" + suffix) {
+        JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
+        JobUtil.timeoutAndFailAfter(delegate, 55)
 
-      parameters {
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        parameters {
+          ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
-        // TODO: Using this parameter is a bit wasteful because Jenkins
-        // still has to schedule the job and load the docker image
-        booleanParam(
-          'RUN_TESTS',
-          true,
-          'Whether to run tests or not',
-        )
-      }
-
-      publishers {
-        // NB: Dead at the moment (PyTorch test suite does not currently generate XMLs)
-        archiveXUnit {
-          jUnit {
-            pattern('test-*.xml')
-            skipNoTestFiles()
-          }
-          // There should be no failed tests
-          failedThresholds {
-            unstable(0)
-            unstableNew(0)
-            failure(0)
-            failureNew(0)
-          }
-          // Skipped tests are OK
-          skippedThresholds {
-            unstable(50)
-            unstableNew(50)
-            failure(50)
-            failureNew(50)
-          }
-          thresholdMode(ThresholdMode.PERCENT)
-        }
-      }
-
-      steps {
-        // TODO: Will be obsolete once this is baked into docker image
-        environmentVariables {
-          env(
-            'BUILD_ENVIRONMENT',
-            "${buildEnvironment}",
+          // TODO: Using this parameter is a bit wasteful because Jenkins
+          // still has to schedule the job and load the docker image
+          booleanParam(
+            'RUN_TESTS',
+            true,
+            'Whether to run tests or not',
           )
         }
 
-        DockerUtil.shell context: delegate,
-                cudaVersion: cudaVersion,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
-                workspaceSource: "docker",
-                script: '''
-set -ex
-
-if [ "${RUN_TESTS:-true}" == "false" ]; then
-  echo "Skipping tests..."
-  exit 0
-fi
-
-if test -x ".jenkins/pytorch/test.sh"; then
-  .jenkins/pytorch/test.sh
-else
-  .jenkins/test.sh
-fi
-
-exit 0
-'''
-      }
-
-      publishers {
-        groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+        publishers {
+          // NB: Dead at the moment (PyTorch test suite does not currently generate XMLs)
+          archiveXUnit {
+            jUnit {
+              pattern('test-*.xml')
+              skipNoTestFiles()
+            }
+            // There should be no failed tests
+            failedThresholds {
+              unstable(0)
+              unstableNew(0)
+              failure(0)
+              failureNew(0)
+            }
+            // Skipped tests are OK
+            skippedThresholds {
+              unstable(50)
+              unstableNew(50)
+              failure(50)
+              failureNew(50)
+            }
+            thresholdMode(ThresholdMode.PERCENT)
+          }
         }
-      }
-    } // job(... + "-test")
+
+        steps {
+          // TODO: Will be obsolete once this is baked into docker image
+          environmentVariables {
+            env(
+              'BUILD_ENVIRONMENT',
+              "${buildEnvironment}",
+            )
+          }
+
+          DockerUtil.shell context: delegate,
+                  cudaVersion: cudaVersion,
+                  image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                  workspaceSource: "docker",
+                  script: '''
+  set -ex
+
+  if [ "${RUN_TESTS:-true}" == "false" ]; then
+    echo "Skipping tests..."
+    exit 0
+  fi
+
+  if test -x ".jenkins/pytorch/test.sh"; then
+    .jenkins/pytorch/test.sh
+  else
+    .jenkins/test.sh
+  fi
+
+  exit 0
+  '''
+        }
+
+        publishers {
+          groovyPostBuild {
+            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          }
+        }
+      } // job(... + "-test")
+    }
   }
 
 

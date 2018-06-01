@@ -95,7 +95,7 @@ dockerBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/tensorcomp/${buildEnvironment}:${tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/tensorcomp/${buildEnvironment}:1"
   }
 
   // Trigger jobs are multi jobs (it may trigger both a build and a test job)

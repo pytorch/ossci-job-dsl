@@ -92,8 +92,10 @@ class Images {
     baseImageOf.put("conda3-integrated-ubuntu16.04", "conda3-ubuntu16.04")
     baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
     baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
-    baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
-    baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("conda3-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda3-cuda8.0-cudnn7-ubuntu16.04")
+    baseImageOf.put("conda3-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda3-cuda9.0-cudnn7-ubuntu16.04")
+    //baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
+    //baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
 
     // Aten builds
     baseImageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")

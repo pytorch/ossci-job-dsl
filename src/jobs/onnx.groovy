@@ -180,6 +180,8 @@ cd "$ONNX_DIR" && pytest && cd -
 # run integration tests
 ./scripts/onnx/test.sh -p
 
+cd "$PYTORCH_DIR" && pytest -v caffe2/python/onnx/tests
+
 '''
     }
   }

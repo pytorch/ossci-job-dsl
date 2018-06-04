@@ -162,6 +162,7 @@ class Images {
   static final List<String> buildAndTestEnvironments = [
     'py2-cuda8.0-cudnn6-ubuntu16.04',
     'py2-cuda9.0-cudnn7-ubuntu16.04',
+    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
     'py2-cuda9.1-cudnn7-ubuntu16.04',
     'py2-mkl-ubuntu16.04',
   
@@ -175,9 +176,6 @@ class Images {
     // Builds for Anaconda
     //'conda2-ubuntu16.04',
     //'conda3-ubuntu16.04',
-  
-    // Aten build during all the merging-cmake changes
-    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
   ];
   
   static final List<String> buildOnlyEnvironments = [
@@ -232,6 +230,8 @@ class Images {
   static final List<String> masterBuildAndTestEnvironments = [
     'py2-cuda8.0-cudnn6-ubuntu16.04',
     'py2-cuda9.0-cudnn7-ubuntu16.04',
+    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
+    'py2-cuda9.1-cudnn7-ubuntu16.04',
     'py2-mkl-ubuntu16.04',
   
     // Vanilla Ubuntu 16.04 (Python 2/3)

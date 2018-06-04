@@ -173,7 +173,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   def testConfigs = [""]  // "" is the default config
   if (buildEnvironment == avxConfigTestEnvironment) {
     testConfigs.add("-NO_AVX2")
-    testConfigs.add("-NO_AVX_NO_AVX2")
+    testConfigs.add("-NO_AVX-NO_AVX2")
   }
 
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where

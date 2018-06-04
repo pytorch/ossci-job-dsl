@@ -92,11 +92,11 @@ multiJob("caffe2-master") {
         }
       }
 
-      Images.masterBuildAndTestEnvironments.each {
+      Images.buildAndTestEnvironments.each {
         definePhaseJob(it + "-trigger-test")
       }
 
-      Images.masterBuildOnlyEnvironments.each {
+      Images.buildOnlyEnvironments.each {
         definePhaseJob(it + "-trigger-build")
       }
     }
@@ -130,11 +130,11 @@ multiJob("caffe2-master-debug") {
         }
       }
 
-      Images.masterBuildAndTestEnvironments.each {
+      Images.buildAndTestEnvironments.each {
         definePhaseJob(it + "-trigger-test")
       }
 
-      Images.masterBuildOnlyEnvironments.each {
+      Images.buildOnlyEnvironments.each {
         definePhaseJob(it + "-trigger-build")
       }
     }

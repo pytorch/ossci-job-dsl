@@ -221,56 +221,6 @@ class Images {
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
-  
-
-  ///////////////////////////////////////////////////////////////////////////////
-  // Master build environments
-  ///////////////////////////////////////////////////////////////////////////////
-  
-  static final List<String> masterBuildAndTestEnvironments = [
-    'py2-cuda8.0-cudnn6-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
-    'py2-cuda9.1-cudnn7-ubuntu16.04',
-    'py2-mkl-ubuntu16.04',
-  
-    // Vanilla Ubuntu 16.04 (Python 2/3)
-    'py2-gcc5-ubuntu16.04',
-    //'py3-gcc5-ubuntu16.04',
-  
-    // Vanilla Ubuntu 14.04
-    'py2-gcc4.8-ubuntu14.04',
-  ];
-  
-  static final List<String> masterBuildOnlyEnvironments = [
-    // Compatibility check for CUDA 8 / cuDNN 7 (build only)
-    'py2-cuda8.0-cudnn7-ubuntu16.04',
-    'py2-cuda8.0-cudnn5-ubuntu16.04',
-  
-    // Compiler compatibility for 14.04 (build only)
-    'py2-gcc4.9-ubuntu14.04',
-  
-    // Compiler compatibility for 16.04 (build only)
-    'py2-clang3.8-ubuntu16.04',
-    'py2-clang3.9-ubuntu16.04',
-    'py2-gcc6-ubuntu16.04',
-    'py2-gcc7-ubuntu16.04',
-  
-    // Build for Android
-    'py2-android-ubuntu16.04',
-  
-    // Build for iOS
-    'py2-ios-macos10.13',
-  
-    // macOS builds
-    'py2-system-macos10.13',
-  
-    // Run a CentOS build (verifies compatibility with CMake 2.8.12)
-    'py2-cuda9.0-cudnn7-centos7',
-  
-    // windows build
-    "py2-cuda9.0-cudnn7-windows",
-  ];
 
 
   /////////////////////////////////////////////////////////////////////////////

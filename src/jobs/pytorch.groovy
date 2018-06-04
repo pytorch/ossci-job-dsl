@@ -171,10 +171,11 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   }
 
   def testConfigs = [""]  // "" is the default config
-  if (buildEnvironment == avxConfigTestEnvironment) {
-    testConfigs.add("-NO_AVX2")
-    testConfigs.add("-NO_AVX_NO_AVX2")
-  }
+  // TODO: turn it on after test.sh is updated
+  // if (buildEnvironment == avxConfigTestEnvironment) {
+  //   testConfigs.add("-NO_AVX2")
+  //   testConfigs.add("-NO_AVX_NO_AVX2")
+  // }
 
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to

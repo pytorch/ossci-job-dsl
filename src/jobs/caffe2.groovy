@@ -978,12 +978,8 @@ Images.dockerCondaBuildEnvironments.each {
 
     steps {
       GitUtil.mergeStep(delegate)
-
       environmentVariables {
-        env(
-          'BUILD_ENVIRONMENT',
-          "${buildEnvironment}",
-                )
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
         if (Images.integratedEnvironments.contains(buildEnvironment)) {
           env('INTEGRATED', 1)
         }
@@ -1060,9 +1056,7 @@ multiJob("nightly-conda-package-upload") {
       def definePhaseJob = { name ->
         phaseJob("${uploadBasePath}/${name}-build-upload") {
           parameters {
-            // Pass parameters of this job
             currentBuild()
-            // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
         }

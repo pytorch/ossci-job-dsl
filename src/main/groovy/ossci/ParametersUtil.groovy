@@ -26,6 +26,16 @@ class ParametersUtil {
     }
   }
 
+  static void CAFFE2_DOCKER_IMAGE_TAG(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'CAFFE2_DOCKER_IMAGE_TAG',
+          defaultValue,
+          'Tag of Caffe2 Docker image to use in downstream builds',
+      )
+    }
+  }
+
   static void CMAKE_ARGS(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

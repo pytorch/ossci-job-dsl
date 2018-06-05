@@ -8,6 +8,7 @@ import ossci.GitUtil
 import ossci.EmailUtil
 import ossci.pytorch.Users
 import ossci.pytorch.DockerVersion
+import ossci.caffe2.DockerVersion as Caffe2DockerVersion
 
 def buildBasePath = 'pytorch-builds'
 
@@ -41,7 +42,13 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
+  // NB: This image is taken from Caffe2
+  "py3.6-clang3.8-rocm1.7.1-ubuntu16.04",
 ]
+
+def isRocmBuild = { buildEnvironment ->
+  return buildEnvironment == "py3.6-clang3.8-rocm1.7.1-ubuntu16.04"
+}
 
 def docEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
@@ -56,7 +63,10 @@ def splitTestEnvironments = [
 def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
-def dockerImage = { buildEnvironment, tag ->
+def dockerImage = { buildEnvironment, tag, caffe2_tag ->
+  if (buildEnvironment == 'py2-clang3.8-rocm1.7.1-ubuntu16.04' || buildEnvironment == 'py3.6-clang3.8-rocm1.7.1-ubuntu16.04') {
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
+  }
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
 }
 
@@ -293,7 +303,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     } // steps
   } // multiJob("${buildBasePath}/${buildEnvironment}-trigger")
 
-  if (buildEnvironment.contains('linux')) {
+  if (buildEnvironment.contains('linux') || isRocmBuild(buildEnvironment)) {
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common delegate, 'docker && cpu'
     JobUtil.timeoutAndFailAfter(delegate, 300)
@@ -304,6 +314,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 
       stringParam(
         'DOCKER_IMAGE_COMMIT_TAG',
@@ -328,8 +339,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       }
 
       DockerUtil.shell context: delegate,
-              image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}'),
+              image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+              commitImage: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
               workspaceSource: "host-copy",
               script: '''
 set -ex
@@ -373,6 +384,7 @@ exit 0
       parameters {
         // TODO: Accept GIT_COMMIT, eliminate race, small profit
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         booleanParam(
           'DOC_PUSH',
           false,
@@ -400,7 +412,7 @@ exit 0
 
         // TODO: Move this script into repository somewhere
         DockerUtil.shell context: delegate,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "host-mount",
                 script: '''
 set -ex
@@ -465,6 +477,7 @@ git status
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
+        ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       }
 
       wrappers {
@@ -486,7 +499,7 @@ git status
         }
 
         DockerUtil.shell context: delegate,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "docker",
                 script: '''
 if test -x ".jenkins/pytorch/short-perf-test-cpu.sh"; then
@@ -509,6 +522,7 @@ fi
 
       parameters {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         ParametersUtil.COMMIT_SOURCE(delegate)
       }
 
@@ -528,7 +542,7 @@ fi
 
         DockerUtil.shell context: delegate,
                 cudaVersion: cudaVersion,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "docker",
                 script: '''
 if test -x ".jenkins/pytorch/short-perf-test-gpu.sh"; then
@@ -556,6 +570,7 @@ fi
 
         parameters {
           ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+          ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 
           // TODO: Using this parameter is a bit wasteful because Jenkins
           // still has to schedule the job and load the docker image
@@ -602,7 +617,7 @@ fi
 
           DockerUtil.shell context: delegate,
                   cudaVersion: cudaVersion,
-                  image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+                  image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                   workspaceSource: "docker",
                   script: '''
   set -ex
@@ -638,6 +653,7 @@ fi
 
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     }
 
     steps {
@@ -651,7 +667,7 @@ fi
 
       DockerUtil.shell context: delegate,
               cudaVersion: cudaVersion,
-              image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}'),
+              image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
               workspaceSource: "docker",
               script: '''
 set -ex

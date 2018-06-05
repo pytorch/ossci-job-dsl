@@ -195,6 +195,9 @@ class Images {
     // Aten
     //'py2-mkl-aten-ubuntu16.04',
     'py2-cuda8.0-cudnn7-aten-ubuntu16.04',
+
+    // Setup.py
+    'py2-setup-ubuntu16.04',
   
     // Build for Android
     'py2-android-ubuntu16.04',

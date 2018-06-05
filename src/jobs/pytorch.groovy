@@ -105,6 +105,7 @@ multiJob("pytorch-pull-request") {
   JobUtil.gitHubPullRequestTrigger(delegate, 'pytorch/pytorch', pytorchbotAuthId, Users)
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
   }
   steps {
     def gitPropertiesFile = './git.properties'
@@ -205,6 +206,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.COMMIT_SOURCE(delegate)
 
       booleanParam(
@@ -222,6 +224,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
     steps {
       def builtImageTag = '${DOCKER_IMAGE_TAG}-${BUILD_ID}'
+      def caffe2BuiltImageTag = '${CAFFE2_DOCKER_IMAGE_TAG}-${BUILD_ID}'
       def builtImageId = '${BUILD_ID}'
 
       if (buildEnvironment.contains("docker")) {
@@ -242,6 +245,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
               predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
+              predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
               predefinedProp('DOCKER_IMAGE_COMMIT_TAG', builtImageTag)
               predefinedProp('IMAGE_COMMIT_ID', builtImageId)
             }
@@ -257,6 +261,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                   predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
                   predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
                   predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                  predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
                   predefinedProp('IMAGE_COMMIT_ID', builtImageId)
                 }
               }
@@ -270,6 +275,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                 predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
                 predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
                 predefinedProp('IMAGE_COMMIT_ID', builtImageId)
               }
             }
@@ -278,6 +284,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             phaseJob("${buildBasePath}/doc-push") {
               parameters {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
                 predefinedProp('DOC_PUSH', '${DOC_PUSH}')
               }
               PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
@@ -294,6 +301,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
             phaseJob("${buildBasePath}/short-perf-test-gpu") {
               parameters {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
                 predefinedProp('COMMIT_SOURCE', '${COMMIT_SOURCE}')
               }
             }

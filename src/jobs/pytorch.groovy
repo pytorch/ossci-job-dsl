@@ -36,6 +36,10 @@ def buildEnvironments = [
   "pytorch-linux-trusty-pynightly",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-macos-10.13-py3",
+
+  // yf225: We will enable this build after the build script PR is merged
+  // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
+
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.
   // "pytorch-docker",
@@ -235,6 +239,18 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               currentBuild()
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+            }
+          }
+        }
+      } else if (buildEnvironment.contains("macos") && buildEnvironment.contains("cuda")) {
+        // Build only for macOS CUDA CI
+        phase("Build") {
+          phaseJob("${buildBasePath}/${buildEnvironment}-build") {
+            parameters {
+              currentBuild()
+              predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+              predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+              predefinedProp('IMAGE_COMMIT_ID', builtImageId)
             }
           }
         }
@@ -789,48 +805,51 @@ fi
         }
       }
     }
-    for (i = 1; i <= numParallelTests; i++) {
-      def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
-      job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
-        JobUtil.common delegate, 'osx'
-        JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+    // Don't run tests for macOS CUDA CI because we don't have macOS GPU machine
+    if (!buildEnvironment.contains("cuda")) {
+      for (i = 1; i <= numParallelTests; i++) {
+        def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+        job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
+          JobUtil.common delegate, 'osx'
+          JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
-        parameters {
-          ParametersUtil.GIT_COMMIT(delegate)
-          ParametersUtil.GIT_MERGE_TARGET(delegate)
+          parameters {
+            ParametersUtil.GIT_COMMIT(delegate)
+            ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-          stringParam(
-            'IMAGE_COMMIT_ID',
-            '',
-            "Identifier for built torch package"
-          )
-        }
-
-        steps {
-          GitUtil.mergeStep(delegate)
-
-          // Don't delete this envvar because we have Python script that uses it
-          environmentVariables {
-            env(
-              'BUILD_ENVIRONMENT',
-              "${buildEnvironment}",
+            stringParam(
+              'IMAGE_COMMIT_ID',
+              '',
+              "Identifier for built torch package"
             )
           }
 
-          MacOSUtil.sandboxShell delegate, '''
-export PATH=/usr/local/bin:$PATH
-chmod +x .jenkins/pytorch/macos-test.sh
-if test -x ".jenkins/pytorch/macos-test.sh"; then
-  .jenkins/pytorch/macos-test.sh
-else
-  .jenkins/macos-test.sh
-fi
-'''
-        }
+          steps {
+            GitUtil.mergeStep(delegate)
 
-        publishers {
-          groovyPostBuild {
-            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+            // Don't delete this envvar because we have Python script that uses it
+            environmentVariables {
+              env(
+                'BUILD_ENVIRONMENT',
+                "${buildEnvironment}",
+              )
+            }
+
+            MacOSUtil.sandboxShell delegate, '''
+  export PATH=/usr/local/bin:$PATH
+  chmod +x .jenkins/pytorch/macos-test.sh
+  if test -x ".jenkins/pytorch/macos-test.sh"; then
+    .jenkins/pytorch/macos-test.sh
+  else
+    .jenkins/macos-test.sh
+  fi
+  '''
+          }
+
+          publishers {
+            groovyPostBuild {
+              script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+            }
           }
         }
       }

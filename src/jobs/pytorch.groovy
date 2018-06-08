@@ -784,6 +784,10 @@ fi
             'BUILD_ENVIRONMENT',
             "${buildEnvironment}",
           )
+          env(
+            'SCCACHE_BUCKET',
+            'ossci-compiler-cache',
+          )
         }
 
         MacOSUtil.sandboxShell delegate, '''

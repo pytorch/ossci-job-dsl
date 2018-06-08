@@ -36,9 +36,7 @@ def buildEnvironments = [
   "pytorch-linux-trusty-pynightly",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-macos-10.13-py3",
-
-  // yf225: We will enable this build after the build script PR is merged
-  // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
+  "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.

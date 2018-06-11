@@ -67,8 +67,8 @@ def splitTestEnvironments = [
 def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
-def dockerImage = { buildEnvironment, tag, caffe2_tag ->
-  if (isRocmBuild(buildEnvironment)) {
+def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
+  if (isRocmBuild(staticBuildEnv)) {
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
   }
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
@@ -363,8 +363,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       }
 
       DockerUtil.shell context: delegate,
-              image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+              image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+              commitImage: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
               workspaceSource: "host-copy",
               script: '''
 set -ex
@@ -436,7 +436,7 @@ exit 0
 
         // TODO: Move this script into repository somewhere
         DockerUtil.shell context: delegate,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "host-mount",
                 script: '''
 set -ex
@@ -523,7 +523,7 @@ git status
         }
 
         DockerUtil.shell context: delegate,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "docker",
                 script: '''
 if test -x ".jenkins/pytorch/short-perf-test-cpu.sh"; then
@@ -566,7 +566,7 @@ fi
 
         DockerUtil.shell context: delegate,
                 cudaVersion: cudaVersion,
-                image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "docker",
                 script: '''
 if test -x ".jenkins/pytorch/short-perf-test-gpu.sh"; then
@@ -641,7 +641,7 @@ fi
 
           DockerUtil.shell context: delegate,
                   cudaVersion: cudaVersion,
-                  image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                  image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                   workspaceSource: "docker",
                   script: '''
   set -ex
@@ -691,7 +691,7 @@ fi
 
       DockerUtil.shell context: delegate,
               cudaVersion: cudaVersion,
-              image: dockerImage('${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+              image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
               workspaceSource: "docker",
               script: '''
 set -ex

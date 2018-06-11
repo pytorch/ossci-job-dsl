@@ -74,6 +74,7 @@ class Images {
     // AMD ROCM builds
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
     'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
+    'py3.6-clang3.8-rocmnightly-ubuntu16.04'
   ];
 
   /////////////////////////////////////////////////////////////////////////////

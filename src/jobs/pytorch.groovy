@@ -51,8 +51,7 @@ def experimentalBuildEnvironments = [
 ]
 
 def isRocmBuild = { buildEnvironment ->
-  // == would have worked, but startsWith for good luck
-  return buildEnvironment.startsWith("py3.6-clang3.8-rocm1.7.1-ubuntu16.04")
+  return buildEnvironment.contains("rocm")
 }
 
 def docEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
@@ -69,7 +68,7 @@ def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag, caffe2_tag ->
-  if (buildEnvironment.contains('rocm')) {
+  if (isRocmBuild(buildEnvironment)) {
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
   }
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"

@@ -47,7 +47,7 @@ def buildEnvironments = [
 
 def experimentalBuildEnvironments = [
   // NB: This image is taken from Caffe2
-  "py3.6-clang3.8-rocm1.7.1-ubuntu16.04",
+  "py3.6-clang3.8-rocmnightly-ubuntu16.04",
 ]
 
 def isRocmBuild = { buildEnvironment ->

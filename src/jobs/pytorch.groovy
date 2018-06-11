@@ -36,7 +36,9 @@ def buildEnvironments = [
   "pytorch-linux-trusty-pynightly",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-macos-10.13-py3",
-  "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
+
+  // yf225: enable again after Xcode 8.2 toolchain is set up
+  // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.

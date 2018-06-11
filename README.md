@@ -90,10 +90,18 @@ and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-t
     ssh ubuntu@$CPU_HOST
     docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i $DOCKER_IMAGE /bin/bash
 
-**Summary for GPU**
+**Summary for NVIDIA/CUDA GPU**
 
     ssh ubuntu@$GPU_HOST
     docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i --runtime=nvidia -e CUDA_VERSION=8 -e NVIDIA_VISIBLE_DEVICES=all $DOCKER_IMAGE /bin/bash
+
+**Summary for AMD/ROCM GPU**
+
+    ssh -p $AMD_PORT $AMD_USERNAME@$AMD_HOST
+    docker run --device=/dev/kfd --device=/dev/dri --group-add video -it $DOCKER_IMAGE /bin/bash
+
+(Please get in contact with @Jorghi12, @bddppq or @ezyang if you need
+access to an AMD host.)
 
 **What is my CPU/GPU HOST?**
 

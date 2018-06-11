@@ -190,9 +190,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     testConfigs.add("-NO_AVX2")
     testConfigs.add("-NO_AVX-NO_AVX2")
   }
-  if (isRocmBuild(buildEnvironment)) {
-    testConfigs = []  // no tests, they are broken at the moment
-  }
 
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to
@@ -332,11 +329,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   if (buildEnvironment.contains('linux') || isRocmBuild(buildEnvironment)) {
   job("${buildBasePath}/${buildEnvironment}-build") {
-    if (isRocmBuild(buildEnvironment)) {
-      JobUtil.common delegate, 'docker && rocm'
-    } else {
-      JobUtil.common delegate, 'docker && cpu'
-    }
+    JobUtil.common delegate, 'docker && cpu'
     JobUtil.timeoutAndFailAfter(delegate, 300)
     JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
 
@@ -596,7 +589,11 @@ fi
     for (i = 1; i <= numParallelTests; i++) {
       def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
       job("${buildBasePath}/${buildEnvironment}" + config + "-test" + suffix) {
-        JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
+        if (isRocmBuild(buildEnvironment)) {
+          JobUtil.common delegate, 'docker && rocm'
+        } else {
+          JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
+        }
         JobUtil.timeoutAndFailAfter(delegate, 55)
 
         parameters {

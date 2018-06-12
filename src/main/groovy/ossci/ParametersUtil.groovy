@@ -105,4 +105,15 @@ class ParametersUtil {
       )
     }
   }
+
+  static void GITHUB_REPO(BuildParametersContext context, String defaultValue = 'you-forgot-to-set-parameter/GITHUB_REPO') {
+    context.with {
+      stringParam(
+          'GITHUB_REPO',
+          defaultValue,
+          'GitHub repository to get commits from (e.g. pytorch/pytorch)',
+      )
+    }
+  }
+
 }

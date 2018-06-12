@@ -73,6 +73,7 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
 }
 
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
+def rocmMailRecipients = "ezyang@fb.com gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
 def ciFailureEmailScript = '''
 if (manager.build.result.toString().contains("FAILURE")) {
@@ -101,6 +102,7 @@ if (manager.build.result.toString().contains("FAILURE")) {
 '''
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
+def caffe2botAuthId = 'e8c3034a-549f-432f-b811-ec4bbc4b3d62'
 
 // Runs on pull requests
 multiJob("pytorch-pull-request") {
@@ -128,6 +130,7 @@ multiJob("pytorch-pull-request") {
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
             predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             predefinedProp('COMMIT_SOURCE', 'pull-request')
+            predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
@@ -158,6 +161,7 @@ multiJob("pytorch-master") {
             propertiesFile(gitPropertiesFile)
             booleanParam('DOC_PUSH', true)
             predefinedProp('COMMIT_SOURCE', 'master')
+            predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
           }
           if (!buildEnvironment.contains('linux')) {
             PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
@@ -168,6 +172,78 @@ multiJob("pytorch-master") {
   }
   publishers {
     mailer(mailRecipients, false, true)
+  }
+}
+
+// Runs on pull requests
+multiJob("rocm-pytorch-pull-request") {
+  JobUtil.gitHubPullRequestTrigger(delegate, 'ROCmSoftwarePlatform/pytorch', caffe2botAuthId, Users)
+  parameters {
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+  }
+  steps {
+    def gitPropertiesFile = './git.properties'
+
+    GitUtil.mergeStep(delegate)
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+    environmentVariables {
+      propertiesFile(gitPropertiesFile)
+    }
+
+    phase("Build and test") {
+      buildEnvironments.each {
+        phaseJob("${buildBasePath}/${it}-trigger") {
+          parameters {
+            // Pass parameters of this job
+            currentBuild()
+            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+            predefinedProp('ghprbCredentialsId', caffe2botAuthId)
+            predefinedProp('COMMIT_SOURCE', 'rocm-pull-request')
+            predefinedProp('GITHUB_REPO', 'ROCmSoftwarePlatform/pytorch')
+            // Ensure consistent merge behavior in downstream builds.
+            propertiesFile(gitPropertiesFile)
+          }
+        }
+      }
+    }
+  }
+}
+
+// Runs on master
+multiJob("rocm-pytorch-master") {
+  JobUtil.masterTrigger(delegate, "ROCmSoftwarePlatform/pytorch")
+  parameters {
+    ParametersUtil.RUN_DOCKER_ONLY(delegate)
+  }
+  steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+    phase("Master jobs") {
+      buildEnvironments.each {
+        def buildEnvironment = it;
+        phaseJob("${buildBasePath}/${it}-trigger") {
+          parameters {
+            // Checkout this exact same revision in downstream builds.
+            gitRevision()
+            propertiesFile(gitPropertiesFile)
+            booleanParam('DOC_PUSH', true)
+            predefinedProp('GITHUB_REPO', 'ROCmSoftwarePlatform/pytorch')
+            // NB: Don't have this be master, otherwise we'll trigger
+            // bad doc pushes!
+            predefinedProp('COMMIT_SOURCE', 'rocm-master')
+          }
+          if (!buildEnvironment.contains('linux')) {
+            PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
+          }
+        }
+      }
+    }
+  }
+  publishers {
+    mailer(rocmMailRecipients, false, true)
   }
 }
 
@@ -329,7 +405,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common delegate, 'docker && cpu'
     JobUtil.timeoutAndFailAfter(delegate, 300)
-    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -728,7 +804,7 @@ exit 0
     // take care of it
     job("${buildBasePath}/${buildEnvironment}-build-test") {
       JobUtil.common delegate, 'docker && cpu'
-      JobUtil.gitCommitFromPublicGitHub delegate, "pytorch/pytorch"
+      JobUtil.gitCommitFromPublicGitHub delegate, '${GITHUB_REPO}'
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
@@ -765,7 +841,7 @@ fi
   if (buildEnvironment.contains("macos")) {
     job("${buildBasePath}/${buildEnvironment}-build") {
       JobUtil.common delegate, 'osx'
-      JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+      JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
@@ -816,7 +892,7 @@ fi
         def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
         job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
           JobUtil.common delegate, 'osx'
-          JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+          JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
           parameters {
             ParametersUtil.GIT_COMMIT(delegate)
@@ -864,7 +940,7 @@ fi
   if (buildEnvironment.contains('win')) {
     job("${buildBasePath}/${buildEnvironment}-build") {
       JobUtil.common delegate, 'windows && cpu'
-      JobUtil.gitCommitFromPublicGitHub delegate, "pytorch/pytorch"
+      JobUtil.gitCommitFromPublicGitHub delegate, '${GITHUB_REPO}'
       JobUtil.timeoutAndFailAfter(delegate, 40)
       // Windows builds are something like 9M a pop, so keep less of
       // them.
@@ -921,7 +997,7 @@ fi
       def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
       job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
         JobUtil.common delegate, 'windows && gpu'
-        JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+        JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
         JobUtil.timeoutAndFailAfter(delegate, 40)
 
         parameters {

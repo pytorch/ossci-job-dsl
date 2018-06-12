@@ -80,12 +80,16 @@ multiJob("caffe2-master") {
   }
 
   steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
     phase("Build") {
       def definePhaseJob = { name ->
         phaseJob("${buildBasePath}/${name}") {
           parameters {
             // Checkout this exact same revision in downstream builds.
             gitRevision()
+            propertiesFile(gitPropertiesFile)
             // Pass parameters of this job
             currentBuild()
           }

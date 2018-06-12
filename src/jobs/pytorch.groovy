@@ -102,7 +102,6 @@ if (manager.build.result.toString().contains("FAILURE")) {
 '''
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
-def caffe2botAuthId = 'e8c3034a-549f-432f-b811-ec4bbc4b3d62'
 
 // Runs on pull requests
 multiJob("pytorch-pull-request") {
@@ -177,7 +176,7 @@ multiJob("pytorch-master") {
 
 // Runs on pull requests
 multiJob("rocm-pytorch-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, 'ROCmSoftwarePlatform/pytorch', caffe2botAuthId, Users)
+  JobUtil.gitHubPullRequestTrigger(delegate, 'ROCmSoftwarePlatform/pytorch', pytorchbotAuthId, Users)
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
@@ -199,7 +198,7 @@ multiJob("rocm-pytorch-pull-request") {
             // Pass parameters of this job
             currentBuild()
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            predefinedProp('ghprbCredentialsId', caffe2botAuthId)
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             predefinedProp('COMMIT_SOURCE', 'rocm-pull-request')
             predefinedProp('GITHUB_REPO', 'ROCmSoftwarePlatform/pytorch')
             // Ensure consistent merge behavior in downstream builds.

@@ -35,6 +35,11 @@ multiJob("caffe2-docker-trigger") {
           predefinedProp('DOCKER_IMAGE_TAG', '${BUILD_ID}')
         }
       }
+      phaseJob("pytorch-master") {
+        parameters {
+          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${BUILD_ID}')
+        }
+      }
     }
     phase("Deploy new images") {
       phaseJob("${dockerBasePath}/deploy") {

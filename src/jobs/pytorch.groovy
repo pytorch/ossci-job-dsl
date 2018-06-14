@@ -38,7 +38,6 @@ def buildEnvironments = [
   "pytorch-macos-10.13-py3",
   "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
-  
   // NB: This image is taken from Caffe2
   "py2-clang3.8-rocmnightly-ubuntu16.04",
 
@@ -105,147 +104,98 @@ if (manager.build.result.toString().contains("FAILURE")) {
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
-// Runs on pull requests
-multiJob("pytorch-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, 'pytorch/pytorch', pytorchbotAuthId, Users)
-  parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
-  }
-  steps {
-    def gitPropertiesFile = './git.properties'
-
-    GitUtil.mergeStep(delegate)
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-    environmentVariables {
-      propertiesFile(gitPropertiesFile)
+def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
+  context.with {
+    JobUtil.masterTrigger(delegate, repo)
+    parameters {
+      ParametersUtil.RUN_DOCKER_ONLY(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     }
+    steps {
+      def gitPropertiesFile = './git.properties'
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
-    phase("Build and test") {
-      buildEnvironments.each {
-        phaseJob("${buildBasePath}/${it}-trigger") {
-          parameters {
-            // Pass parameters of this job
-            currentBuild()
-            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-            predefinedProp('COMMIT_SOURCE', 'pull-request')
-            predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
-            // Ensure consistent merge behavior in downstream builds.
-            propertiesFile(gitPropertiesFile)
+      phase("Master jobs") {
+        buildEnvironments.each {
+          def buildEnvironment = it;
+          phaseJob("${buildBasePath}/${it}-trigger") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // Checkout this exact same revision in downstream builds.
+              gitRevision()
+              propertiesFile(gitPropertiesFile)
+              // Only pytorch/pytorch master gets documentation pushes
+              booleanParam('DOC_PUSH', repo == "pytorch/pytorch")
+              predefinedProp('COMMIT_SOURCE', commitSource)
+              predefinedProp('GITHUB_REPO', repo)
+            }
+            if (!buildEnvironment.contains('linux')) {
+              PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
+            }
           }
-          PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
         }
       }
+    }
+    publishers {
+      mailer(localMailRecipients, false, true)
     }
   }
 }
 
-// Runs on master
 multiJob("pytorch-master") {
-  JobUtil.masterTrigger(delegate, "pytorch/pytorch")
-  parameters {
-    ParametersUtil.RUN_DOCKER_ONLY(delegate)
-  }
-  steps {
-    def gitPropertiesFile = './git.properties'
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-    phase("Master jobs") {
-      buildEnvironments.each {
-        def buildEnvironment = it;
-        phaseJob("${buildBasePath}/${it}-trigger") {
-          parameters {
-            // Checkout this exact same revision in downstream builds.
-            gitRevision()
-            propertiesFile(gitPropertiesFile)
-            booleanParam('DOC_PUSH', true)
-            predefinedProp('COMMIT_SOURCE', 'master')
-            predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
-          }
-          if (!buildEnvironment.contains('linux')) {
-            PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
-          }
-        }
-      }
-    }
-  }
-  publishers {
-    mailer(mailRecipients, false, true)
-  }
+  masterJobSettings(delegate, "pytorch/pytorch", "master", mailRecipients)
 }
 
-// Runs on pull requests
-multiJob("rocm-pytorch-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, 'ROCmSoftwarePlatform/pytorch', pytorchbotAuthId, Users)
-  parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
-  }
-  steps {
-    def gitPropertiesFile = './git.properties'
-
-    GitUtil.mergeStep(delegate)
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-    environmentVariables {
-      propertiesFile(gitPropertiesFile)
-    }
-
-    phase("Build and test") {
-      buildEnvironments.each {
-        phaseJob("${buildBasePath}/${it}-trigger") {
-          parameters {
-            // Pass parameters of this job
-            currentBuild()
-            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-            predefinedProp('COMMIT_SOURCE', 'rocm-pull-request')
-            predefinedProp('GITHUB_REPO', 'ROCmSoftwarePlatform/pytorch')
-            // Ensure consistent merge behavior in downstream builds.
-            propertiesFile(gitPropertiesFile)
-          }
-        }
-      }
-    }
-  }
-}
-
-// Runs on master
 multiJob("rocm-pytorch-master") {
-  JobUtil.masterTrigger(delegate, "ROCmSoftwarePlatform/pytorch")
-  parameters {
-    ParametersUtil.RUN_DOCKER_ONLY(delegate)
-  }
-  steps {
-    def gitPropertiesFile = './git.properties'
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-master", rocmMailRecipients)
+}
 
-    phase("Master jobs") {
-      buildEnvironments.each {
-        def buildEnvironment = it;
-        phaseJob("${buildBasePath}/${it}-trigger") {
-          parameters {
-            // Checkout this exact same revision in downstream builds.
-            gitRevision()
-            propertiesFile(gitPropertiesFile)
-            booleanParam('DOC_PUSH', true)
-            predefinedProp('GITHUB_REPO', 'ROCmSoftwarePlatform/pytorch')
-            // NB: Don't have this be master, otherwise we'll trigger
-            // bad doc pushes!
-            predefinedProp('COMMIT_SOURCE', 'rocm-master')
-          }
-          if (!buildEnvironment.contains('linux')) {
-            PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
+def pullRequestJobSettings = { context, repo, commitSource ->
+  context.with {
+    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    }
+    steps {
+      def gitPropertiesFile = './git.properties'
+
+      GitUtil.mergeStep(delegate)
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      environmentVariables {
+        propertiesFile(gitPropertiesFile)
+      }
+
+      phase("Build and test") {
+        buildEnvironments.each {
+          phaseJob("${buildBasePath}/${it}-trigger") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              predefinedProp('COMMIT_SOURCE', commitSource)
+              predefinedProp('GITHUB_REPO', repo)
+              // Ensure consistent merge behavior in downstream builds.
+              propertiesFile(gitPropertiesFile)
+            }
+            PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
           }
         }
       }
     }
   }
-  publishers {
-    mailer(rocmMailRecipients, false, true)
-  }
+}
+
+multiJob("pytorch-pull-request") {
+  pullRequestJobSettings(delegate, "pytorch/pytorch", "pull-request")
+}
+
+multiJob("rocm-pytorch-pull-request") {
+  pullRequestJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-pull-request")
 }
 
 def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'

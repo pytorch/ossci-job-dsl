@@ -38,6 +38,7 @@ def buildEnvironments = [
   "pytorch-macos-10.13-py3",
   "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
+  
   // NB: This image is taken from Caffe2
   "py2-clang3.8-rocmnightly-ubuntu16.04",
 

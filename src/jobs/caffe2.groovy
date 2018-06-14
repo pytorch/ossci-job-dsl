@@ -16,50 +16,97 @@ folder(buildBasePath) {
 }
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
+def pullRequestJobSettings = { context ->
+  context.with {
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.HYPOTHESIS_SEED(delegate)
+    }
+    steps {
+      def gitPropertiesFile = './git.properties'
+
+      GitUtil.mergeStep(delegate)
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      environmentVariables {
+        propertiesFile(gitPropertiesFile)
+      }
+
+      phase("Build") {
+
+        def definePhaseJob = { name, caffe2_only ->
+          phaseJob("${buildBasePath}/${name}") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              // Ensure consistent merge behavior in downstream builds.
+              propertiesFile(gitPropertiesFile)
+            }
+            if (caffe2_only) {
+              PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
+            }
+          }
+        }
+
+        Images.buildAndTestEnvironments.each {
+          def caffe2_only = !Images.integratedEnvironments.contains(it);
+          definePhaseJob(it + "-trigger-test", caffe2_only)
+        }
+
+        Images.buildOnlyEnvironments.each {
+          def caffe2_only = !Images.integratedEnvironments.contains(it);
+          definePhaseJob(it + "-trigger-build", caffe2_only)
+        }
+      }
+    }
+  }
+}
+
 // Runs on pull requests
 multiJob("caffe2-pull-request") {
   JobUtil.gitHubPullRequestTrigger(delegate, "pytorch/pytorch", pytorchbotAuthId, Users)
-  parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    ParametersUtil.CMAKE_ARGS(delegate)
-    ParametersUtil.HYPOTHESIS_SEED(delegate)
-  }
-  steps {
-    def gitPropertiesFile = './git.properties'
+  pullRequestJobSettings(delegate)
+}
 
-    GitUtil.mergeStep(delegate)
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+def masterJobSettings = { context, defaultCmakeArgs ->
+  context.with {
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
-    environmentVariables {
-      propertiesFile(gitPropertiesFile)
+      // The CUDA master builds should be usable with any GPU generation.
+      // Not just Maxwell (which is the default for these builds).
+
+      ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
+      ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
 
-    phase("Build") {
+    steps {
+      def gitPropertiesFile = './git.properties'
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
-      def definePhaseJob = { name, caffe2_only ->
-        phaseJob("${buildBasePath}/${name}") {
-          parameters {
-            // Pass parameters of this job
-            currentBuild()
-            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-            // Ensure consistent merge behavior in downstream builds.
-            propertiesFile(gitPropertiesFile)
-          }
-          if (caffe2_only) {
-            PhaseJobUtil.condition(delegate, '(${CAFFE2_CHANGED} == 1)')
+      phase("Build") {
+        def definePhaseJob = { name ->
+          phaseJob("${buildBasePath}/${name}") {
+            parameters {
+              // Checkout this exact same revision in downstream builds.
+              gitRevision()
+              propertiesFile(gitPropertiesFile)
+              // Pass parameters of this job
+              currentBuild()
+            }
           }
         }
-      }
 
-      Images.buildAndTestEnvironments.each {
-        def caffe2_only = !Images.integratedEnvironments.contains(it);
-        definePhaseJob(it + "-trigger-test", caffe2_only)
-      }
+        Images.buildAndTestEnvironments.each {
+          definePhaseJob(it + "-trigger-test")
+        }
 
-      Images.buildOnlyEnvironments.each {
-        def caffe2_only = !Images.integratedEnvironments.contains(it);
-        definePhaseJob(it + "-trigger-build", caffe2_only)
+        Images.buildOnlyEnvironments.each {
+          definePhaseJob(it + "-trigger-build")
+        }
       }
     }
   }
@@ -68,80 +115,15 @@ multiJob("caffe2-pull-request") {
 // Runs on release build on master
 multiJob("caffe2-master") {
   JobUtil.masterTrigger(delegate, "pytorch/pytorch")
-
-  parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-
-    // The CUDA master builds should be usable with any GPU generation.
-    // Not just Maxwell (which is the default for these builds).
-
-    ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=All')
-    ParametersUtil.HYPOTHESIS_SEED(delegate)
-  }
-
-  steps {
-    def gitPropertiesFile = './git.properties'
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-    phase("Build") {
-      def definePhaseJob = { name ->
-        phaseJob("${buildBasePath}/${name}") {
-          parameters {
-            // Checkout this exact same revision in downstream builds.
-            gitRevision()
-            propertiesFile(gitPropertiesFile)
-            // Pass parameters of this job
-            currentBuild()
-          }
-        }
-      }
-
-      Images.buildAndTestEnvironments.each {
-        definePhaseJob(it + "-trigger-test")
-      }
-
-      Images.buildOnlyEnvironments.each {
-        definePhaseJob(it + "-trigger-build")
-      }
-    }
-  }
+  masterJobSettings(delegate, '-DCUDA_ARCH_NAME=All')
 }
 
 // Runs on debug build on master (triggered nightly)
 multiJob("caffe2-master-debug") {
   JobUtil.masterTrigger(delegate, "pytorch/pytorch", false)
-
+  masterJobSettings(delegate, '-DCMAKE_BUILD_TYPE=DEBUG')
   triggers {
     cron('@daily')
-  }
-
-  parameters {
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    ParametersUtil.CMAKE_ARGS(delegate, '-DCMAKE_BUILD_TYPE=DEBUG')
-    ParametersUtil.HYPOTHESIS_SEED(delegate)
-  }
-
-  steps {
-    phase("Build") {
-      def definePhaseJob = { name ->
-        phaseJob("${buildBasePath}/${name}") {
-          parameters {
-            // Checkout this exact same revision in downstream builds.
-            gitRevision()
-            // Pass parameters of this job
-            currentBuild()
-          }
-        }
-      }
-
-      Images.buildAndTestEnvironments.each {
-        definePhaseJob(it + "-trigger-test")
-      }
-
-      Images.buildOnlyEnvironments.each {
-        definePhaseJob(it + "-trigger-build")
-      }
-    }
   }
 }
 

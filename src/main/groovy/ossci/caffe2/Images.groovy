@@ -178,6 +178,8 @@ class Images {
     // Builds for Anaconda
     'conda2-ubuntu16.04',
     //'conda3-ubuntu16.04',
+
+    'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
   
   static final List<String> buildOnlyEnvironments = [
@@ -220,10 +222,8 @@ class Images {
   
     // Run a CentOS build (verifies compatibility with CMake 2.8.12)
     'py2-cuda9.0-cudnn7-centos7',
-  
-    // Will turn on rocm tests soon
+
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
-    'py3.6-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
 
 

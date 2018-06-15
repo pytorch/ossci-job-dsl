@@ -72,6 +72,10 @@ multiJob("caffe2-pull-request") {
   pullRequestJobSettings(delegate, "pytorch/pytorch")
 }
 
+multiJob("rocm-caffe2-pull-request") {
+  pullRequestJobSettings(delegate, "ROCmSoftwarePlatform/pytorch")
+}
+
 def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
   context.with {
     JobUtil.masterTrigger(delegate, "pytorch/pytorch", triggerOnPush)
@@ -118,6 +122,10 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
 // Runs on release build on master
 multiJob("caffe2-master") {
   masterJobSettings(delegate, "pytorch/pytorch", true, '-DCUDA_ARCH_NAME=All')
+}
+
+multiJob("rocm-caffe2-master") {
+  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", true, '-DCUDA_ARCH_NAME=All')
 }
 
 // Runs on debug build on master (triggered nightly)

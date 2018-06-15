@@ -114,6 +114,10 @@ if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
   docker_args+=" --security-opt seccomp=/var/lib/jenkins/allow_perf_event_open.json"
 fi
 
+if [ "${BUILD_ENVIRONMENT}" == *-rocm* ]]; then
+  docker_args+=" --device=/dev/kfd --device=/dev/dri --group-add video"
+fi
+
 # Image
 docker_args+=" ${DOCKER_IMAGE}"
 

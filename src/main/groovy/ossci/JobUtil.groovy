@@ -173,7 +173,8 @@ class JobUtil {
           blackListLabels(['skip-tests'])
 
           // Only build the PR if it targets 'master'
-          whiteListTargetBranches(['master'])
+          // 'sending_pr' is a special case for ROCmSoftwarePlatform/pytorch
+          whiteListTargetBranches(['master', 'sending_pr'])
 
           // It would be nice to require the CLA Signed label,
           // but as the label is added by the facebook github bot,

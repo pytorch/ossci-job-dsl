@@ -16,8 +16,9 @@ folder(buildBasePath) {
 }
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
-def pullRequestJobSettings = { context ->
+def pullRequestJobSettings = { context, repo ->
   context.with {
+    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate)
@@ -40,6 +41,7 @@ def pullRequestJobSettings = { context ->
             parameters {
               // Pass parameters of this job
               currentBuild()
+              predefinedProp('GITHUB_REPO', repo)
               // See https://github.com/jenkinsci/ghprb-plugin/issues/591
               predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
               // Ensure consistent merge behavior in downstream builds.
@@ -67,12 +69,12 @@ def pullRequestJobSettings = { context ->
 
 // Runs on pull requests
 multiJob("caffe2-pull-request") {
-  JobUtil.gitHubPullRequestTrigger(delegate, "pytorch/pytorch", pytorchbotAuthId, Users)
-  pullRequestJobSettings(delegate)
+  pullRequestJobSettings(delegate, "pytorch/pytorch")
 }
 
-def masterJobSettings = { context, defaultCmakeArgs ->
+def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
   context.with {
+    JobUtil.masterTrigger(delegate, "pytorch/pytorch", triggerOnPush)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
@@ -93,6 +95,7 @@ def masterJobSettings = { context, defaultCmakeArgs ->
             parameters {
               // Checkout this exact same revision in downstream builds.
               gitRevision()
+              predefinedProp('GITHUB_REPO', repo)
               propertiesFile(gitPropertiesFile)
               // Pass parameters of this job
               currentBuild()
@@ -114,14 +117,12 @@ def masterJobSettings = { context, defaultCmakeArgs ->
 
 // Runs on release build on master
 multiJob("caffe2-master") {
-  JobUtil.masterTrigger(delegate, "pytorch/pytorch")
-  masterJobSettings(delegate, '-DCUDA_ARCH_NAME=All')
+  masterJobSettings(delegate, "pytorch/pytorch", true, '-DCUDA_ARCH_NAME=All')
 }
 
 // Runs on debug build on master (triggered nightly)
 multiJob("caffe2-master-debug") {
-  JobUtil.masterTrigger(delegate, "pytorch/pytorch", false)
-  masterJobSettings(delegate, '-DCMAKE_BUILD_TYPE=DEBUG')
+  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG')
   triggers {
     cron('@daily')
   }
@@ -207,6 +208,8 @@ Images.allDockerBuildEnvironments.each {
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CMAKE_ARGS(delegate)
 
+        ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+
         if (runTests) {
           ParametersUtil.HYPOTHESIS_SEED(delegate)
         }
@@ -251,6 +254,7 @@ Images.allDockerBuildEnvironments.each {
               predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
               predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
               predefinedProp('DOCKER_COMMIT_TAG', builtImageTag)
+              predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
             }
           }
         }
@@ -262,6 +266,7 @@ Images.allDockerBuildEnvironments.each {
                 predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
                 predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               }
             }
           }
@@ -407,13 +412,15 @@ git status
   // All docker builds
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
       stringParam(
         'DOCKER_COMMIT_TAG',
@@ -526,7 +533,7 @@ fi
     }
     JobUtil.common(delegate, label)
     JobUtil.timeoutAndFailAfter(delegate, 45)
-    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
@@ -534,6 +541,8 @@ fi
 
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
+
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
     }
 
     steps {
@@ -659,7 +668,7 @@ Images.macOsBuildEnvironments.each {
 
     multiJob(jobName) {
       JobUtil.commonTrigger(delegate)
-      JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+      JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
       JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
       parameters {
@@ -667,6 +676,7 @@ Images.macOsBuildEnvironments.each {
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
         ParametersUtil.CMAKE_ARGS(delegate)
+        ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
       }
 
       steps {
@@ -683,6 +693,7 @@ Images.macOsBuildEnvironments.each {
           phaseJob("${buildBasePath}/${buildEnvironment}-build") {
             parameters {
               currentBuild()
+              predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               propertiesFile(gitPropertiesFile)
             }
           }
@@ -725,11 +736,12 @@ Images.macOsBuildEnvironments.each {
 
     job("${_buildBasePath}/${buildEnvironment}-${_buildSuffix}") {
       JobUtil.common(delegate, 'osx')
-      JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+      JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
       parameters {
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
+        ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
         if (makeACondaUploadBuild) {
           ParametersUtil.UPLOAD_TO_CONDA(delegate)
@@ -847,13 +859,14 @@ Images.windowsBuildEnvironments.each {
 
   multiJob(jobName) {
     JobUtil.commonTrigger(delegate)
-    JobUtil.gitCommitFromPublicGitHub(delegate, "pytorch/pytorch")
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
     JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
     }
 
     steps {
@@ -875,12 +888,13 @@ Images.windowsBuildEnvironments.each {
   // Windows build jobs
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'windows && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
     JobUtil.timeoutAndFailAfter(delegate, 40)
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
     }
 
     steps {

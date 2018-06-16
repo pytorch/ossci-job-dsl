@@ -175,7 +175,7 @@ cd "$PYTORCH_DIR"
 ./scripts/onnx/install-develop.sh
 
 # run onnx tests
-cd "$ONNX_DIR" && pytest && cd -
+cd "$ONNX_DIR" && catchsegv pytest && cd -
 
 # run integration tests
 ./scripts/onnx/test.sh -p

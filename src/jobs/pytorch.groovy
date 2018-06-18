@@ -32,11 +32,14 @@ def buildEnvironments = [
   "pytorch-linux-trusty-py3.5",
   "pytorch-linux-trusty-py3.6-gcc4.8",
   "pytorch-linux-trusty-py3.6-gcc5.4",
-  "pytorch-linux-trusty-py3.6-gcc7.2",
+  "pytorch-linux-trusty-py3.6-gcc7.3",
   "pytorch-linux-trusty-pynightly",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-macos-10.13-py3",
   "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
+
+  // yf225: remove this after GCC 7.3 docker image is in and GCC 7.3 job is enabled
+  "pytorch-linux-trusty-py3.6-gcc7.2",
 
   // NB: This image is taken from Caffe2
   "py2-clang3.8-rocmnightly-ubuntu16.04",

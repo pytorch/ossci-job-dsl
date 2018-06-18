@@ -17,7 +17,7 @@ def dockerImages = [
   "pytorch-linux-xenial-py3-clang5-asan",
   // "pytorch-linux-artful-cuda9-cudnn7-py3",
 
-  // yf225: remove this after GCC 7.3 docker image is in and GCC 7.3 job is enabled
+  // yf225: remove this after GCC 7.3 docker image is in and PyTorch groovy env name is updated
   "pytorch-linux-trusty-py3.6-gcc7.2",
 ]
 

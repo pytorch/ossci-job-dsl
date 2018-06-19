@@ -62,7 +62,7 @@ multiJob("tensorcomp-pull-request") {
 
 // Runs on release build on master
 multiJob("tensorcomp-master") {
-  JobUtil.masterTrigger(delegate, "facebookresearch/TensorComprehensions")
+  JobUtil.masterTrigger(delegate, "facebookresearch/TensorComprehensions", "master")
 
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, 'latest')

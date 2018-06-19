@@ -103,16 +103,16 @@ class JobUtil {
     }
   }
 
-  static void masterTrigger(MultiJob context, String ownerAndProject, boolean triggerOnPush = true) {
+  static void masterTrigger(MultiJob context, String ownerAndProject, String branchName, boolean triggerOnPush = true) {
     context.with {
       commonTrigger(delegate)
       scm {
         git {
           remote {
             github(ownerAndProject)
-            refspec('+refs/heads/master:refs/remotes/origin/master')
+            refspec('+refs/heads/' + branchName + ':refs/remotes/origin/' + branchName)
           }
-          branch('origin/master')
+          branch('origin/' + branchName)
           GitUtil.defaultExtensions(delegate)
         }
       }
@@ -174,7 +174,7 @@ class JobUtil {
 
           // Only build the PR if it targets 'master'
           // 'sending_pr' is a special case for ROCmSoftwarePlatform/pytorch
-          whiteListTargetBranches(['master', 'sending_pr'])
+          whiteListTargetBranches(['master', 'fbsync', 'sending_pr'])
 
           // It would be nice to require the CLA Signed label,
           // but as the label is added by the facebook github bot,

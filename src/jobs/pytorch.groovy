@@ -106,7 +106,7 @@ def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
   context.with {
-    JobUtil.masterTrigger(delegate, repo)
+    JobUtil.masterTrigger(delegate, repo, "master")
     parameters {
       ParametersUtil.RUN_DOCKER_ONLY(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)

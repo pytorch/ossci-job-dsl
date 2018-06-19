@@ -78,7 +78,7 @@ multiJob("rocm-caffe2-pull-request") {
 
 def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
   context.with {
-    JobUtil.masterTrigger(delegate, "pytorch/pytorch", triggerOnPush)
+    JobUtil.masterTrigger(delegate, "pytorch/pytorch", "master", triggerOnPush)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 

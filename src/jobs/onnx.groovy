@@ -45,7 +45,7 @@ multiJob("onnx-pull-request") {
 
 // Runs on master
 multiJob("onnx-master") {
-  JobUtil.masterTrigger(delegate, "onnx/onnx")
+  JobUtil.masterTrigger(delegate, "onnx/onnx", "master")
   steps {
     phase("Build") {
       buildEnvironments.each {

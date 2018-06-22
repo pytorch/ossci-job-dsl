@@ -242,7 +242,7 @@ job("${dockerBasePath}/deploy") {
     git {
       remote {
         github('pytorch/ossci-job-dsl', 'ssh')
-        credentials('caffe2bot')
+        credentials('pytorchbot')
       }
       branch('origin/master')
     }

@@ -32,7 +32,7 @@ def ignoreTags = [
     scm {
       git {
         remote {
-          github('pietern/ossci-job-dsl', 'ssh')
+          github('pytorch/ossci-job-dsl', 'ssh')
           credentials('caffe2bot')
         }
         branch('origin/master')

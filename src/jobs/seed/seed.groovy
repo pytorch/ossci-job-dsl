@@ -14,7 +14,7 @@ job('seed') {
       // Note: caffe2bot doesn't have admin access to this repo so you
       // have to add the webhook for the GitHub plugin yourself.
       remote {
-        github('pietern/ossci-job-dsl', 'ssh')
+        github('pytorch/ossci-job-dsl', 'ssh')
         credentials('caffe2bot')
       }
       branch('${GIT_COMMIT}')

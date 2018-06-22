@@ -5,7 +5,6 @@ for FAIR/AML's OSSCI infrastructure.
 
 Looking for information about the actual machines the jobs run on?
 See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra).
-Some day we will move this repo.
 
 ## CI failed, but my local build is fine. What should I do?!
 

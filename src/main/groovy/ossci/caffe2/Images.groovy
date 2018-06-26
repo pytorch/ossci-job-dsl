@@ -30,7 +30,8 @@ class Images {
 
     // Compatibility check for cuDNN 6 and 5 (build only)
     'py2-cuda8.0-cudnn6-ubuntu16.04',
-    'py2-cuda8.0-cudnn5-ubuntu16.04',
+    // EOLed on 2018-06-26 by Yangqing, Pieter, Mingzhe
+    // 'py2-cuda8.0-cudnn5-ubuntu16.04',
 
     // Compiler compatibility for 14.04 (build only)
     'py2-gcc4.8-ubuntu14.04',

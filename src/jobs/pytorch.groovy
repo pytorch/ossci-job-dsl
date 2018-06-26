@@ -33,7 +33,7 @@ def buildEnvironments = [
   "pytorch-linux-trusty-py3.5",
   "pytorch-linux-trusty-py3.6-gcc4.8",
   "pytorch-linux-trusty-py3.6-gcc5.4",
-  "pytorch-linux-trusty-py3.6-gcc7.2",
+  "pytorch-linux-trusty-py3.6-gcc7",
   "pytorch-linux-trusty-pynightly",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-macos-10.13-py3",

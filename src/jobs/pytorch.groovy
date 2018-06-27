@@ -78,6 +78,12 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
 def rocmMailRecipients = "ezyang@fb.com gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
+def ciPostWebhook = '''
+def cmd = ["curl", "-X", "POST", "-d", "payload={\"pr\":" + manager.getEnvVariable("ghprbPullId") + ",\"result_url\":\"" + manager.getEnvVariable("BUILD_URL") + "\",\"status\":\"" + manager.getResult() + "\",\"head_sha\":\"" + manager.getEnvVariable("GIT_COMMIT") + "\"}", "https://code.poshannessy.sb.facebook.com/pytorch/build_result"]
+manager.listener.logger.println cmd.join(" ")
+manager.listener.logger.println cmd.execute().text
+'''
+
 def ciFailureEmailScript = '''
 if (manager.build.result.toString().contains("FAILURE")) {
   def logLines = manager.build.logFile.readLines()
@@ -187,6 +193,11 @@ def pullRequestJobSettings = { context, repo, commitSource ->
             PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
           }
         }
+      }
+    }
+    publishers {
+      groovyPostBuild {
+        script(ciPostWebhook)
       }
     }
   }

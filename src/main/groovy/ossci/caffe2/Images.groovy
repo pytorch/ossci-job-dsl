@@ -189,7 +189,7 @@ class Images {
   static final List<String> buildOnlyEnvironments = [
     // Compatibility check for CUDA 8 / cuDNN 7 (build only)
     'py2-cuda8.0-cudnn7-ubuntu16.04',
-    'py2-cuda8.0-cudnn5-ubuntu16.04',
+    // 'py2-cuda8.0-cudnn5-ubuntu16.04',
   
     // Compiler compatibility for 14.04 (build only)
     'py2-gcc4.9-ubuntu14.04',

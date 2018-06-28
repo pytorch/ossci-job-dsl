@@ -19,6 +19,7 @@ def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 def pullRequestJobSettings = { context, repo ->
   context.with {
     JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    JobUtil.postBuildFacebookWebhook(delegate)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate)

@@ -79,7 +79,7 @@ def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.co
 def rocmMailRecipients = "ezyang@fb.com gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
 def ciPostWebhook = '''
-def cmd = ["curl", "-X", "POST", "-d", 'payload={"pr":' + manager.getEnvVariable("ghprbPullId") + ',"result_url":"' + manager.getEnvVariable("BUILD_URL") + '","status":"' + manager.getResult() + '","head_sha":"' + manager.getEnvVariable("GIT_COMMIT") + '"}', "https://code.poshannessy.sb.facebook.com/pytorch/build_result"]
+def cmd = ["curl", "-X", "POST", "-d", 'payload={"pr":' + manager.getEnvVariable("ghprbPullId") + ',"result_url":"' + manager.getEnvVariable("BUILD_URL") + '","status":"' + manager.getResult() + '","head_sha":"' + manager.getEnvVariable("GIT_COMMIT") + '"}', "https://code.facebook.com/pytorch/build_result"]
 manager.listener.logger.println cmd.join(" ")
 manager.listener.logger.println cmd.execute().text
 '''

@@ -8,7 +8,7 @@ class JobUtil {
   // you have a really good reason
   static void common(Job context, String labelExpression) {
     context.with {
-      timeoutAndFailAfter(context, 90)
+      timeoutAndFailAfter(context, 150)
       label(labelExpression)
       concurrentBuild()
       publishers {

@@ -100,7 +100,9 @@ and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-t
     docker run --device=/dev/kfd --device=/dev/dri --group-add video -it $DOCKER_IMAGE /bin/bash
 
 (Please get in contact with @Jorghi12, @bddppq or @ezyang if you need
-access to an AMD host.)
+access to an AMD host.  This should only be necessary if you actually
+plan to run tests on an AMD GPU; if you are debugging build failures,
+any old host is OK.)
 
 **What is my CPU/GPU HOST?**
 

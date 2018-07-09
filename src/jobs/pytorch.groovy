@@ -93,7 +93,6 @@ if (manager.build.result.toString().contains("FAILURE")) {
   def isFalseNegative = (logLines.count {
     it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */ \
     || it.contains("No space left on device") /* OOD error */ \
-    || it.contains("caused by: failed to fill whole buffer") /* sccache compile error */ \
     || it.contains("virtual memory exhausted: Cannot allocate memory") /* sccache compile error */
   } > 0)
   def hasEnteredUserLand = (logLines.count {it.contains("ENTERED_USER_LAND")} > 0)

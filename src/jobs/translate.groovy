@@ -1,228 +1,182 @@
 import ossci.DockerUtil
 import ossci.JobUtil
+import ossci.MacOSUtil
 import ossci.ParametersUtil
 import ossci.PhaseJobUtil
+import ossci.WindowsUtil
+import ossci.GitUtil
+import ossci.EmailUtil
+import ossci.translate.DockerVersion
+import ossci.translate.Images
 import ossci.pytorch.Users
-import ossci.caffe2.DockerVersion
 
+def buildBasePath = 'translate-builds'
 
-def translateBasePath = 'translate'
-def translateDockerBuildEnvironments = [
-  'conda3-cuda9.0-cudnn7-ubuntu16.04',
-  'conda3-cuda8.0-cudnn7-ubuntu16.04',
-]
-
-folder(translateBasePath) {
-  description 'Jobs for translate'
+folder(buildBasePath) {
+  description 'Jobs for all translate build environments'
 }
 
-// This is a temporary solution, and copied from caffe2.groovy
-translateDockerBuildEnvironments.each {
+// Every build environment has its own Docker image
+def dockerImage = { buildEnvironment, tag ->
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/translate/${buildEnvironment}:${tag}"
+}
+
+def mailRecipients = "ezyang@fb.com weiho@fb.com juancarabina@fb.com"
+
+def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
+
+def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
+  context.with {
+    JobUtil.masterTrigger(delegate, repo, "master")
+    parameters {
+      ParametersUtil.RUN_DOCKER_ONLY(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    }
+    steps {
+      def gitPropertiesFile = './git.properties'
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      phase("Master jobs") {
+        Images.dockerImages.each {
+          def buildEnvironment = it;
+          phaseJob("${buildBasePath}/${it}-trigger") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // Checkout this exact same revision in downstream builds.
+              gitRevision()
+              propertiesFile(gitPropertiesFile)
+              predefinedProp('COMMIT_SOURCE', commitSource)
+              predefinedProp('GITHUB_REPO', repo)
+            }
+          }
+        }
+      }
+    }
+    publishers {
+      mailer(localMailRecipients, false, true)
+    }
+  }
+}
+
+multiJob("translate-master") {
+  masterJobSettings(delegate, "pytorch/translate", "master", mailRecipients)
+}
+
+def pullRequestJobSettings = { context, repo, commitSource ->
+  context.with {
+    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    }
+    steps {
+      def gitPropertiesFile = './git.properties'
+
+      GitUtil.mergeStep(delegate)
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      environmentVariables {
+        propertiesFile(gitPropertiesFile)
+      }
+
+      phase("Build and test") {
+        Images.dockerImages.each {
+          phaseJob("${buildBasePath}/${it}-trigger") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              predefinedProp('COMMIT_SOURCE', commitSource)
+              predefinedProp('GITHUB_REPO', repo)
+              // Ensure consistent merge behavior in downstream builds.
+              propertiesFile(gitPropertiesFile)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+multiJob("translate-pull-request") {
+  pullRequestJobSettings(delegate, "pytorch/translate", "pull-request")
+}
+
+// One job per build environment
+Images.dockerImages.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
 
-  // Every build environment has its own Docker image
-  def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${tag}"
+  multiJob("${buildBasePath}/${buildEnvironment}-trigger") {
+    JobUtil.commonTrigger(delegate)
+    JobUtil.subJobDownstreamCommitStatus(delegate, buildEnvironment)
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.COMMIT_SOURCE(delegate)
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/translate')
+    }
+
+    steps {
+      def builtImageTag = '${DOCKER_IMAGE_TAG}-${BUILD_ID}'
+      def builtImageId = '${BUILD_ID}'
+
+      phase("Build and Test") {
+        phaseJob("${buildBasePath}/${buildEnvironment}-build-test") {
+          parameters {
+            currentBuild()
+            predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+            predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+            predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+          }
+        }
+      }
+    } // steps
+  } // multiJob("${buildBasePath}/${buildEnvironment}-trigger")
+
+  job("${buildBasePath}/${buildEnvironment}-build-test") {
+    JobUtil.common delegate, 'docker && gpu'
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/translate')
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+
+      environmentVariables {
+        // TODO: Will be obsolete once this is baked into docker image
+        env(
+          'BUILD_ENVIRONMENT',
+          "${buildEnvironment}",
+        )
+        env(
+          'SCCACHE_BUCKET',
+          'ossci-compiler-cache',
+        )
+      }
+
+      DockerUtil.shell context: delegate,
+              image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}'),
+              workspaceSource: "host-copy",
+              script: '''
+.jenkins/build.sh
+'''
+    }
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript)
+      }
+    }
   }
-
-  // WARNING that both of these jobs produce the same outputs, and so will
-  // probably overwrite each other if all run together.
-
-  // Job to build translate from source, and also build Pytorch and Caffe2
-  // from source. These builds are only temporary, as they should either
-  //   1. be replaced by binary installs for much-faster build times (but can't
-  //      run on every PR this way)
-  //   2. be integrated into the rest of CI so as to use the outputs of other
-  //      Caffe2/pytorch builds, such as taking the results of e.g.
-  //      conda3-cuda9.0-cudnn7-integrated-ubuntu16.04 and building Pytorch in
-  //      it
-  job("${translateBasePath}/${buildEnvironment}-source") {
-    JobUtil.common(delegate, 'docker && cpu')
-
-    parameters {
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-      ParametersUtil.CMAKE_ARGS(delegate)
-
-      stringParam(
-        'DOCKER_COMMIT_TAG',
-        '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
-        "Tag of the Docker image to commit and push upon completion " +
-          "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
-      )
-    }
-
-    steps {
-
-      environmentVariables {
-        env('BUILD_ENVIRONMENT', "${buildEnvironment}")
-      }
-
-      def cudaVersion = buildEnvironment =~ /cuda(\d.\d)/
-      environmentVariables {
-        env('CUDA_VERSION', cudaVersion[0][1])
-      }
-
-      DockerUtil.shell context: delegate,
-              image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
-              // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
-              workspaceSource: "host-mount",
-              script: '''
-set -ex
-
-
-# Ensure jenkins can write to the ccache root dir.
-sudo chown jenkins:jenkins "${HOME}/.ccache"
-sudo chown -R jenkins:jenkins '/opt/conda'
-export PATH=/opt/conda/bin:$PATH
-
-# Make ccache log to the workspace, so we can archive it after the build
-mkdir -p build
-ccache -o log_file=$PWD/build/ccache.log
-
-
-git clone --recursive https://github.com/pytorch/pytorch.git && pushd pytorch
-
-
-# Install Pytorch if it has changed
-yes | conda install numpy pyyaml mkl mkl-include setuptools cmake cffi typing
-if [[ $CUDA_VERSION == 9 ]]; then
-  conda install -yc pytorch magma-cuda80
-else
-  conda install -yc pytorch magma-cuda90
-fi
-python3 setup.py install
-
-
-# Install Caffe2
-yes | pip install future
-mkdir -p build_caffe2 && pushd build_caffe2
-cmake \
-  -DPYTHON_INCLUDE_DIR=$(python -c 'from distutils import sysconfig; print(sysconfig.get_python_inc())') \
-  -DPYTHON_EXECUTABLE=$(which python) \
-  -DUSE_ATEN=ON -DUSE_OPENCV=OFF -DUSE_LEVELDB=OFF -DUSE_LMDB=OFF -DBUILD_TEST=OFF \
-  -DCMAKE_PREFIX_PATH=/opt/conda -DCMAKE_INSTALL_PREFIX=/opt/conda ..
-make install "-j$(nproc)"
-popd
-popd
-
-
-# Install ONNX
-git clone --recursive https://github.com/onnx/onnx.git
-PROTOBUF_INCDIR=/opt/conda/include pip install ./onnx
-
-
-# Install translate
-git clone --recursive https://github.com/pytorch/translate.git && pushd translate
-python3 setup.py build develop
-
-pushd pytorch_translate/cpp
-# If you need to specify a compiler other than the default one cmake is picking
-# up, you can use the -DCMAKE_C_COMPILER and -DCMAKE_CXX_COMPILER flags.
-cmake -DCMAKE_PREFIX_PATH=/opt/conda/usr/local -DCMAKE_INSTALL_PREFIX=/opt/conda .
-make
-popd
-'''
-    }
-
-    publishers {
-      archiveArtifacts {
-        allowEmpty()
-        pattern('build*/CMakeCache.txt')
-      }
-      archiveArtifacts {
-        allowEmpty()
-        pattern('build*/CMakeFiles/*.log')
-      }
-    }
-  } // source installs
-
-
-  ////////////////////////////////////////////////////////////////////////////
-  // Jobs that builds translate with binary installs of Pytorch and Caffe2
-  ////////////////////////////////////////////////////////////////////////////
-  job("${translateBasePath}/${buildEnvironment}-binary") {
-    JobUtil.common(delegate, 'docker && cpu')
-
-    parameters {
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-      ParametersUtil.CMAKE_ARGS(delegate)
-
-      stringParam(
-        'DOCKER_COMMIT_TAG',
-        '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
-        "Tag of the Docker image to commit and push upon completion " +
-          "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
-      )
-    }
-
-    steps {
-
-      environmentVariables {
-        env('BUILD_ENVIRONMENT', "${buildEnvironment}")
-      }
-
-      DockerUtil.shell context: delegate,
-              image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
-              // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
-              workspaceSource: "host-mount",
-              script: '''
-set -ex
-
-# These are needed to get Python 3 working correctly
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
-
-
-# Ensure jenkins can write to the ccache root dir.
-sudo chown jenkins:jenkins "${HOME}/.ccache"
-sudo chown -R jenkins:jenkins '/opt/conda'
-export PATH=/opt/conda/bin:$PATH
-
-# Make ccache log to the workspace, so we can archive it after the build
-mkdir -p build
-ccache -o log_file=$PWD/build/ccache.log
-
-
-# Install Caffe2 and Pytorch
-if [[ $CUDA_VERSION == 8* ]]; then
-  conda install -y -c pytorch magma-cuda80
-  conda install -y -c caffe2 pytorch-caffe2_cuda8.0_cudnn7
-else
-  conda install -y -c pytorch magma-cuda90
-  conda install -y -c caffe2 pytorch-caffe2_cuda9.0_cudnn7
-fi
-
-
-# Install ONNX
-git clone --recursive https://github.com/onnx/onnx.git
-PROTOBUF_INCDIR=/opt/conda/include pip install ./onnx
-
-
-# Install translate
-git clone --recursive https://github.com/pytorch/translate.git && pushd translate
-python3 setup.py build develop
-
-pushd pytorch_translate/cpp
-# If you need to specify a compiler other than the default one cmake is picking
-# up, you can use the -DCMAKE_C_COMPILER and -DCMAKE_CXX_COMPILER flags.
-cmake -DCMAKE_PREFIX_PATH=/opt/conda/usr/local -DCMAKE_INSTALL_PREFIX=/opt/conda .
-make
-popd
-'''
-    }
-
-    publishers {
-      archiveArtifacts {
-        allowEmpty()
-        pattern('build*/CMakeCache.txt')
-      }
-      archiveArtifacts {
-        allowEmpty()
-        pattern('build*/CMakeFiles/*.log')
-      }
-    }
-  } // binary-installs
-} // all build environments
+} // buildEnvironments.each

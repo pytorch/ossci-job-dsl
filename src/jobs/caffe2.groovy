@@ -1094,7 +1094,7 @@ export PATH=/opt/conda/bin:$PATH
 
 # Create a new env so that we can update conda without elevated permissions
 conda create -yn pip && source activate pip
-conda install -y setuptools wheel twine
+conda install -y setuptools wheel twine numpy pyyaml
 
 # Build package
 PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel

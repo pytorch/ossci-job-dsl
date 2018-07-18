@@ -219,10 +219,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     testConfigs.add("-NO_AVX2")
     testConfigs.add("-NO_AVX-NO_AVX2")
   }
-  // Temporarily disable rocm tests
-  if (isRocmBuild(buildEnvironment)) {
-    testConfigs = []
-  }
 
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to
@@ -299,6 +295,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
               predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
               predefinedProp('DOCKER_IMAGE_COMMIT_TAG', builtImageTag)
+              predefinedProp('CAFFE2_DOCKER_IMAGE_COMMIT_TAG', caffe2BuiltImageTag)
               predefinedProp('IMAGE_COMMIT_ID', builtImageId)
               predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
             }
@@ -388,6 +385,12 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         '',
         'Tag of image to commit and push after this build completes (if non-empty)',
       )
+
+      stringParam(
+        'CAFFE2_DOCKER_IMAGE_COMMIT_TAG',
+        '',
+        'Tag of image to commit and push after this build completes (if non-empty) for Caffe2-based images',
+      )
     }
 
     steps {
@@ -407,7 +410,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
       DockerUtil.shell context: delegate,
               image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}', 'pt_${DOCKER_IMAGE_COMMIT_TAG}'),
+              commitImage: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}', 'pt_${CAFFE2_DOCKER_IMAGE_COMMIT_TAG}'),
               workspaceSource: "host-copy",
               script: '''
 set -ex

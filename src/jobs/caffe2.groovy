@@ -1067,6 +1067,7 @@ Images.dockerPipBuildEnvironments.each {
       GitUtil.mergeStep(delegate)
       environmentVariables {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+        env('SCCACHE_BUCKET', 'ossci-compiler-cache',)
       }
 
       def cudaVersion = ''
@@ -1090,6 +1091,43 @@ Images.dockerPipBuildEnvironments.each {
 set -ex
 git submodule update --init --recursive
 
+# Setup SCCACHE
+###############################################################################
+# Ensure jenkins can write to the ccache root dir
+sudo chown jenkins:jenkins "${HOME}/.ccache"
+
+mkdir -p ./sccache
+
+SCCACHE="$(which sccache)"
+if [ -z "${SCCACHE}" ]; then
+  echo "Unable to find sccache..."
+  exit 1
+fi
+
+# Setup wrapper scripts
+for compiler in cc c++ gcc g++ x86_64-linux-gnu-gcc; do
+  (
+    echo "#!/bin/sh"
+    echo "exec $SCCACHE $(which $compiler) \"\$@\""
+  ) > "./sccache/$compiler"
+  chmod +x "./sccache/$compiler"
+done
+
+if [[ "${BUILD_ENVIRONMENT}" == *-cuda* ]]; then
+  (
+    echo "#!/bin/sh"
+    echo "exec $SCCACHE $(which nvcc) \"\$@\""
+  ) > "./sccache/nvcc"
+  chmod +x "./sccache/nvcc"
+fi
+
+export CACHE_WRAPPER_DIR="$PWD/sccache"
+
+# CMake must find these wrapper scripts
+export PATH="$CACHE_WRAPPER_DIR:$PATH"
+
+# Set up python env and build
+###############################################################################
 export PATH=/opt/conda/bin:$PATH
 
 # Create a new env so that we can update conda without elevated permissions
@@ -1097,10 +1135,13 @@ conda create -yn pip && source activate pip
 conda install -y setuptools wheel twine numpy pyyaml
 
 # Build package
+sccache --show-stats
 PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel
+sccache --show-stats
 if [[ -n $UPLOAD_PACKAGE ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
+
 '''
     }
   }

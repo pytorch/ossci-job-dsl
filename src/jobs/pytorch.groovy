@@ -403,7 +403,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
       DockerUtil.shell context: delegate,
               image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
-              commitImage: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}','pt_${DOCKER_IMAGE_COMMIT_TAG}'),
+              commitImage: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_COMMIT_TAG}', 'pt_${DOCKER_IMAGE_COMMIT_TAG}'),
               workspaceSource: "host-copy",
               script: '''
 set -ex
@@ -684,7 +684,7 @@ fi
 
           DockerUtil.shell context: delegate,
                   cudaVersion: cudaVersion,
-                  image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                  image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}', 'pt_${CAFFE2_DOCKER_IMAGE_TAG}'),
                   workspaceSource: "docker",
                   script: '''
   set -ex

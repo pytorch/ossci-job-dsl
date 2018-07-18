@@ -1057,6 +1057,12 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.PACKAGE_VERSION(delegate)
     }
 
+      wrappers {
+        credentialsBinding {
+          usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
+        }
+      }
+
     steps {
       GitUtil.mergeStep(delegate)
       environmentVariables {
@@ -1090,7 +1096,7 @@ conda install -y setuptools wheel twine
 # Build package
 PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel
 if [[ -n $UPLOAD_PACKAGE ]]; then
-  twine upload dist/* -u jesse.hellemn -p TemporaryCaffe2Password
+  twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 '''
     }

@@ -56,12 +56,12 @@ class ParametersUtil {
     }
   }
 
-  static void UPLOAD_TO_CONDA(BuildParametersContext context, defaultValue = false) {
+  static void UPLOAD_PACKAGE(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(
-          'UPLOAD_TO_CONDA',
+          'UPLOAD_PACKAGE',
           defaultValue,
-          "Check this to upload the finished package to Anaconda.org"
+          "Check this to upload the finished package to the public"
       )
     }
   }
@@ -72,6 +72,16 @@ class ParametersUtil {
           'CONDA_PACKAGE_NAME',
           defaultValue,
           "The name of the package to upload to Anaconda"
+      )
+    }
+  }
+
+  static void PACKAGE_VERSION(BuildParametersContext context, defaultValue = '1000') {
+    context.with {
+      stringParam(
+          'PACKAGE_VERSION',
+          defaultValue,
+          "The version to have in 0.4.1.dev#here#"
       )
     }
   }

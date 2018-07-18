@@ -9,7 +9,8 @@ import ossci.caffe2.Images
 import ossci.caffe2.DockerVersion
 
 def buildBasePath = 'caffe2-builds'
-def uploadBasePath = 'caffe2-packages'
+def uploadCondaBasePath = 'caffe2-conda-packages'
+def uploadPipBasePath = 'caffe2-pip-packages'
 
 folder(buildBasePath) {
   description 'Jobs for all Caffe2 build environments'
@@ -739,7 +740,7 @@ Images.macOsBuildEnvironments.each {
     def _buildBasePath = "${buildBasePath}"
     def _buildSuffix = "build"
     if (makeACondaUploadBuild) {
-      _buildBasePath = "${uploadBasePath}"
+      _buildBasePath = "${uploadCondaBasePath}"
       _buildSuffix = "build-upload"
     }
 
@@ -753,7 +754,7 @@ Images.macOsBuildEnvironments.each {
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
         if (makeACondaUploadBuild) {
-          ParametersUtil.UPLOAD_TO_CONDA(delegate)
+          ParametersUtil.UPLOAD_PACKAGE(delegate)
           ParametersUtil.CONDA_PACKAGE_NAME(delegate)
         }
       }
@@ -953,28 +954,29 @@ sccache --show-stats
 // Following definitions and jobs build using conda-build and then upload the
 // packages to Anaconda.org
 //
-folder(uploadBasePath) {
+folder(uploadCondaBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'
+}
+folder(uploadPipBasePath) {
+  description 'Jobs for nightly uploads of Pip packages'
 }
 
 Images.dockerCondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
   def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
-
-  // Every build environment has its own Docker image
   def dockerImage = { tag ->
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
   }
 
-  job("${uploadBasePath}/${buildEnvironment}-build-upload") {
+  job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_TO_CONDA(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.CONDA_PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
@@ -999,11 +1001,7 @@ Images.dockerCondaBuildEnvironments.each {
 
       def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
-        // 'native' indicates to let the nvidia runtime figure out which
-        // version of CUDA to use. This is only possible when using the
-        // nvidia/cuda Docker images.
         cudaVersion = 'native';
-
         // Populate CUDA and cuDNN versions in case we're building pytorch too,
         // which expects these variables to be set
         def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
@@ -1025,15 +1023,74 @@ set -ex
 
 git submodule update --init --recursive
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
-  # TODO don't know if this actually works yet
   package_name="--name $CONDA_PACKAGE_NAME"
+fi
+if [[ -n $SLIM ]]; then
+  slim="--slim"
 fi
 
 # All conda build logic should be in scripts/build_anaconda.sh
-if [[ -n $SLIM ]]; then
-  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name --slim
-else
-  PATH=/opt/conda/bin:$PATH ./scripts/build_anaconda.sh $package_name
+# TODO move lang vars into Dockerfile
+PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.sh $package_name $slim
+'''
+    }
+  }
+}
+
+Images.dockerPipBuildEnvironments.each {
+  // Capture variable for delayed evaluation
+  def buildEnvironment = it
+  def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
+  def dockerImage = { tag ->
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
+  }
+
+  job("${uploadPipBasePath}/${buildEnvironment}-build-upload") {
+    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.PACKAGE_VERSION(delegate)
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+      environmentVariables {
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      }
+
+      def cudaVersion = ''
+      if (buildEnvironment.contains('cuda')) {
+        cudaVersion = 'native';
+        // Populate CUDA and cuDNN versions in case we're building pytorch too,
+        // which expects these variables to be set
+        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
+        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
+        environmentVariables {
+          env('CUDA_VERSION', cudaVer[0][1])
+          env('CUDNN_VERSION', cudnnVer[0][1])
+        }
+      }
+
+      DockerUtil.shell context: delegate,
+              image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              cudaVersion: cudaVersion,
+              workspaceSource: "host-mount",
+              script: '''
+set -ex
+git submodule update --init --recursive
+
+export PATH=/opt/conda/bin:$PATH
+conda install -y setuptools wheel twine
+
+# Build package
+PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel
+if [[ -n $UPLOAD_PACKAGE ]]; then
+  twine upload dist/* -u jesse.hellemn -p TemporaryCaffe2Password
 fi
 '''
     }
@@ -1041,7 +1098,7 @@ fi
 }
 
 // Nightly job to upload conda packages. This job just triggers the above builds
-// every night with UPLOAD_TO_CONDA set to 1
+// every night with UPLOAD_PACKAGE set to 1
 multiJob("nightly-conda-package-upload") {
   JobUtil.commonTrigger(delegate)
   JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
@@ -1050,7 +1107,7 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
-    ParametersUtil.UPLOAD_TO_CONDA(delegate, true)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
     ParametersUtil.CONDA_PACKAGE_NAME(delegate)
   }
   triggers {
@@ -1063,7 +1120,7 @@ multiJob("nightly-conda-package-upload") {
 
     phase("Build") {
       def definePhaseJob = { name ->
-        phaseJob("${uploadBasePath}/${name}-build-upload") {
+        phaseJob("${uploadCondaBasePath}/${name}-build-upload") {
           parameters {
             currentBuild()
             propertiesFile(gitPropertiesFile)

@@ -112,6 +112,9 @@ class Images {
 
     // Caffe2 setup.py builds
     baseImageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
+    
+    // Caffe2 pip builds
+    baseImageOf.put("conda2-pip-ubuntu16.04", "conda2-ubuntu16.04")
 
     // Verify that all docker images (values) in the map are valid
     for (String baseImage : baseImageOf.values()) {
@@ -131,6 +134,14 @@ class Images {
     dockerCondaBuildEnvironments = allDockerBuildEnvironments
         .stream()
         .filter { buildEnv -> buildEnv.startsWith("conda") }
+        .collect()
+  }
+
+  static final Collection<String> dockerPipBuildEnvironments;
+  static {
+    dockerPipBuildEnvironments = allDockerBuildEnvironments
+        .stream()
+        .filter { buildEnv -> buildEnv.contains("pip") }
         .collect()
   }
 

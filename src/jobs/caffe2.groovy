@@ -1091,6 +1091,9 @@ set -ex
 git submodule update --init --recursive
 
 export PATH=/opt/conda/bin:$PATH
+
+# Create a new env so that we can update conda without elevated permissions
+conda create -yn pip && source activate pip
 conda install -y setuptools wheel twine
 
 # Build package

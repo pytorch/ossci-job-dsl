@@ -82,6 +82,9 @@ class Images {
     'py3.6-clang3.8-rocm1.8.2-ubuntu16.04',
 
     'py2-clang5.0-rocmnightly-ubuntu16.04',
+
+    'py2-clang5.0-rocmdeb-ubuntu16.04',
+    'py3.6-clang5.0-rocmdeb-ubuntu16.04',
   ];
 
   /////////////////////////////////////////////////////////////////////////////

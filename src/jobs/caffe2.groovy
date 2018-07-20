@@ -754,7 +754,7 @@ Images.macOsBuildEnvironments.each {
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
         if (makeACondaUploadBuild) {
-          ParametersUtil.UPLOAD_TO_CONDA(delegate)
+          ParametersUtil.UPLOAD_PACKAGE(delegate)
           ParametersUtil.CONDA_PACKAGE_NAME(delegate)
         }
       }
@@ -976,7 +976,7 @@ Images.dockerCondaBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_TO_CONDA(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.CONDA_PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
@@ -1038,12 +1038,7 @@ PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.s
 }
 
 Images.dockerPipBuildEnvironments.each {
-  // Capture variable for delayed evaluation
   def buildEnvironment = it
-  def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
-  def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
-  }
 
   job("${uploadPipBasePath}/${buildEnvironment}-build-upload") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
@@ -1052,8 +1047,7 @@ Images.dockerPipBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_TO_CONDA(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.PACKAGE_VERSION(delegate)
     }
 
@@ -1071,6 +1065,7 @@ Images.dockerPipBuildEnvironments.each {
       }
 
       def cudaVersion = ''
+      def cudaNoDot = '80'
       if (buildEnvironment.contains('cuda')) {
         cudaVersion = 'native';
         // Populate CUDA and cuDNN versions in case we're building pytorch too,
@@ -1081,15 +1076,19 @@ Images.dockerPipBuildEnvironments.each {
           env('CUDA_VERSION', cudaVer[0][1])
           env('CUDNN_VERSION', cudnnVer[0][1])
         }
+        if (cudaVer.contains('1')) {
+          cudaNoDot = '91'
+        } else if (cudaVer.contains('9')) {
+          cudaNoDot = '90'
+        }
       }
 
       DockerUtil.shell context: delegate,
-              image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: cudaVersion,
               workspaceSource: "host-mount",
               script: '''
 set -ex
-git submodule update --init --recursive
 
 # Setup SCCACHE
 ###############################################################################
@@ -1126,19 +1125,11 @@ export CACHE_WRAPPER_DIR="$PWD/sccache"
 # CMake must find these wrapper scripts
 export PATH="$CACHE_WRAPPER_DIR:$PATH"
 
-# Set up python env and build
-###############################################################################
-export PATH=/opt/conda/bin:$PATH
-
-# Create a new env so that we can update conda without elevated permissions
-conda create -yn pip && source activate pip
-conda install -y setuptools wheel twine numpy pyyaml
-
 # Build package
 sccache --show-stats
-PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel
+./build.sh
 sccache --show-stats
-if [[ -n $UPLOAD_TO_CONDA ]]; then
+if [[ -n $UPLOAD_PACKAGE ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 
@@ -1148,7 +1139,7 @@ fi
 }
 
 // Nightly job to upload conda packages. This job just triggers the above builds
-// every night with UPLOAD_TO_CONDA set to 1
+// every night with UPLOAD_PACKAGE set to 1
 multiJob("nightly-conda-package-upload") {
   JobUtil.commonTrigger(delegate)
   JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
@@ -1157,7 +1148,7 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
-    ParametersUtil.UPLOAD_TO_CONDA(delegate, true)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
     ParametersUtil.CONDA_PACKAGE_NAME(delegate)
   }
   triggers {

@@ -56,10 +56,10 @@ class ParametersUtil {
     }
   }
 
-  static void UPLOAD_TO_CONDA(BuildParametersContext context, defaultValue = false) {
+  static void UPLOAD_PACKAGE(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(
-          'UPLOAD_TO_CONDA',
+          'UPLOAD_PACKAGE',
           defaultValue,
           "Check this to upload the finished package to the public"
       )

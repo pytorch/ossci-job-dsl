@@ -1042,7 +1042,7 @@ Images.dockerPipBuildEnvironments.each {
 
   job("${uploadPipBasePath}/${buildEnvironment}-build-upload") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)

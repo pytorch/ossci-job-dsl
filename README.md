@@ -17,10 +17,13 @@ If this is your first time, see "Getting setup".
   this is your docker image.  (If the tag is `###-####`, it comes with
   a build of your source; if it's `###` that's the stock image.)
 - Run `aws ecr get-login` with your AWS credentials to get your Docker
-  login command.  Run this command to login.  (If you get the
-  error `unknown shorthand flag: 'e' in -e`, try deleting `-e none` from
-  the command line.
-- Run `docker run -it $DOCKER_IMAGE`
+  login command.  Run this command to login.
+    + Use `pip install awscli` to install AWS CLI.
+    + You may need to configure the region first using `aws configure`.
+      Our region is `us-east-1`.
+    + If you get the error `unknown shorthand flag: 'e' in -e`, try 
+      deleting `-e none` from the command line.
+- Run `docker run -it $DOCKER_IMAGE /bin/bash`
 
 Try prepending sudo if you get the `permission denied` error for the docker commands
 (and later figure out why your user doesn't have permissions to connect

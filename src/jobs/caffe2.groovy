@@ -754,7 +754,7 @@ Images.macOsBuildEnvironments.each {
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
         if (makeACondaUploadBuild) {
-          ParametersUtil.UPLOAD_PACKAGE(delegate)
+          ParametersUtil.UPLOAD_TO_CONDA(delegate)
           ParametersUtil.CONDA_PACKAGE_NAME(delegate)
         }
       }
@@ -976,7 +976,7 @@ Images.dockerCondaBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_PACKAGE(delegate)
+      ParametersUtil.UPLOAD_TO_CONDA(delegate)
       ParametersUtil.CONDA_PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
@@ -1052,7 +1052,7 @@ Images.dockerPipBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_PACKAGE(delegate)
+      ParametersUtil.UPLOAD_TO_CONDA(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.PACKAGE_VERSION(delegate)
     }
@@ -1138,7 +1138,7 @@ conda install -y setuptools wheel twine numpy pyyaml
 sccache --show-stats
 PYTORCH_DEV_VERSION=$PACKAGE_VERSION FULL_CAFFE2=1 python setup.py sdist bdist_wheel
 sccache --show-stats
-if [[ -n $UPLOAD_PACKAGE ]]; then
+if [[ -n $UPLOAD_TO_CONDA ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 
@@ -1148,7 +1148,7 @@ fi
 }
 
 // Nightly job to upload conda packages. This job just triggers the above builds
-// every night with UPLOAD_PACKAGE set to 1
+// every night with UPLOAD_TO_CONDA set to 1
 multiJob("nightly-conda-package-upload") {
   JobUtil.commonTrigger(delegate)
   JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
@@ -1157,7 +1157,7 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
-    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
+    ParametersUtil.UPLOAD_TO_CONDA(delegate, true)
     ParametersUtil.CONDA_PACKAGE_NAME(delegate)
   }
   triggers {

@@ -40,7 +40,7 @@ def buildEnvironments = [
   "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // NB: This image is taken from Caffe2
-  "py2-clang3.8-rocmnightly-ubuntu16.04",
+  "py2-clang5.0-rocmdeb-ubuntu16.04",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.

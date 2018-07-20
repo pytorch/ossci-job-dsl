@@ -151,9 +151,9 @@ multiJob("pytorch-master") {
   masterJobSettings(delegate, "pytorch/pytorch", "master", mailRecipients)
 }
 
-multiJob("rocm-pytorch-master") {
-  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-master", rocmMailRecipients)
-}
+//multiJob("rocm-pytorch-master") {
+//  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-master", rocmMailRecipients)
+//}
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {

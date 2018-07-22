@@ -240,9 +240,9 @@ Images.allDockerBuildEnvironments.each {
         // prefixes (rare, but possible).
         def builtImagePrefix = ''
         if (runTests) {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-${BUILD_ID}'
+          builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-${GIT_COMMIT}'
         } else {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-${BUILD_ID}'
+          builtImageTag = '${DOCKER_IMAGE_TAG}-build-${GIT_COMMIT}'
         }
 
         // Set these variables so they propagate to the publishers below.
@@ -434,7 +434,7 @@ git status
 
       stringParam(
         'DOCKER_COMMIT_TAG',
-        '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
+        '${DOCKER_IMAGE_TAG}-adhoc-${GIT_COMMIT}',
         "Tag of the Docker image to commit and push upon completion " +
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )

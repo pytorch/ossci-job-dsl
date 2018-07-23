@@ -257,9 +257,9 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     }
 
     steps {
-      def builtImageTag = '${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
-      def caffe2BuiltImageTag = '${CAFFE2_DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
-      def builtImageId = '${GIT_COMMIT}'
+      def builtImageTag = '${DOCKER_IMAGE_TAG}-${BUILD_ID}'
+      def caffe2BuiltImageTag = '${CAFFE2_DOCKER_IMAGE_TAG}-${BUILD_ID}'
+      def builtImageId = '${BUILD_ID}'
 
       if (buildEnvironment.contains("docker")) {
         phase("Build and Test") {

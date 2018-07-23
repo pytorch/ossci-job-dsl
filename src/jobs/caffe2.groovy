@@ -239,10 +239,11 @@ Images.allDockerBuildEnvironments.each {
         // means we have to use different tags, or we risk conflicting
         // prefixes (rare, but possible).
         def builtImagePrefix = ''
+        def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
         if (runTests) {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-${BUILD_ID}'
+          builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-' + gitCommitSanitized
         } else {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-${BUILD_ID}'
+          builtImageTag = '${DOCKER_IMAGE_TAG}-build-' + gitCommitSanitized
         }
 
         // Set these variables so they propagate to the publishers below.
@@ -432,9 +433,10 @@ git status
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
+      def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
       stringParam(
         'DOCKER_COMMIT_TAG',
-        '${DOCKER_IMAGE_TAG}-adhoc-${BUILD_ID}',
+        '${DOCKER_IMAGE_TAG}-adhoc-' + gitCommitSanitized,
         "Tag of the Docker image to commit and push upon completion " +
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )

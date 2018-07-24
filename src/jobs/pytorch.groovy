@@ -54,7 +54,7 @@ def isRocmBuild = { buildEnvironment ->
   return buildEnvironment.contains("rocm")
 }
 
-def docEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
+def docAndTutorialEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def splitTestEnvironments = [
   "pytorch-macos-10.13-py3",
@@ -129,8 +129,8 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
               // Checkout this exact same revision in downstream builds.
               gitRevision()
               propertiesFile(gitPropertiesFile)
-              // Only pytorch/pytorch master gets documentation pushes
-              booleanParam('DOC_PUSH', repo == "pytorch/pytorch")
+              // Only pytorch/pytorch master gets documentation and tutorial pushes
+              booleanParam('DOC_AND_TUTORIAL_PUSH', repo == "pytorch/pytorch")
               predefinedProp('COMMIT_SOURCE', commitSource)
               predefinedProp('GITHUB_REPO', repo)
             }
@@ -250,9 +250,9 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       )
 
       booleanParam(
-        'DOC_PUSH',
+        'DOC_AND_TUTORIAL_PUSH',
         false,
-        'Whether to doc push or not',
+        'Whether to push doc and tutorial or not',
       )
     }
 
@@ -332,12 +332,21 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               }
             }
           }
-          if (buildEnvironment == docEnvironment) {
+          if (buildEnvironment == docAndTutorialEnvironment) {
             phaseJob("${buildBasePath}/doc-push") {
               parameters {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
                 predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-                predefinedProp('DOC_PUSH', '${DOC_PUSH}')
+                predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
+                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+              }
+              PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
+            }
+            phaseJob("${buildBasePath}/tutorial-push") {
+              parameters {
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
+                predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
                 predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               }
               PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
@@ -446,7 +455,7 @@ exit 0
   }
 
 
-  if (buildEnvironment == docEnvironment) {
+  if (buildEnvironment == docAndTutorialEnvironment) {
     job("${buildBasePath}/doc-push") {
       JobUtil.common delegate, 'docker && cpu'
       // Explicitly disable concurrent build because this job is racy.
@@ -456,7 +465,7 @@ exit 0
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         booleanParam(
-          'DOC_PUSH',
+          'DOC_AND_TUTORIAL_PUSH',
           false,
           'Whether to doc push or not',
         )
@@ -487,7 +496,7 @@ exit 0
                 script: '''
 set -ex
 
-if [ "${DOC_PUSH:-true}" == "false" ]; then
+if [ "${DOC_AND_TUTORIAL_PUSH:-true}" == "false" ]; then
   echo "Skipping doc push..."
   exit 0
 fi
@@ -532,9 +541,97 @@ git status
       // copy pasting!
       publishers {
         git {
-          // TODO: This has the race in the no-op case with DOC_PUSH=false. Oops.
+          // TODO: This has the race in the no-op case with DOC_AND_TUTORIAL_PUSH=false. Oops.
           pushOnlyIfSuccess()
           branch('origin', 'master')
+        }
+      }
+    }
+
+    job("${buildBasePath}/tutorial-push") {
+      JobUtil.common delegate, 'docker && gpu'
+      JobUtil.timeoutAndFailAfter(delegate, 300)
+      // Explicitly disable concurrent build because this job is racy.
+      concurrentBuild(false)
+      parameters {
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+        ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+        booleanParam(
+          'DOC_AND_TUTORIAL_PUSH',
+          false,
+          'Whether to tutorial push or not',
+        )
+      }
+      scm {
+        git {
+          remote {
+            github('goodlux/tutorials', 'ssh')
+            credentials('pytorchbot')
+          }
+          branch('origin/master')
+          GitUtil.defaultExtensions(delegate)
+        }
+      }
+      steps {
+        // TODO: delete me after BUILD_ENVIRONMENT baked into docker image
+        environmentVariables {
+          env(
+            'BUILD_ENVIRONMENT',
+            "${buildEnvironment}",
+          )
+        }
+
+        // TODO: Move this script into repository somewhere
+        DockerUtil.shell context: delegate,
+                image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+                workspaceSource: "host-mount",
+                script: '''
+set -ex
+
+if [ "${DOC_AND_TUTORIAL_PUSH:-true}" == "false" ]; then
+  echo "Skipping tutorial push..."
+  exit 0
+fi
+
+sudo apt-get update
+sudo apt-get install -y --no-install-recommends unzip
+
+export PATH=/opt/conda/bin:$PATH
+# pillow >= 4.2 will throw error when trying to write mode RGBA as JPEG,
+# this is a workaround to the issue.
+conda install -y sphinx pandas pillow=4.1.1
+pip install sphinx-gallery sphinx_rtd_theme tqdm
+
+git clone https://github.com/pytorch/vision --quiet
+pushd vision
+pip install . --no-deps  # We don't want it to install the stock PyTorch version from pip
+popd
+
+make docs
+TMP_DIR=`mktemp -d`
+cp -r docs/ $TMP_DIR
+
+git clean -xdf
+git checkout -- .
+git checkout gh-pages
+rm -rf ./*
+mv $TMP_DIR/* .
+rm -rf $TMP_DIR
+
+git add -A || true
+git config user.email "soumith+bot@pytorch.org"
+git config user.name "pytorchbot"
+git commit -m "Automated tutorials push" || true
+git status
+'''
+      }
+      // WARNING WARNING WARNING: This block is unusual!  Look twice before
+      // copy pasting!
+      publishers {
+        git {
+          // TODO: This has the race in the no-op case with DOC_AND_TUTORIAL_PUSH=false. Oops.
+          pushOnlyIfSuccess()
+          branch('origin', 'gh-pages')
         }
       }
     }

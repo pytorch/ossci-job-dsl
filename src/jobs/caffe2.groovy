@@ -241,9 +241,9 @@ Images.allDockerBuildEnvironments.each {
         def builtImagePrefix = ''
         def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
         if (runTests) {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-test-' + gitCommitSanitized
+          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-test-' + gitCommitSanitized
         } else {
-          builtImageTag = '${DOCKER_IMAGE_TAG}-build-' + gitCommitSanitized
+          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-' + gitCommitSanitized
         }
 
         // Set these variables so they propagate to the publishers below.
@@ -436,7 +436,7 @@ git status
       def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
       stringParam(
         'DOCKER_COMMIT_TAG',
-        '${DOCKER_IMAGE_TAG}-adhoc-' + gitCommitSanitized,
+        'tmp-${DOCKER_IMAGE_TAG}-adhoc-' + gitCommitSanitized,
         "Tag of the Docker image to commit and push upon completion " +
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )

@@ -258,8 +258,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
     steps {
       def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
-      def builtImageTag = '${DOCKER_IMAGE_TAG}-' + gitCommitSanitized
-      def caffe2BuiltImageTag = '${CAFFE2_DOCKER_IMAGE_TAG}-' + gitCommitSanitized
+      def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-' + gitCommitSanitized
+      def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-' + gitCommitSanitized
       def builtImageId = gitCommitSanitized
 
       if (buildEnvironment.contains("docker")) {

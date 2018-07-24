@@ -69,10 +69,13 @@ def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
+  // If image tag contains '/', we need to replace it with '-'
+  def tag_sanitized = tag.replace("/", "-")
+  def caffe2_tag_sanitized = caffe2_tag.replace("/", "-")
   if (isRocmBuild(staticBuildEnv)) {
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag_sanitized}"
   }
-  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag_sanitized}"
 }
 
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
@@ -257,10 +260,9 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     }
 
     steps {
-      def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
-      def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-' + gitCommitSanitized
-      def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-' + gitCommitSanitized
-      def builtImageId = gitCommitSanitized
+      def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
+      def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
+      def builtImageId = '${GIT_COMMIT}'
 
       if (buildEnvironment.contains("docker")) {
         phase("Build and Test") {

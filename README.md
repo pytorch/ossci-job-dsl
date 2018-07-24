@@ -13,8 +13,8 @@ See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra).
 If this is your first time, see "Getting setup".
 
 - Search for `docker pull` in your build log and search for something
-  like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:173-5910`;
-  this is your docker image.  (If the tag is `###-####`, it comes with
+  like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:tmp-173-5910`;
+  this is your docker image.  (If the tag is `tmp-###-####`, it comes with
   a build of your source; if it's `###` that's the stock image.)
 - Run `aws ecr get-login` with your AWS credentials to get your Docker
   login command.  Run this command to login.

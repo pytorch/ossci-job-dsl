@@ -239,11 +239,10 @@ Images.allDockerBuildEnvironments.each {
         // means we have to use different tags, or we risk conflicting
         // prefixes (rare, but possible).
         def builtImagePrefix = ''
-        def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
         if (runTests) {
-          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-test-' + gitCommitSanitized
+          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-test-${GIT_COMMIT}'
         } else {
-          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-' + gitCommitSanitized
+          builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-build-${GIT_COMMIT}'
         }
 
         // Set these variables so they propagate to the publishers below.
@@ -433,10 +432,9 @@ git status
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
-      def gitCommitSanitized = '${GIT_COMMIT}'.replace("/", "-")
       stringParam(
         'DOCKER_COMMIT_TAG',
-        'tmp-${DOCKER_IMAGE_TAG}-adhoc-' + gitCommitSanitized,
+        'tmp-${DOCKER_IMAGE_TAG}-adhoc-${GIT_COMMIT}',
         "Tag of the Docker image to commit and push upon completion " +
           "(${buildEnvironment}:DOCKER_COMMIT_TAG)",
       )
@@ -968,7 +966,9 @@ Images.dockerCondaBuildEnvironments.each {
   def buildEnvironment = it
   def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
   def dockerImage = { tag ->
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
+    // If image tag contains '/', we need to replace it with '-'
+    def tag_sanitized = tag.replace("/", "-")
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag_sanitized}"
   }
 
   job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {

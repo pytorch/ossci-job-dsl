@@ -69,13 +69,10 @@ def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
-  // If image tag contains '/', we need to replace it with '-'
-  def tag_sanitized = tag.replace("/", "-")
-  def caffe2_tag_sanitized = caffe2_tag.replace("/", "-")
   if (isRocmBuild(staticBuildEnv)) {
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag_sanitized}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
   }
-  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag_sanitized}"
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
 }
 
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"

@@ -967,8 +967,7 @@ Images.dockerCondaBuildEnvironments.each {
   def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
   def dockerImage = { tag ->
     // If image tag contains '/', we need to replace it with '-'
-    def tag_sanitized = tag.replace("/", "-")
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag_sanitized}"
+    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
   }
 
   job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {

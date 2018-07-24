@@ -39,6 +39,16 @@ retry () {
     $*  || (sleep 1 && $*) || (sleep 2 && $*) || (sleep 4 && $*) || (sleep 8 && $*)
 }
 
+# We need to replace "<PREFIX>:tmp-226-origin/master" with "<PREFIX>:tmp-226-origin-master",
+# so that docker won't complain when pulling / commiting this image
+sanitize_image_tag () {
+  UNSANITIZED_IMAGE=$1
+  UNSANITIZED_IMAGE_arr=(${UNSANITIZED_IMAGE//:/ })
+  IMAGE_PREFIX=${UNSANITIZED_IMAGE_arr[0]}
+  IMAGE_TAG_SANITIZED=$(echo ${UNSANITIZED_IMAGE_arr[1]}  | sed -e 's/\\//-/g')
+  SANITIZED_IMAGE=${IMAGE_PREFIX}:${IMAGE_TAG_SANITIZED}
+}
+
 case "$WORKSPACE_SOURCE" in
   host-mount)
     echo "Mounting host workspace into Docker image"
@@ -68,6 +78,9 @@ if [ -z "${DOCKER_IMAGE:-}" ]; then
   echo "Please set the DOCKER_IMAGE environment variable..."
   exit 1
 fi
+
+sanitize_image_tag ${DOCKER_IMAGE}
+DOCKER_IMAGE=${SANITIZED_IMAGE}
 
 # TODO: Get rid of this (may need to adjust build scripts)
 export -p | sed -e '/ DOCKER_IMAGE=/d' -e '/ PWD=/d' -e '/ PATH=/d' > ./env
@@ -179,6 +192,9 @@ fi
 ) | docker exec -u jenkins -i "$id" bash
 
 if [ -n "${COMMIT_DOCKER_IMAGE:-}" ]; then
+    sanitize_image_tag ${COMMIT_DOCKER_IMAGE}
+    COMMIT_DOCKER_IMAGE=${SANITIZED_IMAGE}
+
     echo "Committing container state to ${COMMIT_DOCKER_IMAGE}..."
     docker commit "$id" "${COMMIT_DOCKER_IMAGE}" > "$output"
     retry docker push "${COMMIT_DOCKER_IMAGE}" > "$output"

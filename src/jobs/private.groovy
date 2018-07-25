@@ -1,6 +1,7 @@
 import static ossci.caffe2.DockerVersion.version as caffe2DockerImageTag
 import static ossci.pytorch.DockerVersion.version as pyTorchDockerImageTag
 import static ossci.tensorcomp.DockerVersion.version as tensorcompDockerImageTag
+import static ossci.translate.DockerVersion.version as translateDockerImageTag
 import ossci.DockerUtil
 
 def buildBasePath = 'private'
@@ -13,9 +14,10 @@ def ignoreTags = [
   'caffe2': caffe2DockerImageTag,
   'pytorch': pyTorchDockerImageTag,
   'tensorcomp': tensorcompDockerImageTag,
+  'translate': translateDockerImageTag,
 ]
 
-['caffe2', 'pytorch', 'tensorcomp'].each {
+['caffe2', 'pytorch', 'tensorcomp', 'translate'].each {
   def project = it
 
   job("${buildBasePath}/docker-registry-cleanup-${project}") {

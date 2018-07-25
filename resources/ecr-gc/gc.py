@@ -4,6 +4,7 @@ import argparse
 import datetime
 import boto3
 import pytz
+import sys
 
 
 def repos(client):
@@ -48,6 +49,25 @@ parser.add_argument('--ignore-tags',
                     default="",
                     help="Never cleanup these tags (comma separated)")
 args = parser.parse_args()
+
+if not args.ignore_tags or not args.filter_prefix:
+    print('''
+Missing required arguments --ignore-tags and --filter-prefix
+
+You must specify --ignore-tags and --filter-prefix to avoid accidentally
+pruning a stable Docker tag which is being actively used.  This will
+make you VERY SAD.  So pay attention.
+
+First, which filter-prefix do you want?  The list of valid prefixes
+is in jobs/private.groovy under the 'docker-registry-cleanup' job.
+You probably want either pytorch or caffe2.
+
+Second, which ignore-tags do you want?  It should be whatever the most
+up-to-date DockerVersion for the repository in question is.  Follow
+the imports of jobs/pytorch.groovy to find them.
+''')
+    sys.exit(1)
+
 client = boto3.client('ecr', region_name='us-east-1')
 stable_window = datetime.timedelta(days=args.keep_stable_days)
 unstable_window = datetime.timedelta(days=args.keep_unstable_days)

@@ -55,6 +55,13 @@ now = datetime.datetime.now(pytz.UTC)
 ignore_tags = args.ignore_tags.split(',')
 
 
+def chunks(chunkable, n):
+    """ Yield successive n-sized chunks from l.
+    """
+    for i in range(0, len(chunkable), n):
+        yield chunkable[i:i+n]
+
+
 for repo in repos(client):
     repositoryName = repo['repositoryName']
     if not repositoryName.startswith(args.filter_prefix):
@@ -92,11 +99,14 @@ for repo in repos(client):
 
 
     # Issue batch delete for all images to delete for this repository
-    if len(digest_to_delete) > 0:
+    # Note that as of 2018-07-25, the maximum number of images you can
+    # delete in a single batch is 100, so chunk our list into batches of
+    # 100
+    for c in chunks(digest_to_delete, 100):
         client.batch_delete_image(
             registryId='308535385114',
             repositoryName=repositoryName,
             imageIds = [
-                { 'imageDigest': digest } for digest in digest_to_delete
+                { 'imageDigest': digest } for digest in c
             ],
         )

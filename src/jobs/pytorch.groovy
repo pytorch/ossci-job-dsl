@@ -376,7 +376,12 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   if (buildEnvironment.contains('linux') || isRocmBuild(buildEnvironment)) {
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common delegate, 'docker && cpu'
+    if (isRocmBuild(buildEnvironment)) {
+      // ROCm builds OOM with only 4G of RAM.  We need more.
+      JobUtil.common delegate, 'docker && bigcpu'
+    } else {
+      JobUtil.common delegate, 'docker && cpu'
+    }
     JobUtil.timeoutAndFailAfter(delegate, 300)
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 

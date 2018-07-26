@@ -26,6 +26,14 @@ def pullRequestJobSettings = { context, repo ->
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
     steps {
       def gitPropertiesFile = './git.properties'
 
@@ -89,6 +97,13 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
 
       ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
+    }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
     }
 
     steps {
@@ -167,6 +182,13 @@ multiJob("caffe2-master-doc") {
     cron('@daily')
   }
 
+  wrappers {
+    // This is needed so that Jenkins knows to hide these strings in all the console outputs
+    credentialsBinding {
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
   steps {
     phase("Build and Push") {
       phaseJob("${buildBasePath}/${docEnvironment}-doc") {
@@ -222,6 +244,13 @@ Images.allDockerBuildEnvironments.each {
 
         if (runTests) {
           ParametersUtil.HYPOTHESIS_SEED(delegate)
+        }
+      }
+
+      wrappers {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
         }
       }
 
@@ -326,6 +355,12 @@ Images.allDockerBuildEnvironments.each {
         }
       }
 
+      wrappers {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+        }
+      }
 
       steps {
         GitUtil.mergeStep(delegate)
@@ -442,6 +477,13 @@ git status
       ParametersUtil.CMAKE_ARGS(delegate)
     }
 
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
     steps {
       GitUtil.mergeStep(delegate)
 
@@ -553,6 +595,13 @@ fi
       ParametersUtil.HYPOTHESIS_SEED(delegate)
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+    }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
     }
 
     steps {
@@ -689,6 +738,13 @@ Images.macOsBuildEnvironments.each {
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
       }
 
+      wrappers {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+        }
+      }
+
       steps {
         def gitPropertiesFile = './git.properties'
 
@@ -762,6 +818,10 @@ Images.macOsBuildEnvironments.each {
       wrappers {
         credentialsBinding {
           usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
+        }
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
         }
       }
 
@@ -878,6 +938,13 @@ Images.windowsBuildEnvironments.each {
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
     }
 
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
     steps {
       def gitPropertiesFile = './git.properties'
       GitUtil.mergeStep(delegate)
@@ -904,6 +971,13 @@ Images.windowsBuildEnvironments.each {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+    }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
     }
 
     steps {
@@ -985,6 +1059,10 @@ Images.dockerCondaBuildEnvironments.each {
       credentialsBinding {
         usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
       }
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
     }
 
     steps {
@@ -1050,15 +1128,15 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.PACKAGE_VERSION(delegate)
     }
 
-      wrappers {
-        credentialsBinding {
-          usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
-        }
-        // This is needed so that Jenkins knows to hide these strings in all the console outputs
-        credentialsBinding {
-          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-        }
+    wrappers {
+      credentialsBinding {
+        usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
       }
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
 
     steps {
       GitUtil.mergeStep(delegate)
@@ -1156,6 +1234,14 @@ multiJob("nightly-conda-package-upload") {
   triggers {
     cron('@daily')
   }
+
+  wrappers {
+    // This is needed so that Jenkins knows to hide these strings in all the console outputs
+    credentialsBinding {
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
   steps {
     def gitPropertiesFile = './git.properties'
     GitUtil.mergeStep(delegate)

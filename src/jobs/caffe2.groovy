@@ -1054,6 +1054,10 @@ Images.dockerPipBuildEnvironments.each {
         credentialsBinding {
           usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
         }
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+        }
       }
 
     steps {

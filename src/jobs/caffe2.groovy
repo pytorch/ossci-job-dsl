@@ -840,13 +840,12 @@ fi
 if [ "${BUILD_IOS:-0}" -eq 1 ]; then
   scripts/build_ios.sh
 elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
-  if [ -n "$CONDA_PACKAGE_NAME" ]; then
-    # TODO don't know if this actually works yet
-    package_name="--name $CONDA_PACKAGE_NAME"
-  fi
-
   # All conda build logic should be in scripts/build_anaconda.sh
-  scripts/build_anaconda.sh $package_name
+  if [ -n "$CONDA_PACKAGE_NAME" ]; then
+    scripts/build_anaconda.sh --name "$CONDA_PACKAGE_NAME"
+  else
+    scripts/build_anaconda.sh
+  fi
 else
   scripts/build_local.sh
 fi
@@ -1021,7 +1020,6 @@ Images.dockerCondaBuildEnvironments.each {
               workspaceSource: "host-mount",
               script: '''
 set -ex
-
 git submodule update --init --recursive
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
   package_name="--name $CONDA_PACKAGE_NAME"
@@ -1150,7 +1148,6 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
-    ParametersUtil.CONDA_PACKAGE_NAME(delegate)
   }
   triggers {
     cron('@daily')

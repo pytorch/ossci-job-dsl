@@ -111,9 +111,12 @@ class Images {
 
     // Caffe2 setup.py builds
     baseImageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
-    
+
     // Caffe2 pip builds
     baseImageOf.put("conda2-pip-ubuntu16.04", "conda2-ubuntu16.04")
+
+    // environment that is used to run pytorch->onnx->caffe2 integration tests
+    baseImageOf.put("onnx-py2-gcc5-ubuntu16.04", "py2-gcc5-ubuntu16.04")
 
     // Verify that all docker images (values) in the map are valid
     for (String baseImage : baseImageOf.values()) {
@@ -185,7 +188,7 @@ class Images {
     'py2-mkl-ubuntu16.04',
 
     // Vanilla Ubuntu 16.04 (Python 2/3)
-    'py2-gcc5-ubuntu16.04',
+    'onnx-py2-gcc5-ubuntu16.04',
     //'py3-gcc5-ubuntu16.04',
 
     // Vanilla Ubuntu 14.04
@@ -254,7 +257,7 @@ class Images {
   // Integrated environments
   /////////////////////////////////////////////////////////////////////////////
   static final List<String> integratedEnvironments = [
-      'py2-gcc5-ubuntu16.04',
+      'onnx-py2-gcc5-ubuntu16.04',
       // 'py3.6-gcc5-ubuntu16.04',
       'conda2-integrated-macos10.13',
       "conda2-integrated-ubuntu16.04",

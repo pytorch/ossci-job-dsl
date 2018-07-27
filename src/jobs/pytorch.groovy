@@ -129,8 +129,8 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
               // Checkout this exact same revision in downstream builds.
               gitRevision()
               propertiesFile(gitPropertiesFile)
-              // Only pytorch/pytorch master gets documentation and tutorial pushes
-              booleanParam('DOC_AND_TUTORIAL_PUSH', repo == "pytorch/pytorch")
+              // Only pytorch/pytorch master gets documentation pushes
+              booleanParam('DOC_PUSH', repo == "pytorch/pytorch")
               predefinedProp('COMMIT_SOURCE', commitSource)
               predefinedProp('GITHUB_REPO', repo)
             }
@@ -250,9 +250,9 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       )
 
       booleanParam(
-        'DOC_AND_TUTORIAL_PUSH',
+        'DOC_PUSH',
         false,
-        'Whether to push doc and tutorial or not',
+        'Whether to push doc or not',
       )
     }
 
@@ -337,22 +337,11 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               parameters {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
                 predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-                predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
+                predefinedProp('DOC_PUSH', '${DOC_PUSH}')
                 predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               }
               PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
             }
-            // ezyang: doesn't work well with autoscaling, since
-            // concurrency is disabled
-            //phaseJob("${buildBasePath}/tutorial-push") {
-            //  parameters {
-            //    predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-            //    predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-            //    predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
-            //    predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
-            //  }
-            //  PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
-            //}
           }
           if (buildEnvironment == perfTestEnvironment) {
             // yf225: CPU perf test is flaky
@@ -472,7 +461,7 @@ exit 0
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         booleanParam(
-          'DOC_AND_TUTORIAL_PUSH',
+          'DOC_PUSH',
           false,
           'Whether to doc push or not',
         )
@@ -503,7 +492,7 @@ exit 0
                 script: '''
 set -ex
 
-if [ "${DOC_AND_TUTORIAL_PUSH:-true}" == "false" ]; then
+if [ "${DOC_PUSH:-true}" == "false" ]; then
   echo "Skipping doc push..."
   exit 0
 fi
@@ -548,7 +537,7 @@ git status
       // copy pasting!
       publishers {
         git {
-          // TODO: This has the race in the no-op case with DOC_AND_TUTORIAL_PUSH=false. Oops.
+          // TODO: This has the race in the no-op case with DOC_PUSH=false. Oops.
           pushOnlyIfSuccess()
           branch('origin', 'master')
         }
@@ -564,7 +553,7 @@ git status
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         booleanParam(
-          'DOC_AND_TUTORIAL_PUSH',
+          'DOC_PUSH',
           false,
           'Whether to tutorial push or not',
         )
@@ -595,7 +584,7 @@ git status
                 script: '''
 set -ex
 
-if [ "${DOC_AND_TUTORIAL_PUSH:-true}" == "false" ]; then
+if [ "${DOC_PUSH:-true}" == "false" ]; then
   echo "Skipping tutorial push..."
   exit 0
 fi
@@ -636,7 +625,7 @@ git status
       // copy pasting!
       publishers {
         git {
-          // TODO: This has the race in the no-op case with DOC_AND_TUTORIAL_PUSH=false. Oops.
+          // TODO: This has the race in the no-op case with DOC_PUSH=false. Oops.
           pushOnlyIfSuccess()
           branch('origin', 'gh-pages')
         }
@@ -1121,3 +1110,81 @@ fi
     }
   } // if (buildEnvironment.contains("win"))
 } // buildEnvironments.each
+
+multiJob("pytorch-tutorial-push") {
+  delegate.with {
+    JobUtil.masterTrigger(delegate, "pytorch/pytorch", "master")
+    parameters {
+      ParametersUtil.RUN_DOCKER_ONLY(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    }
+    steps {
+      def gitPropertiesFile = './git.properties'
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      phase("Master jobs") {
+        phaseJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
+          parameters {
+            // Pass parameters of this job
+            currentBuild()
+            // Checkout this exact same revision in downstream builds.
+            gitRevision()
+            propertiesFile(gitPropertiesFile)
+            predefinedProp('COMMIT_SOURCE', "master")
+            predefinedProp('GITHUB_REPO', "pytorch/pytorch")
+          }
+        }
+      }
+    }
+    publishers {
+      mailer(mailRecipients, false, true)
+    }
+  }
+}
+
+multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
+  JobUtil.commonTrigger(delegate)
+
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    ParametersUtil.COMMIT_SOURCE(delegate)
+    ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+  }
+
+  steps {
+    def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
+    def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
+    def builtImageId = '${GIT_COMMIT}'
+
+    phase("Build") {
+      phaseJob("${buildBasePath}/${docAndTutorialEnvironment}-build") {
+        parameters {
+          currentBuild()
+          predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+          predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+          predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
+          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
+          predefinedProp('DOCKER_IMAGE_COMMIT_TAG', builtImageTag)
+          predefinedProp('CAFFE2_DOCKER_IMAGE_COMMIT_TAG', caffe2BuiltImageTag)
+          predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+          predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+        }
+      }
+    }
+    phase("Test and Push") {
+      phaseJob("${buildBasePath}/tutorial-push") {
+        parameters {
+          predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
+          predefinedProp('DOC_PUSH', '${DOC_PUSH}')
+          predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+        }
+        PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
+      }
+    } // phase("Test and Push")
+  } // steps
+} // multiJob("${buildBasePath}/pytorch-tutorial-push-trigger")

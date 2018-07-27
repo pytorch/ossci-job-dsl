@@ -10,8 +10,14 @@ See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra).
 
 ### Cheat sheet
 
-If this is your first time, see "Getting setup".
-
+- Get the public access key and secret access key at https://fb.quip.com/oAX3ApaV35jU
+  (Facebook employees only).  If you're a non-Facebook employee, talk
+  to @ezyang about getting access.
+- Use them as username/password for `aws ecr get-login`
+  (our region is `us-east-1`).
+  The aws command comes with awscli; see https://aws.amazon.com/cli/
+  for more guidance.  Once you've done this step once, you no longer
+  need to do it again for that computer.
 - Search for `docker pull` in your build log and search for something
   like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:tmp-173-5910`;
   this is your docker image.  (If the tag is `tmp-###-####`, it comes with
@@ -28,7 +34,7 @@ If this is your first time, see "Getting setup".
 Try prepending sudo if you get the `permission denied` error for the docker commands
 (and later figure out why your user doesn't have permissions to connect
 to the Docker socket; maybe you need to add yourself to the docker
-group).
+group and reboot).
 
 Want to run a Docker image on a GPU?  Standard issue devgpus don't
 allow use of Docker, so you will have to either (1) run docker
@@ -40,31 +46,6 @@ do this last minute.
 
 Want to know more about what Docker images are available? See
 "Available docker images."
-
-### Getting setup
-
-You will need to get authorized for the docker registry.  Contact
-@ezyang, @pietern or @pmenglund for authorization.
-
-For the admins:
-
-- Create a new user for the person in IAM
-- Issue them an access key, and send it to them
-
-You'll get an access key like AKIABLAHBLAHBLAH and a longer secret
-access key.  Use them as username/password for `aws ecr get-login`
-(our region is `us-east-1`).
-The aws command comes with awscli; see https://aws.amazon.com/cli/
-for more guidance.
-
-You are ready now; go to the "cheat sheet"
-
-By the way, to log into AWS Console itself (not useful for pulling
-a Docker image, but maybe you want to know), go to
-https://console.aws.amazon.com/console/home?region=us-east-1
-and type 'caffe2' (no quotes) into the text box and click "Next".
-This will take you to the true login window where you can type
-in your username and password.
 
 ### Available Docker images
 
@@ -87,12 +68,12 @@ and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-t
 
 ### Advanced tricks
 
-**Summary for CPU:**
+**Summary for gdb-enabled CPU:**
 
     ssh ubuntu@$CPU_HOST
     docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i $DOCKER_IMAGE /bin/bash
 
-**Summary for NVIDIA/CUDA GPU**
+**Summary for gdb-enabled NVIDIA/CUDA GPU**
 
     ssh ubuntu@$GPU_HOST
     docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i --runtime=nvidia -e CUDA_VERSION=8 -e NVIDIA_VISIBLE_DEVICES=all $DOCKER_IMAGE /bin/bash
@@ -102,20 +83,18 @@ and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-t
     ssh -p $AMD_PORT $AMD_USERNAME@$AMD_HOST
     docker run --device=/dev/kfd --device=/dev/dri --group-add video -it $DOCKER_IMAGE /bin/bash
 
-(Please get in contact with @Jorghi12, @bddppq or @ezyang if you need
-access to an AMD host.  This should only be necessary if you actually
+Get credentials for an AMD GPU machine at https://fb.quip.com/Luj5AQjlH11U
+This should only be necessary if you actually
 plan to run tests on an AMD GPU; if you are debugging build failures,
-any old host is OK.)
+any old host is OK, though make sure you have 16G of RAM (at least).
 
 **What is my CPU/GPU HOST?**
 
 - If you don't need the exact same hardware, you can run these commands
   on any machine that has Docker
-- Look in [ssh config in pietern/ossci-infra](https://github.com/pietern/ossci-infra/blob/master/etc/ssh_config),
-  which has working cached IP addresses for CPU Linux and OS X
-  (GPU Linux is not working as we move to elastic).  You'll need
-  your public keys on the machines.
-- The canonical information about all our running instances can be found
+- There are some AWS dev machines which can be used.  This particular
+  author likes to use ec2-52-90-201-109.compute-1.amazonaws.com
+  The canonical information about all our running instances can be found
   on [AWS console](https://console.aws.amazon.com/ec2/v2/home?&region=us-east-1#Instances:sort=desc:tag:Name);
   you'll need a login under the 'caffe2' account, ask @pietern for
   access.
@@ -171,16 +150,10 @@ one.
 
 ### Mac OS X
 
-OS X builds are not containerized.  To SSH into an OS X machine, run:
-
-    ssh administrator@208.52.182.75
-    ssh administrator@208.52.182.225
-
-If these IP addresses do not work, here is some more canonical
-information:
-
-- Look in [ssh config in pietern/ossci-infra](https://github.com/pietern/ossci-infra/blob/master/etc/ssh_config).
-- Check the [AWS console](https://console.aws.amazon.com/ec2/v2/home?&region=us-east-1#Instances:sort=desc:tag:Name)
+OS X builds are not containerized.  You probably have a Macbook;
+first try reproducing locally.  Otherwise, see https://fb.quip.com/FIDAOAi7r2A
+for canonical information about our OS X workers. (Facebook employees
+only).
 
 Changes you make to these machines affect everyone, so please be careful.
 
@@ -202,11 +175,6 @@ here is how we structure our jobs:
   Docker images.  These images are uploaded to
   `registry.pytorch.org/pytorch`.  Every new built Docker image gets a new
   tag, which is a sequentially incrementing number.
-
-    * Docker builds are layered; for example, we will image an
-      Ubuntu Xenial image, and then on top of it, build both CUDA 8 and
-      CUDA 9 images, and then on top of those, build Python 2 and
-      Python 3 images.
 
     * After a Docker build completes, we test and make sure that master
       of PyTorch builds with the new image (in case changes in the image
@@ -233,11 +201,6 @@ here is how we structure our jobs:
 
 * There are also miscellaneous cronjobs for cleaning old Docker images
   from the registry and the local builders.
-
-## Common job DSL gotchas
-
-* Essentially *all* jobs should have `concurrentBuild()` set.  Don't
-  forget it, or your builds may queue up.
 
 ## File structure
 

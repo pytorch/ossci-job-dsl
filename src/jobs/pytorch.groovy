@@ -1113,6 +1113,9 @@ fi
 
 multiJob("pytorch-tutorial-push") {
   delegate.with {
+    throttleConcurrentBuilds {
+      maxTotal(1)
+    }
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
@@ -1143,11 +1146,6 @@ multiJob("pytorch-tutorial-push") {
 
 multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
   JobUtil.commonTrigger(delegate)
-
-  throttleConcurrentBuilds {
-    throttleDisabled(false)
-    maxTotal(1)
-  }
 
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)

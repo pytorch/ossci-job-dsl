@@ -56,6 +56,9 @@ docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --ignore-tags ${ignoreTags[project]}
 """
     }
+    publishers {
+      mailer('ezyang@fb.com', false, false)
+    }
   }
 }
 

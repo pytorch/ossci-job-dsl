@@ -1145,6 +1145,7 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
   JobUtil.commonTrigger(delegate)
 
   throttleConcurrentBuilds {
+    throttleDisabled(false)
     maxTotal(1)
   }
 

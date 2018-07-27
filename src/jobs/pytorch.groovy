@@ -342,15 +342,17 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
               }
               PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
             }
-            phaseJob("${buildBasePath}/tutorial-push") {
-              parameters {
-                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-                predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
-                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
-              }
-              PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
-            }
+            // ezyang: doesn't work well with autoscaling, since
+            // concurrency is disabled
+            //phaseJob("${buildBasePath}/tutorial-push") {
+            //  parameters {
+            //    predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+            //    predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
+            //    predefinedProp('DOC_AND_TUTORIAL_PUSH', '${DOC_AND_TUTORIAL_PUSH}')
+            //    predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+            //  }
+            //  PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
+            //}
           }
           if (buildEnvironment == perfTestEnvironment) {
             // yf225: CPU perf test is flaky

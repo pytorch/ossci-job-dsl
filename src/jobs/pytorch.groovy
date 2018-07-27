@@ -1113,9 +1113,7 @@ fi
 
 multiJob("pytorch-tutorial-push") {
   delegate.with {
-    JobUtil.masterTrigger(delegate, "pytorch/pytorch", "master")
     parameters {
-      ParametersUtil.RUN_DOCKER_ONLY(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     }

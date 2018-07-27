@@ -1143,6 +1143,7 @@ multiJob("pytorch-tutorial-push") {
 
 multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
   JobUtil.commonTrigger(delegate)
+  concurrentBuild(false)
 
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)

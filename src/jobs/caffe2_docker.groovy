@@ -18,6 +18,11 @@ multiJob("caffe2-docker-trigger") {
     )
   }
 
+  triggers {
+    // Refresh the docker image on a weekly basis
+    cron('@weekly')
+  }
+
   steps {
     phase("Build images") {
       Images.dockerBaseImages.each {

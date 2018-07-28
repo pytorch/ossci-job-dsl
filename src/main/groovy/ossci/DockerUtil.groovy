@@ -169,7 +169,7 @@ fi
 
 # The docker images used for pip-packages have no user
 if [ -z "$NO_JENKINS_USER" ]; then
-  jenkins_user=-u jenkins
+  jenkins_user="-u jenkins"
 fi
 
 # I found the only way to make the command below return the proper

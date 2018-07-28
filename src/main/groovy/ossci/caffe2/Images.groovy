@@ -112,9 +112,6 @@ class Images {
     // Caffe2 setup.py builds
     baseImageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
 
-    // Caffe2 pip builds
-    baseImageOf.put("conda2-pip-ubuntu16.04", "conda2-ubuntu16.04")
-
     // environment that is used to run pytorch->onnx->caffe2 integration tests
     baseImageOf.put("onnx-py2-gcc5-ubuntu16.04", "py2-gcc5-ubuntu16.04")
 
@@ -134,17 +131,46 @@ class Images {
   static final Collection<String> dockerCondaBuildEnvironments;
   static {
     dockerCondaBuildEnvironments = allDockerBuildEnvironments
+          .stream()
+          .filter { buildEnv -> buildEnv.startsWith("conda") }
+          .collect();
+  }
+
+  // Pip packages
+  static final List<String> pipCudaVersions = [
+    "", "-cuda80", "-cuda90", "-cuda91"
+  ];
+  static final List<String> pipPythonVersions = [
+    "cp27-cp27m",
+    "cp27-cp27mu",
+    "cp35-cp35m",
+    "cp36-cp65m",
+    "cp37-cp37m",
+  ];
+  static final Collection<String> pipNoPlatform;
+  static {
+    pipNoPlatform = pipPythonVersions
         .stream()
-        .filter { buildEnv -> buildEnv.startsWith("conda") }
-        .collect()
+        .map { pyVer -> "pip-" + pyVer }
+        .flatMap { pipPy -> pipCudaVersions.stream().map { cudaTag -> pipPy + cudaTag } }
+        .collect();
   }
 
   static final Collection<String> dockerPipBuildEnvironments;
   static {
-    dockerPipBuildEnvironments = allDockerBuildEnvironments
+    dockerPipBuildEnvironments = pipNoPlatform
         .stream()
-        .filter { buildEnv -> buildEnv.contains("pip") }
-        .collect()
+        .map { pipJob -> pipJob + "-linux" }
+        .collect();
+  }
+
+  static final Collection<String> macPipBuildEnvironments;
+  static {
+    macPipBuildEnvironments = pipNoPlatform
+        .stream()
+        .filter { buildEnv -> !buildEnv.contains("cuda") }
+        .map { buildEnv -> buildEnv + "-macos10.13" }
+        .collect();
   }
 
 

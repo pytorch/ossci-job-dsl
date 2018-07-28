@@ -167,6 +167,11 @@ if [ "$IMPORT_ENV" == 1 ]; then
     docker cp $WORKSPACE/env "$id:/var/lib/jenkins/workspace/env"
 fi
 
+# The docker images used for pip-packages have no user
+if [ -z "$NO_JENKINS_USER" ]; then
+  jenkins_user=-u jenkins
+fi
+
 # I found the only way to make the command below return the proper
 # exit code is by splitting run and exec. Executing run directly
 # doesn't propagate a non-zero exit code properly.
@@ -189,7 +194,7 @@ fi
 
     # Use everything below the '####' as script to run
     sed -n '/^####/ { s///; :a; n; p; ba; }' "${BASH_SOURCE[0]}"
-) | docker exec -u jenkins -i "$id" bash
+) | docker exec $jenkins_user -i "$id" bash
 
 if [ -n "${COMMIT_DOCKER_IMAGE:-}" ]; then
     sanitize_image_tag ${COMMIT_DOCKER_IMAGE}
@@ -217,6 +222,7 @@ exit 0
         env('WORKSPACE_SOURCE', attrs.getOrDefault("workspaceSource", "host-mount"))
         env('COPY_WORKSPACE', attrs.getOrDefault("copyWorkspace", ""))
         env('IMPORT_ENV', attrs.getOrDefault("importEnv", 1))
+        env('NO_JENKINS_USER', attrs.getOrDefault("noJenkinsUser", ""))
       }
 
       // If we're using Amazon ECR then we can't use fixed credentials

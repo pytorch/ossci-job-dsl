@@ -528,9 +528,6 @@ cmake_args=()
 cmake_args+=("$CMAKE_ARGS")
 
 if [[ $BUILD_ENVIRONMENT == *aten* ]]; then
-  # TODO this is needed until docker version is bumped, but that is blocked on
-  # master tests that are currently failing
-  sudo pip install pyyaml
   cmake_args+=("-DBUILD_ATEN=ON")
 fi
 
@@ -1145,71 +1142,37 @@ Images.dockerPipBuildEnvironments.each {
         env('SCCACHE_BUCKET', 'ossci-compiler-cache',)
       }
 
-      def cudaVersion = ''
-      def cudaNoDot = '80'
+      // cpu builds on 80
+      def cudaVersion = '80'
       if (buildEnvironment.contains('cuda')) {
         cudaVersion = 'native';
-        // Populate CUDA and cuDNN versions in case we're building pytorch too,
-        // which expects these variables to be set
-        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
-        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
-        environmentVariables {
-          env('CUDA_VERSION', cudaVer[0][1])
-          env('CUDNN_VERSION', cudnnVer[0][1])
-        }
-        if (cudaVer.contains('1')) {
-          cudaNoDot = '91'
-        } else if (cudaVer.contains('9')) {
-          cudaNoDot = '90'
-        }
+        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
+        cudaVersion = cudaVer[0][1]
       }
 
+      // One python version per machine
+      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+      environmentVariables {
+        env('DESIRED_PYTHON', pyVersion[0][1])
+      }
+
+
       DockerUtil.shell context: delegate,
-              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
+              image: "soumith/manylinux-cuda${cudaVersion}:latest",
               cudaVersion: cudaVersion,
               workspaceSource: "host-mount",
+              noJenkinsUser: "true",
               script: '''
 set -ex
 
-# Setup SCCACHE
-###############################################################################
-# Ensure jenkins can write to the ccache root dir
-sudo chown jenkins:jenkins "${HOME}/.ccache"
+// Remove all python versions except the one that we want
+// Need to escape backslash for groovy
+pushd /opt/python
+find . -maxdepth 1 \\! -name "${DESIRED_PYTHON}" -exec rm -rf '{}' \\;
+popd
 
-mkdir -p ./sccache
-
-SCCACHE="$(which sccache)"
-if [ -z "${SCCACHE}" ]; then
-  echo "Unable to find sccache..."
-  exit 1
-fi
-
-# Setup wrapper scripts
-for compiler in cc c++ gcc g++ x86_64-linux-gnu-gcc; do
-  (
-    echo "#!/bin/sh"
-    echo "exec $SCCACHE $(which $compiler) \"\$@\""
-  ) > "./sccache/$compiler"
-  chmod +x "./sccache/$compiler"
-done
-
-if [[ "${BUILD_ENVIRONMENT}" == *-cuda* ]]; then
-  (
-    echo "#!/bin/sh"
-    echo "exec $SCCACHE $(which nvcc) \"\$@\""
-  ) > "./sccache/nvcc"
-  chmod +x "./sccache/nvcc"
-fi
-
-export CACHE_WRAPPER_DIR="$PWD/sccache"
-
-# CMake must find these wrapper scripts
-export PATH="$CACHE_WRAPPER_DIR:$PATH"
-
-# Build package
-sccache --show-stats
-./build.sh
-sccache --show-stats
+// Build the wheel for this one python version
+./manywheel/build.sh
 if [[ -n $UPLOAD_PACKAGE ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi

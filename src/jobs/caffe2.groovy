@@ -1236,7 +1236,7 @@ multiJob("nightly-conda-package-upload") {
 
 multiJob("nightly-pip-package-upload") {
   JobUtil.commonTrigger(delegate)
-  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)

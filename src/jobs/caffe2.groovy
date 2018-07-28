@@ -1233,3 +1233,50 @@ multiJob("nightly-conda-package-upload") {
     }
   }
 }
+
+multiJob("nightly-pip-package-upload") {
+  JobUtil.commonTrigger(delegate)
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
+    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
+  }
+  triggers {
+    cron('@daily')
+  }
+
+  wrappers {
+    // This is needed so that Jenkins knows to hide these strings in all the console outputs
+    credentialsBinding {
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
+  steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.mergeStep(delegate)
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+    phase("Build") {
+      def definePhaseJob = { name ->
+        phaseJob("${uploadPipBasePath}/${name}-build-upload") {
+          parameters {
+            currentBuild()
+            propertiesFile(gitPropertiesFile)
+          }
+        }
+      }
+
+      Images.macPipBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+
+      assert 'pip-cp27-cp27m-cuda90-linux' in Images.dockerPipBuildEnvironments
+      Images.dockerPipBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+    }
+  }
+}

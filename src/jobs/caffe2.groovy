@@ -1137,12 +1137,8 @@ Images.dockerPipBuildEnvironments.each {
 
     steps {
       GitUtil.mergeStep(delegate)
-      environmentVariables {
-        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-        env('SCCACHE_BUCKET', 'ossci-compiler-cache',)
-      }
 
-      // cpu builds on 80
+      // cpu builds on Dockerfile-cuda80
       def cudaNoDot = '80'
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
@@ -1152,6 +1148,8 @@ Images.dockerPipBuildEnvironments.each {
       // One python version per machine
       def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
       environmentVariables {
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+        env('SCCACHE_BUCKET', 'ossci-compiler-cache',)
         env('DESIRED_PYTHON', pyVersion[0][1])
       }
 
@@ -1164,6 +1162,38 @@ Images.dockerPipBuildEnvironments.each {
               script: '''
 set -ex
 
+# Setup SCCACHE
+###############################################################################
+curl https://s3.amazonaws.com/ossci-linux/sccache -o /usr/local/bin/sccache
+chmod a+x /usr/local/bin/sccache
+
+SCCACHE="$(which sccache)"
+if [ -z "${SCCACHE}" ]; then
+  echo "Unable to find sccache..."
+  exit 1
+fi
+
+sccache_dir="$PWD/sccache"
+mkdir -p "$sccache_dir"
+
+# List of compilers to use sccache on.
+declare -a compilers=("cc" "c++" "gcc" "g++" "x86_64-linux-gnu-gcc" "nvcc")
+
+# Setup wrapper scripts
+for compiler in "${compilers[@]}"; do
+  (
+    echo "#!/bin/sh"
+    echo "exec $SCCACHE $(which $compiler) \"\$@\""
+  ) > "$sccache_dir/$compiler"
+  chmod +x "$sccache_dir/$compiler"
+done
+
+# CMake must find these wrapper scripts
+export CACHE_WRAPPER_DIR="$sccache_dir"
+export PATH="$CACHE_WRAPPER_DIR:$PATH"
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
 # Remove all python versions except the one that we want
 # Need to escape backslash for groovy
 pushd /opt/python
@@ -1171,7 +1201,11 @@ find . -maxdepth 1 \\! -name "${DESIRED_PYTHON}" -exec rm -rf '{}' \\;
 popd
 
 # Build the wheel for this one python version
-./manywheel/build.sh
+if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
+  ./manywheel/build.sh
+else
+  ./manywheel/build_cpu.sh
+fi
 if [[ -n $UPLOAD_PACKAGE ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi

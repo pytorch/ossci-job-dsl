@@ -1243,9 +1243,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
   }
-  triggers {
-    cron('@daily')
-  }
 
   wrappers {
     // This is needed so that Jenkins knows to hide these strings in all the console outputs

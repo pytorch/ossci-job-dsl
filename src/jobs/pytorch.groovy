@@ -603,17 +603,19 @@ pushd vision
 pip install . --no-deps  # We don't want it to install the stock PyTorch version from pip
 popd
 
-make docs
-TMP_DIR=`mktemp -d`
-cp -r docs/ $TMP_DIR
-
-git clean -f env
-git clean -xdf __pycache__
+git clean -xdf
+git checkout -- .
 git checkout gh-pages
-rm -rf ./*
-mv $TMP_DIR/* .
-rm -rf $TMP_DIR
 
+git clone https://github.com/goodlux/tutorials_repo.git --quiet
+pushd tutorials_repo
+make docs
+popd
+
+mv tutorials_repo/* ./
+rm -rf tutorials_repo
+
+git status
 git add -A || true
 git config user.email "soumith+bot@pytorch.org"
 git config user.name "pytorchbot"

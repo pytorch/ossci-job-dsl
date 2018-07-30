@@ -1143,11 +1143,10 @@ Images.dockerPipBuildEnvironments.each {
       }
 
       // cpu builds on 80
-      def cudaVersion = '80'
+      def cudaNoDot = '80'
       if (buildEnvironment.contains('cuda')) {
-        cudaVersion = 'native';
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
-        cudaVersion = cudaVer[0][1]
+        cudaNoDot = cudaVer[0][1]
       }
 
       // One python version per machine
@@ -1158,20 +1157,20 @@ Images.dockerPipBuildEnvironments.each {
 
 
       DockerUtil.shell context: delegate,
-              image: "soumith/manylinux-cuda${cudaVersion}:latest",
-              cudaVersion: cudaVersion,
+              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
+              cudaVersion: 'native',
               workspaceSource: "host-mount",
               noJenkinsUser: "true",
               script: '''
 set -ex
 
-// Remove all python versions except the one that we want
-// Need to escape backslash for groovy
+# Remove all python versions except the one that we want
+# Need to escape backslash for groovy
 pushd /opt/python
 find . -maxdepth 1 \\! -name "${DESIRED_PYTHON}" -exec rm -rf '{}' \\;
 popd
 
-// Build the wheel for this one python version
+# Build the wheel for this one python version
 ./manywheel/build.sh
 if [[ -n $UPLOAD_PACKAGE ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD

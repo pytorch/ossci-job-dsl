@@ -1160,7 +1160,7 @@ Images.dockerPipBuildEnvironments.each {
               image: "soumith/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: 'native',
               workspaceSource: "host-mount",
-              noJenkinsUser: "true",
+              usePipDockers: "true",
               script: '''
 set -ex
 

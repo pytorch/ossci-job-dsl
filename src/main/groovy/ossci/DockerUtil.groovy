@@ -131,6 +131,13 @@ if [[ $(/bin/hostname) == *-rocm-* ]]; then
   docker_args+=" --device=/dev/kfd --device=/dev/dri --group-add video"
 fi
 
+# The docker images used for pip-packages have no user and need --ipc=host
+if [ -n "$USE_PIP_DOCKERS" ]; then
+  docker_args+=" --ipc=host"
+else
+  jenkins_user="-u jenkins"
+fi
+
 # Image
 docker_args+=" ${DOCKER_IMAGE}"
 
@@ -165,11 +172,6 @@ fi
 if [ "$IMPORT_ENV" == 1 ]; then
     # Copy in the env file
     docker cp $WORKSPACE/env "$id:/var/lib/jenkins/workspace/env"
-fi
-
-# The docker images used for pip-packages have no user
-if [ -z "$NO_JENKINS_USER" ]; then
-  jenkins_user="-u jenkins"
 fi
 
 # I found the only way to make the command below return the proper
@@ -222,7 +224,7 @@ exit 0
         env('WORKSPACE_SOURCE', attrs.getOrDefault("workspaceSource", "host-mount"))
         env('COPY_WORKSPACE', attrs.getOrDefault("copyWorkspace", ""))
         env('IMPORT_ENV', attrs.getOrDefault("importEnv", 1))
-        env('NO_JENKINS_USER', attrs.getOrDefault("noJenkinsUser", ""))
+        env('USE_PIP_DOCKERS', attrs.getOrDefault("usePipDockers", ""))
       }
 
       // If we're using Amazon ECR then we can't use fixed credentials

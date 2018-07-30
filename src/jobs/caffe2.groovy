@@ -1183,7 +1183,7 @@ declare -a compilers=("cc" "c++" "gcc" "g++" "x86_64-linux-gnu-gcc" "nvcc")
 for compiler in "${compilers[@]}"; do
   (
     echo "#!/bin/sh"
-    echo "exec $SCCACHE $(which $compiler) \"\$@\""
+    echo "exec $SCCACHE $(which $compiler) \\"\\$@\\""
   ) > "$sccache_dir/$compiler"
   chmod +x "$sccache_dir/$compiler"
 done

@@ -607,8 +607,8 @@ make docs
 TMP_DIR=`mktemp -d`
 cp -r docs/ $TMP_DIR
 
-git clean -xdf
-git checkout -- .
+git clean -f env
+git clean -xdf __pycache__
 git checkout gh-pages
 rm -rf ./*
 mv $TMP_DIR/* .

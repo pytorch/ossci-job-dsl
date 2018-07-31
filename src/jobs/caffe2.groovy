@@ -1149,7 +1149,6 @@ Images.dockerPipBuildEnvironments.each {
       def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
       environmentVariables {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-        env('SCCACHE_BUCKET', 'ossci-compiler-cache',)
         env('DESIRED_PYTHON', pyVersion[0][1])
       }
 
@@ -1161,38 +1160,6 @@ Images.dockerPipBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
-
-# Setup SCCACHE
-###############################################################################
-curl https://s3.amazonaws.com/ossci-linux/sccache -o /usr/local/bin/sccache
-chmod a+x /usr/local/bin/sccache
-
-SCCACHE="$(which sccache)"
-if [ -z "${SCCACHE}" ]; then
-  echo "Unable to find sccache..."
-  exit 1
-fi
-
-sccache_dir="$PWD/sccache"
-mkdir -p "$sccache_dir"
-
-# List of compilers to use sccache on.
-declare -a compilers=("cc" "c++" "gcc" "g++" "x86_64-linux-gnu-gcc" "nvcc")
-
-# Setup wrapper scripts
-for compiler in "${compilers[@]}"; do
-  (
-    echo "#!/bin/sh"
-    echo "exec $SCCACHE $(which $compiler) \\"\\$@\\""
-  ) > "$sccache_dir/$compiler"
-  chmod +x "$sccache_dir/$compiler"
-done
-
-# CMake must find these wrapper scripts
-export CACHE_WRAPPER_DIR="$sccache_dir"
-export PATH="$CACHE_WRAPPER_DIR:$PATH"
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
 
 # Remove all python versions except the one that we want
 # Need to escape backslash for groovy

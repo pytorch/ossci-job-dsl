@@ -612,7 +612,7 @@ pushd tutorials_repo
 make docs
 popd
 
-mv tutorials_repo/* ./
+cp -r tutorials_repo/* ./
 rm -rf tutorials_repo
 rm -rf vision
 

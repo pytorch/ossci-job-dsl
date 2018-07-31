@@ -612,9 +612,10 @@ pushd tutorials_repo
 make docs
 popd
 
-cp -r tutorials_repo/* ./
-rm -rf tutorials_repo
 rm -rf vision
+
+cp -r tutorials_repo/_build/html/* ./
+rm -rf tutorials_repo
 
 git status
 git add -A || true

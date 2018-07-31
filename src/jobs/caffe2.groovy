@@ -1160,14 +1160,6 @@ Images.dockerPipBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
-
-# Remove all python versions except the one that we want
-# Need to escape backslash for groovy
-pushd /opt/python
-find . -maxdepth 1 \\! -name "${DESIRED_PYTHON}" -exec rm -rf '{}' \\;
-popd
-
-# Build the wheel for this one python version
 if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
   ./manywheel/build.sh
 else

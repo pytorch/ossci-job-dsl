@@ -614,6 +614,7 @@ popd
 
 mv tutorials_repo/* ./
 rm -rf tutorials_repo
+rm -rf vision
 
 git status
 git add -A || true

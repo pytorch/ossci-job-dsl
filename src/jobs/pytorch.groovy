@@ -607,7 +607,7 @@ git clean -xdf
 git checkout -- .
 git checkout gh-pages
 
-git clone https://github.com/goodlux/tutorials_repo.git --quiet
+git clone https://github.com/goodlux/tutorials tutorials_repo
 pushd tutorials_repo
 make docs
 popd

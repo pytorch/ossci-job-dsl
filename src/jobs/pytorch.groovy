@@ -1142,7 +1142,7 @@ multiJob("pytorch-tutorial-push") {
     }
     publishers {
       mailer(mailRecipients, false, true)
-      downstream('pytorch-tutorial-push', 'SUCCESS')
+      downstream('pytorch-tutorial-push', 'FAILURE')
     }
   }
 }

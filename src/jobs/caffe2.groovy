@@ -1165,7 +1165,7 @@ if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
 else
   ./manywheel/build_cpu.sh
 fi
-if [[ -n $UPLOAD_PACKAGE ]]; then
+if [[ $UPLOAD_PACKAGE == true ]]; then
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 

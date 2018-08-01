@@ -610,11 +610,12 @@ git checkout gh-pages
 git clone https://github.com/goodlux/tutorials tutorials_repo
 pushd tutorials_repo
 make docs
+ls
 popd
 
 rm -rf vision
 
-cp -r tutorials_repo/_build/html/* ./
+cp -r tutorials_repo/docs/* ./
 rm -rf tutorials_repo
 
 git status

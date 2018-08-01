@@ -138,7 +138,7 @@ class Images {
 
   // Pip packages
   static final List<String> pipCudaVersions = [
-    "", "-cuda80", "-cuda90", "-cuda91"
+    "", "-cuda80", "-cuda90", "-cuda92"
   ];
   static final List<String> pipPythonVersions = [
     "cp27-cp27m",

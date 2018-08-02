@@ -670,6 +670,12 @@ git checkout gh-pages
 
 git clone https://github.com/goodlux/tutorials tutorials_repo
 pushd tutorials_repo
+
+# yf225 debug: disable buggy tutorials
+rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
+rm advanced_source/numpy_extensions_tutorial.py
+rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
+
 make docs
 popd
 

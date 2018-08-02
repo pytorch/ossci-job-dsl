@@ -651,7 +651,7 @@ if [ "${DOC_PUSH:-true}" == "false" ]; then
 fi
 
 sudo apt-get update
-sudo apt-get install -y --no-install-recommends unzip
+sudo apt-get install -y --no-install-recommends unzip p7zip-full
 
 export PATH=/opt/conda/bin:$PATH
 # pillow >= 4.2 will throw error when trying to write mode RGBA as JPEG,
@@ -671,11 +671,20 @@ git checkout gh-pages
 git clone https://github.com/goodlux/tutorials tutorials_repo
 pushd tutorials_repo
 
+# Download dataset for beginner_source/dcgan_faces_tutorial.py
+curl https://s3.amazonaws.com/pytorch-datasets/img_align_celeba.zip --output img_align_celeba.zip
+sudo mkdir -p /home/ubuntu/facebook/datasets/celeba
+sudo chmod -R 0777 /home/ubuntu/facebook/datasets/celeba
+7z x img_align_celeba.zip -o/home/ubuntu/facebook/datasets/celeba > null
+
+# Download dataset for beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
+mkdir data/
+curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
+
 # yf225 debug: disable buggy tutorials
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
 rm advanced_source/numpy_extensions_tutorial.py
 rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
-rm beginner_source/dcgan_faces_tutorial.py
 
 make docs
 popd

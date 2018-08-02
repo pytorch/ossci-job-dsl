@@ -9,11 +9,12 @@ import ossci.EmailUtil
 import ossci.pytorch.Users
 import ossci.pytorch.DockerVersion
 import ossci.caffe2.DockerVersion as Caffe2DockerVersion
+import ossci.caffe2.Images as Caffe2Images
 
 def buildBasePath = 'pytorch-builds'
 
 folder(buildBasePath) {
-  description 'Jobs for all PyTorch build environments'
+  description 'Jobs for all PyTorch and Caffe2 build environments'
 }
 
 // Build environments for PyTorch
@@ -107,13 +108,15 @@ if (manager.build.result.toString().contains("FAILURE")) {
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
-def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
+def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commitSource, localMailRecipients ->
   context.with {
-    JobUtil.masterTrigger(delegate, repo, "master")
+    JobUtil.masterTrigger(delegate, repo, "master", triggerOnPush)
     parameters {
       ParametersUtil.RUN_DOCKER_ONLY(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+      ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
+      ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
     steps {
       def gitPropertiesFile = './git.properties'
@@ -139,6 +142,27 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
             }
           }
         }
+        def definePhaseJob = { name ->
+          phaseJob("${buildBasePath}/${name}") {
+            parameters {
+              // Checkout this exact same revision in downstream builds.
+              gitRevision()
+              predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
+              predefinedProp('GITHUB_REPO', repo)
+              propertiesFile(gitPropertiesFile)
+              // Pass parameters of this job
+              currentBuild()
+            }
+          }
+        }
+
+        Caffe2Images.buildAndTestEnvironments.each {
+          definePhaseJob(it + "-trigger-test")
+        }
+
+        Caffe2Images.buildOnlyEnvironments.each {
+          definePhaseJob(it + "-trigger-build")
+        }
       }
     }
     publishers {
@@ -148,12 +172,20 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
 }
 
 multiJob("pytorch-master") {
-  masterJobSettings(delegate, "pytorch/pytorch", "master", mailRecipients)
+  masterJobSettings(delegate, "pytorch/pytorch", true, '-DCUDA_ARCH_NAME=All', "master", mailRecipients)
 }
 
 //multiJob("rocm-pytorch-master") {
 //  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-master", rocmMailRecipients)
 //}
+
+// Runs on debug build on master (triggered nightly)
+multiJob("caffe2-master-debug") {
+  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
+  triggers {
+    cron('@daily')
+  }
+}
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {
@@ -161,6 +193,8 @@ def pullRequestJobSettings = { context, repo, commitSource ->
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+      ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
     steps {
       def gitPropertiesFile = './git.properties'
@@ -173,6 +207,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
       }
 
       phase("Build and test") {
+        // PyTorch
         buildEnvironments.each {
           phaseJob("${buildBasePath}/${it}-trigger") {
             parameters {
@@ -185,8 +220,34 @@ def pullRequestJobSettings = { context, repo, commitSource ->
               // Ensure consistent merge behavior in downstream builds.
               propertiesFile(gitPropertiesFile)
             }
-            PhaseJobUtil.condition(delegate, '(${PYTORCH_CHANGED} == 1)')
           }
+        }
+
+        // Caffe2
+        def definePhaseJob = { name, caffe2_only ->
+          phaseJob("${buildBasePath}/${name}") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // override DOCKER_IMAGE_TAG
+              predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
+              predefinedProp('GITHUB_REPO', repo)
+              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              // Ensure consistent merge behavior in downstream builds.
+              propertiesFile(gitPropertiesFile)
+            }
+          }
+        }
+
+        Caffe2Images.buildAndTestEnvironments.each {
+          def caffe2_only = !Caffe2Images.integratedEnvironments.contains(it);
+          definePhaseJob(it + "-trigger-test", caffe2_only)
+        }
+
+        Caffe2Images.buildOnlyEnvironments.each {
+          def caffe2_only = !Caffe2Images.integratedEnvironments.contains(it);
+          definePhaseJob(it + "-trigger-build", caffe2_only)
         }
       }
     }

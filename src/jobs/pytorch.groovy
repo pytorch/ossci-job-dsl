@@ -675,7 +675,7 @@ pushd tutorials_repo
 curl https://s3.amazonaws.com/pytorch-datasets/img_align_celeba.zip --output img_align_celeba.zip
 sudo mkdir -p /home/ubuntu/facebook/datasets/celeba
 sudo chmod -R 0777 /home/ubuntu/facebook/datasets/celeba
-7z x img_align_celeba.zip -o/home/ubuntu/facebook/datasets/celeba > null
+unzip img_align_celeba.zip -d /home/ubuntu/facebook/datasets/celeba > null
 
 # Download dataset for beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 mkdir data/

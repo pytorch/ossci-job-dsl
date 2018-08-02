@@ -178,7 +178,7 @@ cd "$PYTORCH_DIR"
 cd "$ONNX_DIR" && catchsegv pytest && cd -
 
 # run integration tests
-./scripts/onnx/test.sh -p
+./scripts/onnx/test.sh
 
 '''
     }

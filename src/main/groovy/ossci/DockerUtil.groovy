@@ -95,7 +95,12 @@ docker_args+="-t"
 docker_args+=" -d"
 
 # Mount the workspace to another location so we can copy files to it
-docker_args+=" -v $WORKSPACE:/var/lib/jenkins/host-workspace"
+if [ -z "$USE_PIP_DOCKERS" ]; then
+  docker_args+=" -v $WORKSPACE:/var/lib/jenkins/host-workspace"
+else
+  # The pip build script puts the finished wheels in /remote/wheelhouse
+  docker_args+=" -v $WORKSPACE:/remote"
+fi
 
 # Prepare for capturing core dumps
 mkdir -p $WORKSPACE/crash

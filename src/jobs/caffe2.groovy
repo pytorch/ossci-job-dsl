@@ -949,6 +949,10 @@ Images.dockerCondaBuildEnvironments.each {
               workspaceSource: "host-mount",
               script: '''
 set -ex
+if [[ -z "$ANACONDA_USERNAME" ]]; then
+  echo "Caffe2 Anaconda credentials are not propogated correctly."
+  exit 1
+fi
 git submodule update --init --recursive
 if [[ -n $UPLOAD_PACKAGE ]]; then
   $upload_to_conda="--upload"
@@ -1011,21 +1015,33 @@ Images.dockerPipBuildEnvironments.each {
       DockerUtil.shell context: delegate,
               image: "soumith/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: 'native',
-              workspaceSource: "host-mount",
+              workspaceSource: "docker",
               usePipDockers: "true",
               script: '''
 set -ex
-if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
-  ./manywheel/build.sh
-else
-  ./manywheel/build_cpu.sh
+if [[ -z "$CAFFE2_PIP_USERNAME" ]]; then
+  echo "Caffe2 Pypi credentials are not propogated correctly."
+  exit 1
 fi
+if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
+  /remote/manywheel/build.sh
+else
+  /remote/manywheel/build_cpu.sh
+fi
+
+# Upload pip package
 if [[ $UPLOAD_PACKAGE == true ]]; then
   yum install -y python-pip
   yes | pip install twine
-  twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
+  # This will upload all wheels it finds, but all these jobs should be
+  # separated into different workspace directories.
+  twine upload /remote/wheelhouse*/torch*.whl -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 
+# Print sizes of all wheels. This is also printed by build*.sh before the tests
+# but is repeated here to be easier to find.
+echo "Succesfully built wheels of size:"
+du -h /remote/wheelhouse*/torch*.whl
 '''
     }
   }

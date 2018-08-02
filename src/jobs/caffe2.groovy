@@ -27,13 +27,6 @@ def pullRequestJobSettings = { context, repo ->
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
 
-    wrappers {
-      // This is needed so that Jenkins knows to hide these strings in all the console outputs
-      credentialsBinding {
-        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-      }
-    }
-
     steps {
       def gitPropertiesFile = './git.properties'
 
@@ -97,13 +90,6 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs ->
 
       ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
-    }
-
-    wrappers {
-      // This is needed so that Jenkins knows to hide these strings in all the console outputs
-      credentialsBinding {
-        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-      }
     }
 
     steps {
@@ -180,13 +166,6 @@ multiJob("caffe2-master-doc") {
 
   triggers {
     cron('@daily')
-  }
-
-  wrappers {
-    // This is needed so that Jenkins knows to hide these strings in all the console outputs
-    credentialsBinding {
-      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-    }
   }
 
   steps {
@@ -815,9 +794,7 @@ Images.macOsBuildEnvironments.each {
       wrappers {
         credentialsBinding {
           usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
-        }
-        // This is needed so that Jenkins knows to hide these strings in all the console outputs
-        credentialsBinding {
+          // This is needed so that Jenkins knows to hide these strings in all the console outputs
           usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
         }
       }
@@ -1021,8 +998,7 @@ sccache --show-stats
 
 
 //
-// Following definitions and jobs build using conda-build and then upload the
-// packages to Anaconda.org
+// Following definitions and jobs are for uploading conda or pip packages
 //
 folder(uploadCondaBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'
@@ -1055,9 +1031,7 @@ Images.dockerCondaBuildEnvironments.each {
     wrappers {
       credentialsBinding {
         usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
-      }
-      // This is needed so that Jenkins knows to hide these strings in all the console outputs
-      credentialsBinding {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }
     }
@@ -1096,6 +1070,9 @@ Images.dockerCondaBuildEnvironments.each {
               script: '''
 set -ex
 git submodule update --init --recursive
+if [[ -n $UPLOAD_PACKAGE ]]; then
+  $upload_to_conda="--upload"
+fi
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
   package_name="--name $CONDA_PACKAGE_NAME"
 fi
@@ -1105,7 +1082,7 @@ fi
 
 # All conda build logic should be in scripts/build_anaconda.sh
 # TODO move lang vars into Dockerfile
-PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.sh $package_name $slim
+PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.sh $upload_to_conda $package_name $slim
 '''
     }
   }
@@ -1128,9 +1105,7 @@ Images.dockerPipBuildEnvironments.each {
     wrappers {
       credentialsBinding {
         usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
-      }
-      // This is needed so that Jenkins knows to hide these strings in all the console outputs
-      credentialsBinding {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }
     }
@@ -1166,6 +1141,8 @@ else
   ./manywheel/build_cpu.sh
 fi
 if [[ $UPLOAD_PACKAGE == true ]]; then
+  yum install -y python-pip
+  yes | pip install twine
   twine upload dist/* -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 
@@ -1188,13 +1165,6 @@ multiJob("nightly-conda-package-upload") {
   }
   triggers {
     cron('@daily')
-  }
-
-  wrappers {
-    // This is needed so that Jenkins knows to hide these strings in all the console outputs
-    credentialsBinding {
-      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-    }
   }
 
   steps {
@@ -1234,13 +1204,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
-  }
-
-  wrappers {
-    // This is needed so that Jenkins knows to hide these strings in all the console outputs
-    credentialsBinding {
-      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-    }
   }
 
   steps {

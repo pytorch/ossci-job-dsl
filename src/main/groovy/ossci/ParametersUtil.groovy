@@ -56,6 +56,26 @@ class ParametersUtil {
     }
   }
 
+  static void GITHUB_ORG(BuildParametersContext context, defaultValue = 'pytorch') {
+    context.with {
+      stringParam(
+          'GITHUB_ORG',
+          defaultValue,
+          'The xxxx of https://github.com/xxxx/pytorch.git'
+      )
+    }
+  }
+
+  static void PYTORCH_BRANCH(BuildParametersContext context, defaultValue = 'v0.4.1') {
+    context.with {
+      stringParam(
+          'PYTORCH_BRANCH',
+          defaultValue,
+          'Branch of pytorch/pytorch repo to checkout'
+      )
+    }
+  }
+
   static void UPLOAD_PACKAGE(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(

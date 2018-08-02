@@ -984,8 +984,8 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.PACKAGE_VERSION(delegate)
-      stringParam('GITHUB_ORG', 'pytorch', 'The xxxx of https://github.com/xxxx/pytorch.git')
-      stringParam('PYTORCH_BRANCH', 'v0.4.1', 'Branch of pytorch/pytorch repo to checkout')
+      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_BRANCH(delegate)
     }
 
     wrappers {
@@ -1109,8 +1109,10 @@ multiJob("nightly-pip-package-upload") {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
+    ParametersUtil.PACKAGE_VERSION(delegate)
+    ParametersUtil.GITHUB_ORG(delegate)
+    ParametersUtil.PYTORCH_BRANCH(delegate)
   }
 
   steps {

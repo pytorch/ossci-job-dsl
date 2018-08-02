@@ -70,7 +70,7 @@ def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
-  if (buildEnvironment == "pytorch-linux-rocm") {
+  if (staticBuildEnv == "pytorch-linux-rocm") {
     buildEnvironment = "py2-clang3.8-rocm1.7.1-ubuntu16.04"
   }
   if (isRocmBuild(staticBuildEnv)) {

@@ -984,6 +984,8 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.PACKAGE_VERSION(delegate)
+      stringParam('GITHUB_ORG', 'pytorch', 'The xxxx of https://github.com/xxxx/pytorch.git')
+      stringParam('PYTORCH_BRANCH', 'v0.4.1', 'Branch of pytorch/pytorch repo to checkout')
     }
 
     wrappers {
@@ -1023,6 +1025,15 @@ if [[ -z "$CAFFE2_PIP_USERNAME" ]]; then
   echo "Caffe2 Pypi credentials are not propogated correctly."
   exit 1
 fi
+
+# Clone the Pytorch branch into /pytorch, where the script below expects it
+# TODO error out if the branch doesn't exist, as that's probably a user error
+git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
+pushd /pytorch
+git checkout "$PYTORCH_BRANCH"
+popd
+
+# Build the pip packages
 if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
   /remote/manywheel/build.sh
 else

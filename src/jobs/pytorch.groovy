@@ -41,7 +41,7 @@ def buildEnvironments = [
   "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // NB: This image is taken from Caffe2
-  "py2-clang3.8-rocm1.7.1-ubuntu16.04",
+  "pytorch-linux-rocm",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.
@@ -70,6 +70,9 @@ def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
+  if (buildEnvironment == "pytorch-linux-rocm") {
+    buildEnvironment = "py2-clang3.8-rocm1.7.1-ubuntu16.04"
+  }
   if (isRocmBuild(staticBuildEnv)) {
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
   }

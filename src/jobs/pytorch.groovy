@@ -675,6 +675,7 @@ pushd tutorials_repo
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
 rm advanced_source/numpy_extensions_tutorial.py
 rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
+rm beginner_source/dcgan_faces_tutorial.py
 
 make docs
 popd

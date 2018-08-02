@@ -143,7 +143,7 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
           }
         }
         def definePhaseJob = { name ->
-          phaseJob("${buildBasePath}/${name}") {
+          phaseJob("caffe2-builds/${name}") {
             parameters {
               // Checkout this exact same revision in downstream builds.
               gitRevision()
@@ -225,7 +225,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
 
         // Caffe2
         def definePhaseJob = { name, caffe2_only ->
-          phaseJob("${buildBasePath}/${name}") {
+          phaseJob("caffe2-builds/${name}") {
             parameters {
               // Pass parameters of this job
               currentBuild()

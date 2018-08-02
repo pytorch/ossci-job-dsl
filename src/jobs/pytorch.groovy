@@ -681,9 +681,8 @@ unzip img_align_celeba.zip -d /home/ubuntu/facebook/datasets/celeba > null
 mkdir data/
 curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
 
-# yf225 debug: disable buggy tutorials
+# We will fix the hybrid frontend tutorials when the API is stable
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
-rm advanced_source/numpy_extensions_tutorial.py
 rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 
 make docs

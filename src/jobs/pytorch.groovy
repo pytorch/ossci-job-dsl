@@ -660,7 +660,7 @@ export PATH=/opt/conda/bin:$PATH
 # pillow >= 4.2 will throw error when trying to write mode RGBA as JPEG,
 # this is a workaround to the issue.
 conda install -y sphinx pandas pillow=4.1.1
-pip install sphinx-gallery sphinx_rtd_theme tqdm
+pip install sphinx-gallery sphinx_rtd_theme tqdm matplotlib ipython
 
 git clone https://github.com/pytorch/vision --quiet
 pushd vision
@@ -674,7 +674,6 @@ git checkout gh-pages
 git clone https://github.com/goodlux/tutorials tutorials_repo
 pushd tutorials_repo
 make docs
-ls
 popd
 
 rm -rf vision

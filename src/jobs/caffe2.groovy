@@ -992,6 +992,7 @@ Images.dockerPipBuildEnvironments.each {
     wrappers {
       credentialsBinding {
         usernamePassword('CAFFE2_PIP_USERNAME', 'CAFFE2_PIP_PASSWORD', 'caffe2_pypi_access_token')
+        usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PIP_S3_CREDENTIALS')
         // This is needed so that Jenkins knows to hide these strings in all the console outputs
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }

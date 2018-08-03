@@ -95,14 +95,21 @@ docker_args+="-t"
 docker_args+=" -d"
 
 if [ -z "$USE_PIP_DOCKERS" ]; then
+  # This is the home directory, but isn't really used directly in any scripts
   docker_homedir="/var/lib/jenkins"
+  # The github repo will be cloned to workspace, and most scripts do most of
+  # their work in here
   docker_workspace="$docker_homedir/workspace"
+  # see note below
   docker_host_workspace="$docker_homedir/host-workspace"
   docker_user="-u jenkins"
 else
+  # The pip build script was originally written to mount /remote, to build all
+  # the wheels into /wheelhouse, and then to copy only the finished wheels to
+  # /remote.
   docker_homedir="/"
-  docker_workspace="$docker_homedir/remote"
-  docker_host_workspace="$docker_homedir/remote"
+  docker_workspace="/remote"
+  docker_host_workspace="/remote"
   docker_user=""
   docker_args+=" --ipc=host"
 fi
@@ -111,7 +118,8 @@ fi
 # TODO this directory ($docker_homedir/host-workspace) doesn't actually seem to
 # be used anywhere. This line still seems necessary just because it happens to
 # create $docker_homedir when it creates $docker_homedir/host-workspace , and
-# $docker_homedir is always needed.
+# $docker_homedir is always needed. (On host-mount jobs $docker_homedir will
+# always be created regardless of whether this line is here or not)
 docker_args+=" -v $WORKSPACE:$docker_host_workspace"
 
 # Prepare for capturing core dumps

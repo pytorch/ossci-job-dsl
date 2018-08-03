@@ -982,10 +982,11 @@ Images.dockerPipBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.UPLOAD_PACKAGE(delegate)
-      ParametersUtil.PACKAGE_VERSION(delegate)
       ParametersUtil.GITHUB_ORG(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.PACKAGE_VERSION(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate)
+      ParametersUtil.FULL_CAFFE2(delegate)
     }
 
     wrappers {
@@ -1024,6 +1025,13 @@ set -ex
 if [[ -z "$CAFFE2_PIP_USERNAME" ]]; then
   echo "Caffe2 Pypi credentials are not propogated correctly."
   exit 1
+fi
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == true ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
 fi
 
 # Clone the Pytorch branch into /pytorch, where the script below expects it
@@ -1109,10 +1117,11 @@ multiJob("nightly-pip-package-upload") {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
-    ParametersUtil.PACKAGE_VERSION(delegate)
     ParametersUtil.GITHUB_ORG(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
+    ParametersUtil.PACKAGE_VERSION(delegate)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
+    ParametersUtil.FULL_CAFFE2(delegate)
   }
 
   steps {

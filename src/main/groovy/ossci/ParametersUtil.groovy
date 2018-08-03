@@ -96,12 +96,22 @@ class ParametersUtil {
     }
   }
 
-  static void PACKAGE_VERSION(BuildParametersContext context, defaultValue = '1000') {
+  static void PACKAGE_VERSION(BuildParametersContext context, defaultValue = '100') {
     context.with {
       stringParam(
           'PACKAGE_VERSION',
           defaultValue,
-          "The version to have in 0.4.1.dev#here#"
+          "The <xxxx> to have in 0.4.1.dev<xxxx>"
+      )
+    }
+  }
+
+  static void FULL_CAFFE2(BuildParametersContext context, defaultValue = false) {
+    context.with {
+      booleanParam(
+          'FULL_CAFFE2',
+          defaultValue,
+          "Check this to build with FULL_CAFFE2=1 or not"
       )
     }
   }

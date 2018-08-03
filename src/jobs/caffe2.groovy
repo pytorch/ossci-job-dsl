@@ -955,7 +955,7 @@ if [[ -z "$ANACONDA_USERNAME" ]]; then
 fi
 git submodule update --init --recursive
 if [[ -n $UPLOAD_PACKAGE ]]; then
-  $upload_to_conda="--upload"
+  upload_to_conda="--upload"
 fi
 if [[ -n $CONDA_PACKAGE_NAME ]]; then
   package_name="--name $CONDA_PACKAGE_NAME"
@@ -1013,6 +1013,7 @@ Images.dockerPipBuildEnvironments.each {
       environmentVariables {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
         env('DESIRED_PYTHON', pyVersion[0][1])
+        env('CUDA_NO_DOT', cudaNoDot)
       }
 
 
@@ -1042,20 +1043,30 @@ pushd /pytorch
 git checkout "$PYTORCH_BRANCH"
 popd
 
-# Build the pip packages
+# Build the pip packages, and define some variables used to upload the wheel
 if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
   /remote/manywheel/build.sh
+  wheelhouse_dir="/remote/wheelhouse$CUDA_NO_DOT"
+  s3_dir="cu$CUDA_NO_DOT"
 else
   /remote/manywheel/build_cpu.sh
+  wheelhouse_dir="/remote/wheelhousecpu"
+  s3_dir="cpu"
 fi
 
-# Upload pip package
+# Upload pip packages to s3, as they're too big for PyPI
 if [[ $UPLOAD_PACKAGE == true ]]; then
-  yum install -y python-pip
-  yes | pip install twine
-  # This will upload all wheels it finds, but all these jobs should be
-  # separated into different workspace directories.
-  twine upload /remote/wheelhouse*/torch*.whl -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
+  # This logic is taken from builder/manywheel/upload.sh but is copied here so
+  # that we can run just the one line we need and fail the job if the upload
+  # fails
+  ls "$wheelhouse_dir/" | xargs -I {} aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/$s3_dir/" --acl public-read
+
+  # To upload to PyPI, perhaps for smaller packages, use
+  #yum install -y python-pip
+  #yes | pip install twine
+  ## This will upload all wheels it finds, but all these jobs should be
+  ## separated into different workspace directories.
+  #twine upload /remote/wheelhouse*/torch*.whl -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
 fi
 
 # Print sizes of all wheels. This is also printed by build*.sh before the tests

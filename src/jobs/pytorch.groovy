@@ -607,7 +607,7 @@ git status
 
     job("${buildBasePath}/tutorial-push") {
       JobUtil.common delegate, 'docker && gpu'
-      JobUtil.timeoutAndFailAfter(delegate, 300)
+      JobUtil.timeoutAndFailAfter(delegate, 3000)
       // Explicitly disable concurrent build because this job is racy.
       concurrentBuild(false)
       parameters {

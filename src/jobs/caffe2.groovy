@@ -1,4 +1,5 @@
 import ossci.DockerUtil
+import ossci.EmailUtil
 import ossci.GitUtil
 import ossci.JobUtil
 import ossci.MacOSUtil
@@ -1074,9 +1075,9 @@ fi
 echo "Succesfully built wheels of size:"
 du -h /remote/wheelhouse*/torch*.whl
 '''
-    }
+    } // steps
   }
-}
+} // dockerPipBuildEnvironments
 
 // Nightly job to upload conda packages. This job just triggers the above builds
 // every night with UPLOAD_PACKAGE set to 1
@@ -1119,9 +1120,15 @@ multiJob("nightly-conda-package-upload") {
           definePhaseJob(it)
         }
       }
+    } // phase(Build)
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript('hellemn@fb.com'))
+      }
     }
-  }
-}
+  } // steps
+} // nightly conda
 
 multiJob("nightly-pip-package-upload") {
   JobUtil.commonTrigger(delegate)
@@ -1159,6 +1166,12 @@ multiJob("nightly-pip-package-upload") {
       Images.dockerPipBuildEnvironments.each {
         definePhaseJob(it)
       }
+    } // phase(Build)
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript('hellemn@fb.com'))
+      }
     }
-  }
-}
+  } // steps
+} // nightly pip

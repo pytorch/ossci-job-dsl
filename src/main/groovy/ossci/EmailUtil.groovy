@@ -43,4 +43,33 @@ def sendEmail(receivers, subject, text) {
   manager.listener.logger.println 'Email sent.'
 }
 '''
+
+  // WARNING: If you edit this script, you'll have to reapprove it at
+  // https://ci.pytorch.org/jenkins/scriptApproval/
+  static String ciFailureEmailScript(String mailRecipients) {
+    return '''
+if (manager.build.result.toString().contains("FAILURE")) {
+  def logLines = manager.build.logFile.readLines()
+  def isFalsePositive = (logLines.count {
+    it.contains("ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.") /* This commit is not the latest one anymore. */ \
+    || it.contains("java.lang.InterruptedException") /* Job is cancelled. */ \
+    || it.contains("fatal: reference is not a tree") /* Submodule commit doesn't exist, Linux */ \
+    || it.contains("Server does not allow request for unadvertised object") /* Submodule commit doesn't exist, Windows */
+  } > 0)
+  isFalsePositive = isFalsePositive || logLines.size() == 0 /* If there is no log in the build, it means the build is cancelled by a newer commit */
+  def isFalseNegative = (logLines.count {
+    it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */ \
+    || it.contains("No space left on device") /* OOD error */ \
+    || it.contains("virtual memory exhausted: Cannot allocate memory") /* sccache compile error */
+  } > 0)
+  def hasEnteredUserLand = (logLines.count {it.contains("ENTERED_USER_LAND")} > 0)
+  def hasExitedUserLand = (logLines.count {it.contains("EXITED_USER_LAND")} > 0)
+  def inUserLand = (hasEnteredUserLand && !hasExitedUserLand)
+  if ((!inUserLand && !isFalsePositive) || isFalseNegative) {
+    // manager.listener.logger.println "CI system failure occured"
+    sendEmail("'''+mailRecipients+'''", 'CI system failure', 'See <'+manager.build.getEnvironment()["BUILD_URL"]+'>'+'\\n\\n'+'Log:\\n\\n'+manager.build.logFile.text)
+  }
+}
+'''
+  }
 }

@@ -79,33 +79,6 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
 def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
 def rocmMailRecipients = "ezyang@fb.com gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
-// WARNING: If you edit this script, you'll have to reapprove it at
-// https://ci.pytorch.org/jenkins/scriptApproval/
-def ciFailureEmailScript = '''
-if (manager.build.result.toString().contains("FAILURE")) {
-  def logLines = manager.build.logFile.readLines()
-  def isFalsePositive = (logLines.count {
-    it.contains("ERROR: Couldn't find any revision to build. Verify the repository and branch configuration for this job.") /* This commit is not the latest one anymore. */ \
-    || it.contains("java.lang.InterruptedException") /* Job is cancelled. */ \
-    || it.contains("fatal: reference is not a tree") /* Submodule commit doesn't exist, Linux */ \
-    || it.contains("Server does not allow request for unadvertised object") /* Submodule commit doesn't exist, Windows */
-  } > 0)
-  isFalsePositive = isFalsePositive || logLines.size() == 0 /* If there is no log in the build, it means the build is cancelled by a newer commit */
-  def isFalseNegative = (logLines.count {
-    it.contains("clang: error: unable to execute command: Segmentation fault: 11") /* macOS clang segfault error */ \
-    || it.contains("No space left on device") /* OOD error */ \
-    || it.contains("virtual memory exhausted: Cannot allocate memory") /* sccache compile error */
-  } > 0)
-  def hasEnteredUserLand = (logLines.count {it.contains("ENTERED_USER_LAND")} > 0)
-  def hasExitedUserLand = (logLines.count {it.contains("EXITED_USER_LAND")} > 0)
-  def inUserLand = (hasEnteredUserLand && !hasExitedUserLand)
-  if ((!inUserLand && !isFalsePositive) || isFalseNegative) {
-    // manager.listener.logger.println "CI system failure occured"
-    sendEmail("'''+mailRecipients+'''", 'CI system failure', 'See <'+manager.build.getEnvironment()["BUILD_URL"]+'>'+'\\n\\n'+'Log:\\n\\n'+manager.build.logFile.text)
-  }
-}
-'''
-
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commitSource, localMailRecipients ->
@@ -506,7 +479,7 @@ exit 0
 
     publishers {
       groovyPostBuild {
-        script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
       }
     }
   }
@@ -755,7 +728,7 @@ fi
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     }
@@ -798,7 +771,7 @@ fi
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     } // job(... + "short-perf-test-gpu")
@@ -886,7 +859,7 @@ fi
 
         publishers {
           groovyPostBuild {
-            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+            script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
           }
         }
       } // job(... + "-test")
@@ -931,7 +904,7 @@ exit 0
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     } // job(... + "-multigpu-test")
@@ -978,7 +951,7 @@ fi
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     }
@@ -1029,7 +1002,7 @@ fi
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     }
@@ -1077,7 +1050,7 @@ fi
 
           publishers {
             groovyPostBuild {
-              script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+              script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
             }
           }
         }
@@ -1136,7 +1109,7 @@ fi
 
       publishers {
         groovyPostBuild {
-          script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+          script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
         }
       }
     }
@@ -1183,7 +1156,7 @@ fi
 
         publishers {
           groovyPostBuild {
-            script(EmailUtil.sendEmailScript + ciFailureEmailScript)
+            script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
           }
         }
       } // job("${buildBasePath}/${buildEnvironment}-test")

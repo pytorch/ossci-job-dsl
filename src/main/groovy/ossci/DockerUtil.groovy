@@ -94,13 +94,25 @@ docker_args+="-t"
 # Detach so we can use docker exec to run stuff
 docker_args+=" -d"
 
-# Mount the workspace to another location so we can copy files to it
 if [ -z "$USE_PIP_DOCKERS" ]; then
-  docker_args+=" -v $WORKSPACE:/var/lib/jenkins/host-workspace"
+  docker_homedir="/var/lib/jenkins"
+  docker_workspace="$docker_homedir/workspace"
+  docker_host_workspace="$docker_homedir/host-workspace"
+  docker_user="-u jenkins"
 else
-  # The pip build script puts the finished wheels in /remote/wheelhouse
-  docker_args+=" -v $WORKSPACE:/remote"
+  docker_homedir="/"
+  docker_workspace="$docker_homedir/remote"
+  docker_host_workspace="$docker_homedir/remote"
+  docker_user=""
+  docker_args+=" --ipc=host"
 fi
+
+# Mount the workspace to another location so we can copy files to it
+# TODO this directory ($docker_homedir/host-workspace) doesn't actually seem to
+# be used anywhere. This line still seems necessary just because it happens to
+# create $docker_homedir when it creates $docker_homedir/host-workspace , and
+# $docker_homedir is always needed.
+docker_args+=" -v $WORKSPACE:$docker_host_workspace"
 
 # Prepare for capturing core dumps
 mkdir -p $WORKSPACE/crash
@@ -109,11 +121,11 @@ docker_args+=" -v $WORKSPACE/crash:/var/crash"
 if [ "$WORKSPACE_SOURCE" = "host-mount" ]; then
     # Directly mount host workspace into workspace directory.
     # This is "old-style" behavior
-    docker_args+=" -v $WORKSPACE:/var/lib/jenkins/workspace"
+    docker_args+=" -v $WORKSPACE:$docker_workspace"
 fi
 
 # Working directory is homedir
-docker_args+=" -w /var/lib/jenkins"
+docker_args+=" -w $docker_homedir"
 
 if [ -n "${CUDA_VERSION:-}" ]; then
     # Extra arguments to use for nvidia-docker
@@ -129,18 +141,11 @@ if [ -n "${CUDA_VERSION:-}" ]; then
 fi
 
 if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
-  docker_args+=" --security-opt seccomp=/var/lib/jenkins/allow_perf_event_open.json"
+  docker_args+=" --security-opt seccomp=$docker_homedir/allow_perf_event_open.json"
 fi
 
 if [[ $(/bin/hostname) == *-rocm-* ]]; then
   docker_args+=" --device=/dev/kfd --device=/dev/dri --group-add video"
-fi
-
-# The docker images used for pip-packages have no user and need --ipc=host
-if [ -n "$USE_PIP_DOCKERS" ]; then
-  docker_args+=" --ipc=host"
-else
-  jenkins_user="-u jenkins"
 fi
 
 # Image
@@ -171,12 +176,12 @@ if [ "$WORKSPACE_SOURCE" = "host-copy" ]; then
     # Copy the workspace into the Docker image.
     # Pick this if you want the source code to persist into a saved
     # docker image
-    docker cp $WORKSPACE/. "$id:/var/lib/jenkins/workspace"
+    docker cp $WORKSPACE/. "$id:$docker_workspace"
 fi
 
 if [ "$IMPORT_ENV" == 1 ]; then
     # Copy in the env file
-    docker cp $WORKSPACE/env "$id:/var/lib/jenkins/workspace/env"
+    docker cp $WORKSPACE/env "$id:$docker_workspace/env"
 fi
 
 # I found the only way to make the command below return the proper
@@ -184,7 +189,7 @@ fi
 # doesn't propagate a non-zero exit code properly.
 (
     # Get into working dir, now that it exists
-    echo 'cd workspace'
+    echo "cd $docker_workspace"
 
     if [ "$IMPORT_ENV" == 1 ]; then
       # Source environment
@@ -201,7 +206,7 @@ fi
 
     # Use everything below the '####' as script to run
     sed -n '/^####/ { s///; :a; n; p; ba; }' "${BASH_SOURCE[0]}"
-) | docker exec $jenkins_user -i "$id" bash
+) | docker exec $docker_user -i "$id" bash
 
 if [ -n "${COMMIT_DOCKER_IMAGE:-}" ]; then
     sanitize_image_tag ${COMMIT_DOCKER_IMAGE}

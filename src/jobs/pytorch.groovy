@@ -658,6 +658,10 @@ curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
 rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 
+# yf225: temporarily disabling these tutorials until fixed
+rm beginner_source/audio_classifier_tutorial.py
+rm beginner_source/dcgan_faces_tutorial.py
+
 make docs
 popd
 

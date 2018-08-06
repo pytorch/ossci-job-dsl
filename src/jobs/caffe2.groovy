@@ -985,9 +985,11 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.GITHUB_ORG(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
-      ParametersUtil.PACKAGE_VERSION(delegate)
-      ParametersUtil.UPLOAD_PACKAGE(delegate)
-      ParametersUtil.FULL_CAFFE2(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+      ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')
+      ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
+      ParametersUtil.FULL_CAFFE2(delegate, false)
     }
 
     wrappers {
@@ -1002,21 +1004,23 @@ Images.dockerPipBuildEnvironments.each {
     steps {
       GitUtil.mergeStep(delegate)
 
-      // cpu builds on Dockerfile-cuda80
+      // Determine dockerfile, cpu builds on Dockerfile-cuda80
       def cudaNoDot = '80'
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
         cudaNoDot = cudaVer[0][1]
       }
 
-      // One python version per machine
+      // Determine which python version to build
       def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+
+      // Populate environment
       environmentVariables {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
         env('DESIRED_PYTHON', pyVersion[0][1])
         env('CUDA_NO_DOT', cudaNoDot)
+        env('CURRENT_DATE', new Date().format('yyyy.MM.dd'))
       }
-
 
       DockerUtil.shell context: delegate,
               image: "soumith/manylinux-cuda${cudaNoDot}:latest",
@@ -1035,6 +1039,20 @@ if [[ "$FULL_CAFFE2" == true ]]; then
   export FULL_CAFFE2=1
 else
   unset FULL_CAFFE2
+fi
+
+# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
+export PYTORCH_BUILD_NUMBER=0
+if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
+  echo 'Using override-version'
+  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
+elif [[ "$USE_DATE_AS_VERSION" == 1 ]]; then
+  echo 'Using the current date + VERSION_POSTFIX'
+  export PYTORCH_BUILD_VERSION="${CURRENT_DATE}${VERSION_POSTFIX}"
+else
+  echo "WARNING:"
+  echo "No version parameters were set, so this will use whatever the default"
+  echo "version logic within setup.py is."
 fi
 
 # Clone the Pytorch branch into /pytorch, where the script below expects it
@@ -1138,9 +1156,14 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.GITHUB_ORG(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
-    ParametersUtil.PACKAGE_VERSION(delegate)
-    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
-    ParametersUtil.FULL_CAFFE2(delegate)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+    ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+    ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')
+    ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
+    ParametersUtil.FULL_CAFFE2(delegate, false)
+  }
+  triggers {
+    cron('@daily')
   }
 
   steps {

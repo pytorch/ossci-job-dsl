@@ -86,22 +86,42 @@ class ParametersUtil {
     }
   }
 
+  static void USE_DATE_AS_VERSION(BuildParametersContext context, defaultValue = true) {
+    context.with {
+      booleanParam(
+          'USE_DATE_AS_VERSION',
+          defaultValue,
+          "Check this to use the current date (on the executing machine) as the version"
+      )
+    }
+  }
+
+  static void VERSION_POSTFIX(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'VERSION_POSTFIX',
+          defaultValue,
+          "A string to be added as-is to the end of the version. Will get overwritten by OVERRIDE_PACKAGE_VERSION. Good to be used with USE_DATE_AS_VERSION"
+      )
+    }
+  }
+
+  static void OVERRIDE_PACKAGE_VERSION(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'OVERRIDE_PACKAGE_VERSION',
+          defaultValue,
+          "The exact entier package version string to use, overriding all other version parameters"
+      )
+    }
+  }
+
   static void CONDA_PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
           'CONDA_PACKAGE_NAME',
           defaultValue,
           "The name of the package to upload to Anaconda"
-      )
-    }
-  }
-
-  static void PACKAGE_VERSION(BuildParametersContext context, defaultValue = '100') {
-    context.with {
-      stringParam(
-          'PACKAGE_VERSION',
-          defaultValue,
-          "The <xxxx> to have in 0.4.1.dev<xxxx>"
       )
     }
   }

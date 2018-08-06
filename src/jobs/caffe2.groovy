@@ -987,6 +987,7 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.PACKAGE_NAME(delegate, 'torch-nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
       ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
       ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
@@ -1079,7 +1080,7 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
   # This logic is taken from builder/manywheel/upload.sh but is copied here so
   # that we can run just the one line we need and fail the job if the upload
   # fails
-  ls "$wheelhouse_dir/" | xargs -I {} aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/$s3_dir/" --acl public-read
+  ls "$wheelhouse_dir/" | xargs -I {} aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 
   # To upload to PyPI, perhaps for smaller packages, use
   #yum install -y python-pip
@@ -1159,6 +1160,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.PYTORCH_BRANCH(delegate)
     ParametersUtil.PACKAGE_NAME(delegate, 'torch-nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+    ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
     ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')

@@ -126,6 +126,16 @@ class ParametersUtil {
     }
   }
 
+  static void PIP_UPLOAD_FOLDER(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'PIP_UPLOAD_FOLDER',
+          defaultValue,
+          "The folder to upload to. Unset ('') for the default, 'nightly/' for nightly jobs"
+      )
+    }
+  }
+
   static void FULL_CAFFE2(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(

@@ -668,7 +668,7 @@ Images.macOsBuildEnvironments.each {
 
         if (makeACondaUploadBuild) {
           ParametersUtil.UPLOAD_PACKAGE(delegate)
-          ParametersUtil.CONDA_PACKAGE_NAME(delegate)
+          ParametersUtil.PACKAGE_NAME(delegate)
         }
       }
 
@@ -756,8 +756,8 @@ if [ "${BUILD_IOS:-0}" -eq 1 ]; then
   scripts/build_ios.sh
 elif [ -n "${CAFFE2_USE_ANACONDA}" ]; then
   # All conda build logic should be in scripts/build_anaconda.sh
-  if [ -n "$CONDA_PACKAGE_NAME" ]; then
-    scripts/build_anaconda.sh --name "$CONDA_PACKAGE_NAME"
+  if [ -n "$PACKAGE_NAME" ]; then
+    scripts/build_anaconda.sh --name "$PACKAGE_NAME"
   else
     scripts/build_anaconda.sh
   fi
@@ -905,7 +905,7 @@ Images.dockerCondaBuildEnvironments.each {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate)
-      ParametersUtil.CONDA_PACKAGE_NAME(delegate)
+      ParametersUtil.PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
 
@@ -958,8 +958,8 @@ git submodule update --init --recursive
 if [[ -n $UPLOAD_PACKAGE ]]; then
   upload_to_conda="--upload"
 fi
-if [[ -n $CONDA_PACKAGE_NAME ]]; then
-  package_name="--name $CONDA_PACKAGE_NAME"
+if [[ -n $PACKAGE_NAME ]]; then
+  package_name="--name $PACKAGE_NAME"
 fi
 if [[ -n $SLIM ]]; then
   slim="--slim"
@@ -985,9 +985,10 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.GITHUB_ORG(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.PACKAGE_NAME(delegate, 'torch-nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-      ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')
+      ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
     }
@@ -1046,7 +1047,7 @@ export PYTORCH_BUILD_NUMBER=0
 if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
   echo 'Using override-version'
   export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
-elif [[ "$USE_DATE_AS_VERSION" == 1 ]]; then
+elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
   echo 'Using the current date + VERSION_POSTFIX'
   export PYTORCH_BUILD_VERSION="${CURRENT_DATE}${VERSION_POSTFIX}"
 else
@@ -1156,6 +1157,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.GITHUB_ORG(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
+    ParametersUtil.PACKAGE_NAME(delegate, 'torch-nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
     ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')

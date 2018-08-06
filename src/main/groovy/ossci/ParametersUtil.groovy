@@ -116,12 +116,12 @@ class ParametersUtil {
     }
   }
 
-  static void CONDA_PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
+  static void PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
-          'CONDA_PACKAGE_NAME',
+          'PACKAGE_NAME',
           defaultValue,
-          "The name of the package to upload to Anaconda"
+          "The name of the package to upload"
       )
     }
   }

@@ -61,17 +61,17 @@ class ParametersUtil {
       stringParam(
           'GITHUB_ORG',
           defaultValue,
-          'The xxxx of https://github.com/xxxx/pytorch.git'
+          'The xxxx of https://github.com/xxxx/pytorch.git to build wheels for'
       )
     }
   }
 
-  static void PYTORCH_BRANCH(BuildParametersContext context, defaultValue = 'v0.4.1') {
+  static void PYTORCH_BRANCH(BuildParametersContext context, defaultValue = 'master') {
     context.with {
       stringParam(
           'PYTORCH_BRANCH',
           defaultValue,
-          'Branch of pytorch/pytorch repo to checkout'
+          'Branch of $GITHUB_ORG/pytorch repo to checkout to build wheels for'
       )
     }
   }

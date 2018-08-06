@@ -1080,6 +1080,7 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
   # This logic is taken from builder/manywheel/upload.sh but is copied here so
   # that we can run just the one line we need and fail the job if the upload
   # fails
+  echo "Uploading all of: $(ls $wheelhouse_dir) to: s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/"
   ls "$wheelhouse_dir/" | xargs -I {} aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 
   # To upload to PyPI, perhaps for smaller packages, use

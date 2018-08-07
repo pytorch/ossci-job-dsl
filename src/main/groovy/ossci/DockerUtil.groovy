@@ -94,6 +94,10 @@ docker_args+="-t"
 # Detach so we can use docker exec to run stuff
 docker_args+=" -d"
 
+# Increase shared memory size so that we can run bigger models in Docker container
+# See: https://github.com/pytorch/pytorch/issues/2244
+docker_args+=" --shm-size 8G"
+
 if [ -z "$USE_PIP_DOCKERS" ]; then
   # This is the home directory, but isn't really used directly in any scripts
   docker_homedir="/var/lib/jenkins"

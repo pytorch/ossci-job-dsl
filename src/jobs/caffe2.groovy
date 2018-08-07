@@ -1155,7 +1155,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-    ParametersUtil.VERSION_POSTFIX(delegate, '.dev1')
+    ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
   }

@@ -1080,18 +1080,11 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
   # that we can run just the one line we need and fail the job if the upload
   # fails
   echo "Uploading all of: $(ls $wheelhouse_dir) to: s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/"
-  ls "$wheelhouse_dir/" | xargs -I {} aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
-
-  # To upload to PyPI, perhaps for smaller packages, use
-  #yum install -y python-pip
-  #yes | pip install twine
-  ## This will upload all wheels it finds, but all these jobs should be
-  ## separated into different workspace directories.
-  #twine upload /remote/wheelhouse*/torch*.whl -u $CAFFE2_PIP_USERNAME -p $CAFFE2_PIP_PASSWORD
+  yes | /opt/python/cp27-cp27m/bin/pip install awscli==1.6.6
+  ls "$wheelhouse_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 fi
 
-# Print sizes of all wheels. This is also printed by build*.sh before the tests
-# but is repeated here to be easier to find.
+# Print sizes of all wheels
 echo "Succesfully built wheels of size:"
 du -h /remote/wheelhouse*/torch*.whl
 '''

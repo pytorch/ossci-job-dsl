@@ -219,21 +219,4 @@ class JobUtil {
       }
     }
   }
-
-  static void postBuildFacebookWebhook(Job context) {
-    // WARNING: If you edit this script, you'll have to reapprove it at
-    // https://ci.pytorch.org/jenkins/scriptApproval/
-    def ciPostWebhook = '''
-def cmd = ["curl", "-X", "POST", "-d", 'payload={"pr":' + manager.getEnvVariable("ghprbPullId") + ',"result_url":"' + manager.getEnvVariable("BUILD_URL") + '","status":"' + manager.getResult() + '","head_sha":"' + manager.getEnvVariable("GIT_COMMIT") + '"}', "https://code.facebook.com/pytorch/build_result"]
-manager.listener.logger.println cmd.join(" ")
-manager.listener.logger.println cmd.execute().text
-'''
-    context.with {
-      publishers {
-        groovyPostBuild {
-          script(ciPostWebhook)
-        }
-      }
-    }
-  }
 }

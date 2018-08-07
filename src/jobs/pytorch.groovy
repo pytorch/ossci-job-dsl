@@ -224,7 +224,6 @@ def pullRequestJobSettings = { context, repo, commitSource ->
         }
       }
     }
-    JobUtil.postBuildFacebookWebhook(delegate)
   }
 }
 

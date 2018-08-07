@@ -629,11 +629,16 @@ export PATH=/opt/conda/bin:$PATH
 # pillow >= 4.2 will throw error when trying to write mode RGBA as JPEG,
 # this is a workaround to the issue.
 conda install -y sphinx pandas pillow=4.1.1
-pip install sphinx-gallery sphinx_rtd_theme tqdm matplotlib ipython
+pip install sphinx-gallery sphinx_rtd_theme tqdm matplotlib ipython sox libsox-dev libsox-fmt-all
 
 git clone https://github.com/pytorch/vision --quiet
 pushd vision
 pip install . --no-deps  # We don't want it to install the stock PyTorch version from pip
+popd
+
+git clone https://github.com/pytorch/audio --quiet
+pushd audio
+python setup.py install
 popd
 
 git clean -xdf
@@ -653,18 +658,19 @@ unzip img_align_celeba.zip -d /home/ubuntu/facebook/datasets/celeba > null
 mkdir data/
 curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
 
+# Download dataset for beginner_source/audio_classifier_tutorial.py
+curl https://s3.amazonaws.com/pytorch-datasets/UrbanSound8K.tar.gz --output UrbanSound8K.tar.gz
+tar -xvzf UrbanSound8K.tar.gz
+
 # We will fix the hybrid frontend tutorials when the API is stable
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py
 rm beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
-
-# yf225: temporarily disabling these tutorials until fixed
-rm beginner_source/audio_classifier_tutorial.py
-rm beginner_source/dcgan_faces_tutorial.py
 
 make docs
 popd
 
 rm -rf vision
+rm -rf audio
 
 cp -r tutorials_repo/docs/* ./
 rm -rf tutorials_repo

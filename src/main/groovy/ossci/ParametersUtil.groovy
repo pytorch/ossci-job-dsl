@@ -116,10 +116,10 @@ class ParametersUtil {
     }
   }
 
-  static void PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
+  static void TORCH_PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
-          'PACKAGE_NAME',
+          'TORCH_PACKAGE_NAME',
           defaultValue,
           "The name of the package to upload"
       )

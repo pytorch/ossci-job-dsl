@@ -248,7 +248,6 @@ class Images {
 
     // Setup.py
     'py2-setup-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-setup-ubuntu16.04',
 
     // Build for Android
     'py2-android-ubuntu16.04',

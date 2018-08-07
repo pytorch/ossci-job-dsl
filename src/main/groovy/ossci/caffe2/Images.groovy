@@ -111,6 +111,7 @@ class Images {
 
     // Caffe2 setup.py builds
     baseImageOf.put("py2-setup-ubuntu16.04", "py2-mkl-ubuntu16.04")
+    baseImageOf.put("py2-cuda9.0-cudnn7-setup-ubuntu16.04", "py2-cuda9.0-cudnn7-ubuntu16.04")
 
     // environment that is used to run pytorch->onnx->caffe2 integration tests
     baseImageOf.put("onnx-py2-gcc5-ubuntu16.04", "py2-gcc5-ubuntu16.04")
@@ -247,6 +248,7 @@ class Images {
 
     // Setup.py
     'py2-setup-ubuntu16.04',
+    'py2-cuda9.0-cudnn7-setup-ubuntu16.04',
 
     // Build for Android
     'py2-android-ubuntu16.04',

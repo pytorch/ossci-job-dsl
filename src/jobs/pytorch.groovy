@@ -623,13 +623,13 @@ if [ "${DOC_PUSH:-true}" == "false" ]; then
 fi
 
 sudo apt-get update
-sudo apt-get install -y --no-install-recommends unzip p7zip-full
+sudo apt-get install -y --no-install-recommends unzip p7zip-full sox libsox-dev libsox-fmt-all
 
 export PATH=/opt/conda/bin:$PATH
 # pillow >= 4.2 will throw error when trying to write mode RGBA as JPEG,
 # this is a workaround to the issue.
 conda install -y sphinx pandas pillow=4.1.1
-pip install sphinx-gallery sphinx_rtd_theme tqdm matplotlib ipython sox libsox-dev libsox-fmt-all
+pip install sphinx-gallery sphinx_rtd_theme tqdm matplotlib ipython
 
 git clone https://github.com/pytorch/vision --quiet
 pushd vision

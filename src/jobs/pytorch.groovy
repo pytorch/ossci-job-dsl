@@ -660,7 +660,7 @@ curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
 
 # Download dataset for beginner_source/audio_classifier_tutorial.py
 curl https://s3.amazonaws.com/pytorch-datasets/UrbanSound8K.tar.gz --output UrbanSound8K.tar.gz
-tar -xvzf UrbanSound8K.tar.gz
+tar -xzf UrbanSound8K.tar.gz -C ./beginner_source
 
 # We will fix the hybrid frontend tutorials when the API is stable
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py

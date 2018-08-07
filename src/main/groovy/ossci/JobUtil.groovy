@@ -69,7 +69,6 @@ class JobUtil {
         timeout {
           absolute(minutes)
           failBuild()
-          abortBuild()
           writeDescription('Build failed due to timeout after {0} minutes')
         }
       }

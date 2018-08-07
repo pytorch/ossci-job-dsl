@@ -1021,7 +1021,6 @@ Images.dockerPipBuildEnvironments.each {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
         env('DESIRED_PYTHON', pyVersion[0][1])
         env('CUDA_NO_DOT', cudaNoDot)
-        env('CURRENT_DATE', new Date().format('yyyy.MM.dd'))
       }
 
       DockerUtil.shell context: delegate,
@@ -1050,7 +1049,7 @@ if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
   export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
 elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
   echo 'Using the current date + VERSION_POSTFIX'
-  export PYTORCH_BUILD_VERSION="${CURRENT_DATE}${VERSION_POSTFIX}"
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
 else
   echo "WARNING:"
   echo "No version parameters were set, so this will use whatever the default"

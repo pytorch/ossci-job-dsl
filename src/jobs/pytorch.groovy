@@ -594,7 +594,7 @@ git status
       scm {
         git {
           remote {
-            github('goodlux/tutorials', 'ssh')
+            github('facebookmicrosites/pytorch-tutorials', 'ssh')
             credentials('pytorchbot')
           }
           branch('origin/master')
@@ -640,7 +640,7 @@ git clean -xdf
 git checkout -- .
 git checkout gh-pages
 
-git clone https://github.com/goodlux/tutorials tutorials_repo
+git clone https://github.com/facebookmicrosites/pytorch-tutorials tutorials_repo
 pushd tutorials_repo
 
 # Download dataset for beginner_source/dcgan_faces_tutorial.py

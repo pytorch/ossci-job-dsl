@@ -32,6 +32,7 @@ Images.macCondaBuildEnvironments.each {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_ARGS(delegate)
     ParametersUtil.UPLOAD_PACKAGE(delegate)
     ParametersUtil.TORCH_PACKAGE_NAME(delegate)
   }
@@ -111,6 +112,7 @@ Images.dockerCondaBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.EXTRA_CAFFE2_CMAKE_ARGS(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate)
       ParametersUtil.TORCH_PACKAGE_NAME(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -195,6 +197,7 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.GITHUB_ORG(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.EXTRA_CAFFE2_CMAKE_ARGS(delegate)
       ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch-nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
@@ -310,6 +313,7 @@ multiJob("nightly-conda-package-upload") {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_ARGS(delegate)
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
@@ -362,6 +366,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.GIT_MERGE_TARGET(delegate)
     ParametersUtil.GITHUB_ORG(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_ARGS(delegate)
     ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch-nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')

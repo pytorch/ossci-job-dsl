@@ -46,6 +46,16 @@ class ParametersUtil {
     }
   }
 
+  static void EXTRA_CAFFE2_CMAKE_ARGS(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'EXTRA_CAFFE2_CMAKE_ARGS',
+          defaultValue,
+          'Additional arguments passed to build_pytorch_libs::build_caffe2',
+      )
+    }
+  }
+
   static void HYPOTHESIS_SEED(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

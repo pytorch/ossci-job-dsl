@@ -46,10 +46,10 @@ class ParametersUtil {
     }
   }
 
-  static void EXTRA_CAFFE2_CMAKE_ARGS(BuildParametersContext context, defaultValue = '') {
+  static void EXTRA_CAFFE2_CMAKE_FLAGS(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
-          'EXTRA_CAFFE2_CMAKE_ARGS',
+          'EXTRA_CAFFE2_CMAKE_FLAGS',
           defaultValue,
           'Additional arguments passed to build_pytorch_libs::build_caffe2',
       )

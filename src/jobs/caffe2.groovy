@@ -880,6 +880,8 @@ sccache --show-stats
 
 //
 // Following definitions and jobs are for uploading conda or pip packages
+// The only reason why this is here is because mac conda builds are defined
+// in the macos builds above
 //
 folder(uploadCondaBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'

@@ -91,6 +91,12 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
       ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    } // wrappers
     steps {
       def gitPropertiesFile = './git.properties'
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
@@ -169,6 +175,12 @@ def pullRequestJobSettings = { context, repo, commitSource ->
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    } // wrappers
     steps {
       def gitPropertiesFile = './git.properties'
 
@@ -288,6 +300,13 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         'Whether to push doc or not',
       )
     }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    } // wrappers
 
     steps {
       def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
@@ -431,6 +450,13 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       )
     }
 
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    } // wrappers
+
     steps {
       GitUtil.mergeStep(delegate)
 
@@ -499,6 +525,12 @@ exit 0
           'Whether to doc push or not',
         )
       }
+      wrappers {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+        }
+      } // wrappers
       scm {
         git {
           remote {
@@ -591,6 +623,12 @@ git status
           'Whether to tutorial push or not',
         )
       }
+      wrappers {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        credentialsBinding {
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+        }
+      } // wrappers
       scm {
         git {
           remote {
@@ -708,6 +746,8 @@ git status
       wrappers {
         credentialsBinding {
           usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'iam-user-perf')
+          // This is needed so that Jenkins knows to hide these strings in all the console outputs
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
         }
       }
 
@@ -754,6 +794,8 @@ fi
       wrappers {
         credentialsBinding {
           usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'iam-user-perf')
+          // This is needed so that Jenkins knows to hide these strings in all the console outputs
+          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
         }
       }
 

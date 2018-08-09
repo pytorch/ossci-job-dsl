@@ -66,7 +66,7 @@ class ParametersUtil {
     }
   }
 
-  static void PYTORCH_BRANCH(BuildParametersContext context, defaultValue = 'master') {
+  static void PYTORCH_BRANCH(BuildParametersContext context, defaultValue = '0.4.1') {
     context.with {
       stringParam(
           'PYTORCH_BRANCH',

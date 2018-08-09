@@ -375,9 +375,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
   }
-  triggers {
-    cron('@daily')
-  }
 
   steps {
     def gitPropertiesFile = './git.properties'

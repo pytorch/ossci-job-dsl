@@ -16,6 +16,7 @@ folder(buildBasePath) {
 def buildEnvironments = [
   'py2-gcc5-ubuntu16.04',
   'py3.5-gcc5-ubuntu16.04',
+  'py3.6-gcc5-ubuntu16.04',
 ]
 
 // Runs on pull requests

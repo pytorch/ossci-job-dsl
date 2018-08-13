@@ -85,6 +85,11 @@ buildEnvironments.each {
         '${sha1}',
         'Refspec of commit to use (e.g. origin/master)',
       )
+      stringParam(
+        'PYTORCH_GIT_COMMIT',
+        'origin/master',
+        'Commit to use for PyTorch checkout in integrated tests',
+      )
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
 
@@ -170,6 +175,7 @@ git clone --recursive https://github.com/pytorch/pytorch.git "$PYTORCH_DIR"
 rm -rf "$ONNX_DIR"
 cp -r "$PWD" "$ONNX_DIR"
 cd "$PYTORCH_DIR"
+git checkout "$PYTORCH_GIT_COMMIT"
 
 # install everything
 ./scripts/onnx/install-develop.sh

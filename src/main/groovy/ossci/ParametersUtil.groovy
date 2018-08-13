@@ -156,6 +156,16 @@ class ParametersUtil {
     }
   }
 
+  static void DEBUG_NM_OUTPUT(BuildParametersContext context, defaultValue = false) {
+    context.with {
+      booleanParam(
+          'DEBUG_NM_OUTPUT',
+          defaultValue,
+          "Check this to print out the full nm output on the built wheels"
+      )
+    }
+  }
+
   static void GIT_COMMIT(BuildParametersContext context, String defaultValue = 'origin/master') {
     context.with {
       stringParam(

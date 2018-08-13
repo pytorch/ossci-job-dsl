@@ -198,13 +198,14 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.GITHUB_ORG(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
-      ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch-nightly')
+      ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
       ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
       ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
+      ParametersUtil.DEBUG_NM_OUTPUT(delegate, false)
     }
 
     wrappers {
@@ -242,17 +243,17 @@ Images.dockerPipBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
+
+# Parameter checking
+###############################################################################
 if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
   echo "Caffe2 Pypi credentials are not propogated correctly."
   exit 1
 fi
 
 # Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == true ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+export FULL_CAFFE2=$(test $FULL_CAFFE2 != true ; echo $?)
+export DEBUG_NM_OUTPUT=$(test $DEBUG_NM_OUTPUT != true ; echo $?)
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
 export PYTORCH_BUILD_NUMBER=0
@@ -268,6 +269,16 @@ else
   echo "version logic within setup.py is."
 fi
 
+# Pip converts all - to _
+if [[ $TORCH_PACKAGE_NAME == *-* ]]; then
+  export TORCH_PACKAGE_NAME="$(echo $TORCH_PACKAGE_NAME | tr '-' '_')"
+  echo "WARNING:"
+  echo "Pip will convert all dashes '-' to underscores '_' so we will actually"
+  echo "use $TORCH_PACKAGE_NAME as the package name"
+fi
+
+# Building
+###############################################################################
 # Clone the Pytorch branch into /pytorch, where the script below expects it
 # TODO error out if the branch doesn't exist, as that's probably a user error
 git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
@@ -367,13 +378,14 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.GITHUB_ORG(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
-    ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch-nightly')
+    ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
     ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
+    ParametersUtil.DEBUG_NM_OUTPUT(delegate, false)
   }
   triggers {
     cron('@daily')

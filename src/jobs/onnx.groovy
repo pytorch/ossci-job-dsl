@@ -85,11 +85,6 @@ buildEnvironments.each {
         '${sha1}',
         'Refspec of commit to use (e.g. origin/master)',
       )
-      stringParam(
-        'PYTORCH_GIT_COMMIT',
-        'origin/master',
-        'Commit to use for PyTorch checkout in integrated tests',
-      )
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
 
@@ -171,7 +166,7 @@ pip install pytest-cov nbval
 # checkout pytorch to run integration tests
 PYTORCH_DIR=/tmp/pytorch
 ONNX_DIR="$PYTORCH_DIR/third_party/onnx"
-git clone --recursive https://github.com/pytorch/pytorch.git -b "$PYTORCH_GIT_COMMIT" "$PYTORCH_DIR"
+git clone --recursive https://github.com/pytorch/pytorch.git "$PYTORCH_DIR"
 rm -rf "$ONNX_DIR"
 cp -r "$PWD" "$ONNX_DIR"
 cd "$PYTORCH_DIR"

@@ -151,7 +151,7 @@ fi
 VENV_DIR=/tmp/venv
 
 PYTHON="$(which python)"
-if [[ "${BUILD_ENVIRONMENT}" =~ py((2|3)\.?[0-9]?\.?[0-9]?) ]]; then
+if [[ "${BUILD_ENVIRONMENT}" =~ py((2|3)\\.?[0-9]?\\.?[0-9]?) ]]; then
     PYTHON=$(which "python${BASH_REMATCH[1]}")
 fi
 

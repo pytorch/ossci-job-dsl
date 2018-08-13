@@ -150,14 +150,13 @@ fi
 # setup virtualenv
 VENV_DIR=/tmp/venv
 
-if [[ "${BUILD_ENVIRONMENT}" == py2-* ]]; then
-    python2 -m virtualenv "$VENV_DIR"
-elif [[ "${BUILD_ENVIRONMENT}" == py3* ]]; then
-    python3 -m virtualenv "$VENV_DIR"
-else
-    echo "Unable to detect Python version from BUILD_ENVIRONMENT='$BUILD_ENVIRONMENT'" >&2
-    exit 1
+PYTHON="$(which python)"
+if [[ "${BUILD_ENVIRONMENT}" =~ py((2|3)\.?[0-9]?\.?[0-9]?) ]]; then
+    PYTHON=$(which "python${BASH_REMATCH[1]}")
 fi
+
+$PYTHON -m virtualenv "$VENV_DIR"
+
 source "$VENV_DIR/bin/activate"
 pip install -U pip setuptools
 

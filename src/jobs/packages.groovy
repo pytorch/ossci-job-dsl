@@ -206,7 +206,7 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
-      ParametersUtil.DEBUG_NM_OUTPUT(delegate, false)
+      ParametersUtil.DEBUG(delegate, false)
     }
 
     wrappers {
@@ -258,10 +258,10 @@ if [[ "$FULL_CAFFE2" == 'true' ]]; then
 else
   unset FULL_CAFFE2
 fi
-if [[ "$DEBUG_NM_OUTPUT" == 'true' ]]; then
-  export DEBUN_NM_OUTPUT=1
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
 else
-  unset DEBUG_NM_OUTPUT
+  unset DEBUG
 fi
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
@@ -395,7 +395,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
-    ParametersUtil.DEBUG_NM_OUTPUT(delegate, false)
+    ParametersUtil.DEBUG(delegate, false)
   }
   triggers {
     cron('@daily')

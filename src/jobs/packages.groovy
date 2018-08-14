@@ -379,7 +379,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.PYTORCH_BRANCH(delegate)
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
     ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
-    ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
     ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')

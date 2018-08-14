@@ -252,8 +252,16 @@ if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
 fi
 
 # Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-export FULL_CAFFE2=$(test $FULL_CAFFE2 != true ; echo $?)
-export DEBUG_NM_OUTPUT=$(test $DEBUG_NM_OUTPUT != true ; echo $?)
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG_NM_OUTPUT" == 'true' ]]; then
+  export DEBUN_NM_OUTPUT=1
+else
+  unset DEBUG_NM_OUTPUT
+fi
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
 export PYTORCH_BUILD_NUMBER=0

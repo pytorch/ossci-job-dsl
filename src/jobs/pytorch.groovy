@@ -650,6 +650,7 @@ git status
 
         // TODO: Move this script into repository somewhere
         DockerUtil.shell context: delegate,
+                cudaVersion: cudaVersion,
                 image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
                 workspaceSource: "host-mount",
                 script: '''

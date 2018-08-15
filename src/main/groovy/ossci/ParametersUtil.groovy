@@ -126,6 +126,26 @@ class ParametersUtil {
     }
   }
 
+  static void PYTORCH_BUILD_VERSION(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'PYTORCH_BUILD_VERSION',
+          defaultValue,
+          "PYTORCH_BUILD_VERSION as conda/build_pytorch.sh expects it"
+      )
+    }
+  }
+
+  static void PYTORCH_BUILD_NUMBER(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'PYTORCH_BUILD_NUMBER',
+          defaultValue,
+          "PYTORCH_BUILD_NUMBER as conda/build_pytorch.sh expects it"
+      )
+    }
+  }
+
   static void TORCH_PACKAGE_NAME(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(
@@ -142,6 +162,16 @@ class ParametersUtil {
           'PIP_UPLOAD_FOLDER',
           defaultValue,
           "The folder to upload to. Unset ('') for the default, 'nightly/' for nightly jobs"
+      )
+    }
+  }
+
+  static void TORCH_CONDA_BUILD_FOLDER(BuildParametersContext context, defaultValue = 'pytorch-nightly') {
+    context.with {
+      stringParam(
+          'TORCH_CONDA_BUILD_FOLDER',
+          defaultValue,
+          "The build-folder to call conda-build on."
       )
     }
   }

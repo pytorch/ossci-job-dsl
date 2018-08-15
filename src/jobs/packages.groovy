@@ -9,22 +9,26 @@ import ossci.caffe2.Images
 import ossci.caffe2.DockerVersion
 
 
-def uploadCondaBasePath = 'caffe2-conda-packages'
-def uploadPipBasePath = 'caffe2-pip-packages'
-folder(uploadCondaBasePath) {
+def caffe2OnlyCondaUploadBasePath = 'caffe2-conda-packages'
+def uploadCondaBasePath = 'conda-packages'
+def uploadPipBasePath = 'pip-packages'
+folder(caffe2OnlyCondaUploadBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'
 }
 folder(uploadPipBasePath) {
   description 'Jobs for nightly uploads of Pip packages'
+}
+folder(uploadCondaBasePath) {
+  description 'Jobs for nightly uploads of Conda packages'
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Mac
 //////////////////////////////////////////////////////////////////////////////
-Images.macCondaBuildEnvironments.each {
+Images.macCaffe2CondaBuildEnvironments.each {
   def buildEnvironment = it
-  job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
+  job("${caffe2OnlyCondaUploadBasePath}/${buildEnvironment}-build-upload") {
   JobUtil.common(delegate, 'osx')
   JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
@@ -96,7 +100,7 @@ scripts/build_anaconda.sh --name "$TORCH_PACKAGE_NAME"
 //////////////////////////////////////////////////////////////////////////////
 // Docker conda
 //////////////////////////////////////////////////////////////////////////////
-Images.dockerCondaBuildEnvironments.each {
+Images.dockerCaffe2CondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
   def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
@@ -105,7 +109,7 @@ Images.dockerCondaBuildEnvironments.each {
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
   }
 
-  job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
+  job("${caffe2OnlyCondaUploadBasePath}/${buildEnvironment}-build-upload") {
     JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
@@ -181,6 +185,92 @@ PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.s
     }
   }
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Docker conda
+//////////////////////////////////////////////////////////////////////////////
+Images.dockerCondaBuildEnvironments.each {
+  def buildEnvironment = it
+
+  job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
+    JobUtil.common(delegate, 'docker && gpu')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'torch-nightly')
+      ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+      ParametersUtil.FULL_CAFFE2(delegate, false)
+      ParametersUtil.DEBUG(delegate, false)
+    }
+
+    wrappers {
+      credentialsBinding {
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+
+      // Determine dockerfile, cpu builds on Dockerfile-cuda80
+      def desired_cuda = '80'
+      if (buildEnvironment.contains('cuda')) {
+        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
+        desired_cuda = cudaVer[0][1]
+      }
+
+      // Determine which python version to build
+      def condaVersion = buildEnvironment =~ /^conda([0-9])/
+
+      // Populate environment
+      environmentVariables {
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+        env('DESIRED_PYTHON', condaVersion[0][1])
+        env('DESIRED_CUDA', desired_cuda)
+      }
+
+      DockerUtil.shell context: delegate,
+              image: "soumith/conda-cuda:latest",
+              cudaVersion: 'native',
+              workspaceSource: "docker",
+              usePipDockers: "true",
+              script: '''
+set -ex
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
+else
+  unset DEBUG
+fi
+
+# Clone the Pytorch branch into /pytorch, where the script below expects it
+git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
+pushd /pytorch
+git checkout "$PYTORCH_BRANCH"
+popd
+
+# Build the conda packages
+/remote/conda/build_pytorch.sh $DESIRED_CUDA $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
+'''
+    } // steps
+  }
+} // dockerCondaBuildEnvironments
 
 //////////////////////////////////////////////////////////////////////////////
 // Docker pip
@@ -327,7 +417,7 @@ du -h /remote/wheelhouse*/torch*.whl
 //////////////////////////////////////////////////////////////////////////////
 // Nightly upload jobs - just trigger the jobs above in bulk
 //////////////////////////////////////////////////////////////////////////////
-multiJob("nightly-conda-package-upload") {
+multiJob("nightly-caffe2-conda-package-upload") {
   JobUtil.commonTrigger(delegate)
   JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
   parameters {
@@ -349,7 +439,7 @@ multiJob("nightly-conda-package-upload") {
 
     phase("Build") {
       def definePhaseJob = { name ->
-        phaseJob("${uploadCondaBasePath}/${name}-build-upload") {
+        phaseJob("${caffe2OnlyCondaUploadBasePath}/${name}-build-upload") {
           parameters {
             currentBuild()
             propertiesFile(gitPropertiesFile)
@@ -357,12 +447,12 @@ multiJob("nightly-conda-package-upload") {
         }
       }
 
-      Images.macCondaBuildEnvironments.each {
+      Images.macCaffe2CondaBuildEnvironments.each {
         definePhaseJob(it)
       }
 
-      assert 'conda2-ubuntu16.04' in Images.dockerCondaBuildEnvironments
-      Images.dockerCondaBuildEnvironments.each {
+      assert 'conda2-ubuntu16.04' in Images.dockerCaffe2CondaBuildEnvironments
+      Images.dockerCaffe2CondaBuildEnvironments.each {
         if (!it.contains('gcc4.8')) {
           definePhaseJob(it)
         }
@@ -433,3 +523,56 @@ multiJob("nightly-pip-package-upload") {
     }
   } // steps
 } // nightly pip
+
+
+// nightly conda
+multiJob("nightly-conda-package-upload") {
+  JobUtil.commonTrigger(delegate)
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.GITHUB_ORG(delegate)
+    ParametersUtil.PYTORCH_BRANCH(delegate)
+    ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'torch-nightly')
+    ParametersUtil.CMAKE_ARGS(delegate)
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+    ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+    ParametersUtil.FULL_CAFFE2(delegate, false)
+    ParametersUtil.DEBUG(delegate, false)
+  }
+
+  steps {
+    def gitPropertiesFile = './git.properties'
+    GitUtil.mergeStep(delegate)
+    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+    phase("Build") {
+      def definePhaseJob = { name ->
+        phaseJob("${uploadCondaBasePath}/${name}-build-upload") {
+          parameters {
+            currentBuild()
+            propertiesFile(gitPropertiesFile)
+          }
+        }
+      }
+
+      Images.macCondaBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+
+      assert 'conda2.7-linux' in Images.dockerCondaBuildEnvironments
+      Images.dockerCondaBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+    } // phase(Build)
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript('hellemn@fb.com'))
+      }
+    }
+  } // steps
+} // nightly conda

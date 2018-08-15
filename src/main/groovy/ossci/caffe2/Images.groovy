@@ -129,20 +129,53 @@ class Images {
   // Actual list of all Docker jenkins-builds that will be defined
   static final Collection<String> allDockerBuildEnvironments = baseImageOf.keySet();
 
-  static final Collection<String> dockerCondaBuildEnvironments;
+  static final Collection<String> dockerCaffe2CondaBuildEnvironments;
   static {
-    dockerCondaBuildEnvironments = allDockerBuildEnvironments
+    dockerCaffe2CondaBuildEnvironments = allDockerBuildEnvironments
           .stream()
           .filter { buildEnv -> buildEnv.startsWith("conda") }
           .collect();
   }
 
-  // Pip packages
-  static final List<String> pipCudaVersions = [
+  // Pip and conda packages
+  static final List<String> packageCudaVersions = [
     "",
     "-cuda80",
     "-cuda90"
   ];
+
+  /**
+   * Makes a list of 
+   *   <prefix><cuda_version><python_version>-linux
+   *   <prefix><python_version>-mac
+   * For every cuda version and python version
+   */
+  private static final void populatePackageNames(
+      String prefix,
+      Collection<String> pythonVersions,
+      Collection<String> linuxBuildEnvironments,
+      Collection<String> macBuildEnvironments) {
+
+    Collection<String> baseNames = pythonVersions
+        .stream()
+        .map { pyVer -> prefix + pyVer }
+        .flatMap { pyVer -> packageCudaVersions.stream().map { cudaTag -> pyVer + cudaTag } }
+        .collect();
+
+    linuxBuildEnvironments.addAll(
+        baseNames.stream()
+                 .map { base -> base + "-linux" }
+                 .collect()
+    );
+    macBuildEnvironments.addAll(
+        baseNames.stream()
+                 .filter { buildEnv -> !buildEnv.contains("cuda") }
+                 .map { buildEnv -> buildEnv + "-macos10.13" }
+                 .collect()
+    );
+  }
+
+  // Pip packages
   static final List<String> pipPythonVersions = [
     "cp27-cp27m",
     "cp27-cp27mu",
@@ -150,30 +183,29 @@ class Images {
     "cp36-cp36m",
     "cp37-cp37m",
   ];
-  static final Collection<String> pipNoPlatform;
+  static final Collection<String> dockerPipBuildEnvironments = [];
+  static final Collection<String> macPipBuildEnvironments = [];
   static {
-    pipNoPlatform = pipPythonVersions
-        .stream()
-        .map { pyVer -> "pip-" + pyVer }
-        .flatMap { pipPy -> pipCudaVersions.stream().map { cudaTag -> pipPy + cudaTag } }
-        .collect();
+    populatePackageNames("pip-", pipPythonVersions, dockerPipBuildEnvironments, macPipBuildEnvironments);
+    assert 'pip-cp27-cp27m-linux' in dockerPipBuildEnvironments
+    assert 'pip-cp36-cp36m-cuda90-linux' in dockerPipBuildEnvironments
+    assert 'pip-cp35-cp35m-macos10.13' in macPipBuildEnvironments
   }
 
-  static final Collection<String> dockerPipBuildEnvironments;
+  // Conda packages
+  static final List<String> condaPythonVersions = [
+    "2.7",
+    "3.5",
+    "3.6",
+    "3.7",
+  ];
+  static final Collection<String> dockerCondaBuildEnvironments = [];
+  static final Collection<String> macCondaBuildEnvironments = [];
   static {
-    dockerPipBuildEnvironments = pipNoPlatform
-        .stream()
-        .map { pipJob -> pipJob + "-linux" }
-        .collect();
-  }
-
-  static final Collection<String> macPipBuildEnvironments;
-  static {
-    macPipBuildEnvironments = pipNoPlatform
-        .stream()
-        .filter { buildEnv -> !buildEnv.contains("cuda") }
-        .map { buildEnv -> buildEnv + "-macos10.13" }
-        .collect();
+    populatePackageNames("conda", condaPythonVersions, dockerCondaBuildEnvironments, macCondaBuildEnvironments);
+    assert 'conda2.7-linux' in dockerCondaBuildEnvironments
+    assert 'conda3.6-cuda90-linux' in dockerCondaBuildEnvironments
+    assert 'conda3.5-macos10.13' in macCondaBuildEnvironments
   }
 
 
@@ -199,7 +231,7 @@ class Images {
   // macOs conda-builds referred to by the nightly upload job
   // These jobs are actually defined along with the rest of the
   // macOsBuildEnvironments above
-  static final List<String>  macCondaBuildEnvironments = [
+  static final List<String>  macCaffe2CondaBuildEnvironments = [
     'conda2-macos10.13',
     'conda3-macos10.13',
   ];

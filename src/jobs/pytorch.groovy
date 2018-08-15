@@ -688,18 +688,21 @@ git clone https://github.com/facebookmicrosites/pytorch-tutorials tutorials_repo
 pushd tutorials_repo
 
 # Download dataset for beginner_source/dcgan_faces_tutorial.py
-curl https://s3.amazonaws.com/pytorch-datasets/img_align_celeba.zip --output img_align_celeba.zip
+curl https://s3.amazonaws.com/pytorch-tutorial-assets/img_align_celeba.zip --output img_align_celeba.zip
 sudo mkdir -p /home/ubuntu/facebook/datasets/celeba
 sudo chmod -R 0777 /home/ubuntu/facebook/datasets/celeba
 unzip img_align_celeba.zip -d /home/ubuntu/facebook/datasets/celeba > null
 
 # Download dataset for beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 mkdir data/
-curl https://s3.amazonaws.com/pytorch-datasets/iris.data --output data/iris.data
+curl https://s3.amazonaws.com/pytorch-tutorial-assets/iris.data --output data/iris.data
 
 # Download dataset for beginner_source/audio_classifier_tutorial.py
-curl https://s3.amazonaws.com/pytorch-datasets/UrbanSound8K.tar.gz --output UrbanSound8K.tar.gz
+curl https://s3.amazonaws.com/pytorch-tutorial-assets/UrbanSound8K.tar.gz --output UrbanSound8K.tar.gz
 tar -xzf UrbanSound8K.tar.gz -C ./beginner_source
+
+# Download model for beginner_source/fgsm_tutorial.py
+curl https://s3.amazonaws.com/pytorch-tutorial-assets/lenet_mnist_model.pth --output ./beginner_source/lenet_mnist_model.pth
 
 # We will fix the hybrid frontend tutorials when the API is stable
 rm beginner_source/hybrid_frontend/learning_hybrid_frontend_through_example_tutorial.py

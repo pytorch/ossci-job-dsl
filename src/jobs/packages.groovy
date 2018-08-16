@@ -259,11 +259,7 @@ else
   unset DEBUG
 fi
 
-# Clone the Pytorch branch into /pytorch, where the script below expects it
-git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
-pushd /pytorch
-git checkout "$PYTORCH_BRANCH"
-popd
+# Note. No pytorch repo is needed. conda-build/meta.yaml references it itself
 
 # Build the conda packages
 pushd /remote/conda

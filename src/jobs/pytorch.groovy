@@ -608,98 +608,6 @@ git status
         }
       }
     }
-
-    job("${buildBasePath}/tutorial-push") {
-      JobUtil.common delegate, 'docker && gpu'
-      JobUtil.timeoutAndFailAfter(delegate, 3000)
-      // Explicitly disable concurrent build because this job is racy.
-      concurrentBuild(false)
-      parameters {
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-        ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
-        booleanParam(
-          'TUTORIAL_PUSH',
-          false,
-          'Whether to tutorial push or not',
-        )
-      }
-      wrappers {
-        // This is needed so that Jenkins knows to hide these strings in all the console outputs
-        credentialsBinding {
-          usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-        }
-      } // wrappers
-      scm {
-        git {
-          remote {
-            github('facebookmicrosites/pytorch-tutorials', 'ssh')
-            credentials('pytorchbot')
-          }
-          branch('origin/master')
-          GitUtil.defaultExtensions(delegate)
-        }
-      }
-      steps {
-        // TODO: delete me after BUILD_ENVIRONMENT baked into docker image
-        environmentVariables {
-          env(
-            'BUILD_ENVIRONMENT',
-            "${buildEnvironment}",
-          )
-        }
-
-        // TODO: Move this script into repository somewhere
-        DockerUtil.shell context: delegate,
-                cudaVersion: cudaVersion,
-                image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
-                workspaceSource: "host-copy",
-                script: '''
-set -ex
-
-# yf225 debug
-git log
-ls
-cat .jenkins/build.sh
-
-if test -x ".jenkins/build.sh"; then
-  .jenkins/build.sh
-else
-  exit 1
-fi
-
-mkdir -p ../docs_new
-# Save generated tutorials to a location outside of source, so that we can do a clean checkout to gh-pages
-cp -r docs/* ../docs_new
-
-git clean -xdf
-git checkout -- .
-git checkout gh-pages
-
-cp -r ../docs_new/* ./
-
-if [ "${TUTORIAL_PUSH:-true}" == "false" ]; then
-  echo "Skipping tutorial push..."
-  exit 0
-fi
-
-git status
-git add -A || true
-git config user.email "soumith+bot@pytorch.org"
-git config user.name "pytorchbot"
-git commit -m "Automated tutorials push" || true
-git status
-'''
-      }
-      // WARNING WARNING WARNING: This block is unusual!  Look twice before
-      // copy pasting!
-      publishers {
-        git {
-          // TODO: This has the race in the no-op case with TUTORIAL_PUSH=false. Oops.
-          pushOnlyIfSuccess()
-          branch('origin', 'gh-pages')
-        }
-      }
-    }
   }
 
   if (buildEnvironment == perfTestEnvironment) {
@@ -1218,7 +1126,7 @@ def tutorialPullRequestJobSettings = { context, tutorial_repo, commitSource ->
             booleanParam('TUTORIAL_PUSH', commitSource == "master")
             predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             predefinedProp('COMMIT_SOURCE', commitSource)
-            predefinedProp('GITHUB_REPO', "pytorch/pytorch")
+            predefinedProp('GITHUB_REPO', tutorial_repo)
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }
@@ -1232,7 +1140,7 @@ multiJob("pytorch-tutorial-pull-request") {
   tutorialPullRequestJobSettings(delegate, "facebookmicrosites/pytorch-tutorials", "pull-request")
 }
 
-multiJob("pytorch-tutorial-push") {
+multiJob("pytorch-tutorial-master") {
   delegate.with {
     throttleConcurrentBuilds {
       maxTotal(1)
@@ -1255,7 +1163,7 @@ multiJob("pytorch-tutorial-push") {
             propertiesFile(gitPropertiesFile)
             booleanParam('TUTORIAL_PUSH', true)
             predefinedProp('COMMIT_SOURCE', "master")
-            predefinedProp('GITHUB_REPO', "pytorch/pytorch")
+            predefinedProp('GITHUB_REPO', "facebookmicrosites/pytorch-tutorials")
           }
         }
       }
@@ -1277,46 +1185,147 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     ParametersUtil.COMMIT_SOURCE(delegate)
-    ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+    ParametersUtil.GITHUB_REPO(delegate, 'facebookmicrosites/pytorch-tutorials')
 
     booleanParam(
       'TUTORIAL_PUSH',
       false,
       'Whether to push tutorial or not',
     )
+
+    stringParam(
+      'PYTORCH_VERSION',
+      'master',
+      "The PyTorch version to build on"
+    )
   }
 
   steps {
-    def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
-    def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
-    def builtImageId = '${GIT_COMMIT}'
-
-    phase("Build") {
-      phaseJob("${buildBasePath}/${docAndTutorialEnvironment}-build") {
-        parameters {
-          currentBuild()
-          predefinedProp('GIT_COMMIT', 'master')
-          predefinedProp('GIT_MERGE_TARGET', '')
-          predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
-          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
-          predefinedProp('DOCKER_IMAGE_COMMIT_TAG', builtImageTag)
-          predefinedProp('CAFFE2_DOCKER_IMAGE_COMMIT_TAG', caffe2BuiltImageTag)
-          predefinedProp('IMAGE_COMMIT_ID', builtImageId)
-          predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
-        }
-      }
-    }
-    phase("Test and Push") {
-      phaseJob("${buildBasePath}/tutorial-push") {
+    phase("Build and Push") {
+      phaseJob("${buildBasePath}/tutorial-build-push") {
         parameters {
           predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
           predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-          predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
+          predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
+          predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
           predefinedProp('TUTORIAL_PUSH', '${TUTORIAL_PUSH}')
           predefinedProp('GITHUB_REPO', 'facebookmicrosites/pytorch-tutorials')
+          predefinedProp('PYTORCH_VERSION', 'master')
         }
       }
-    } // phase("Test and Push")
+    } // phase("Build and Push")
   } // steps
 } // multiJob("${buildBasePath}/pytorch-tutorial-push-trigger")
+
+def buildEnvironment = docAndTutorialEnvironment
+def cudaVersion = '';
+if ( buildEnvironment.contains('cuda8') ) {
+  cudaVersion = '8'
+}
+if ( buildEnvironment.contains('cuda9') ) {
+  cudaVersion = '9'
+}
+
+job("${buildBasePath}/tutorial-build-push") {
+  JobUtil.common delegate, 'docker && gpu'
+  JobUtil.timeoutAndFailAfter(delegate, 3000)
+  // Explicitly disable concurrent build because this job is racy.
+  concurrentBuild(false)
+  parameters {
+    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+    ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    booleanParam(
+      'TUTORIAL_PUSH',
+      false,
+      'Whether to tutorial push or not',
+    )
+    stringParam(
+      'PYTORCH_VERSION',
+      'master',
+      "The PyTorch version to build on"
+    )
+  }
+  wrappers {
+    // This is needed so that Jenkins knows to hide these strings in all the console outputs
+    credentialsBinding {
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  } // wrappers
+  scm {
+    git {
+      remote {
+        github('${GITHUB_REPO}', 'ssh')
+        credentials('pytorchbot')
+      }
+      branch('origin/master')
+      GitUtil.defaultExtensions(delegate)
+    }
+  }
+  steps {
+    // TODO: delete me after BUILD_ENVIRONMENT baked into docker image
+    environmentVariables {
+      env(
+        'BUILD_ENVIRONMENT',
+        "${buildEnvironment}",
+      )
+    }
+
+    // TODO: Move this script into repository somewhere
+    DockerUtil.shell context: delegate,
+            cudaVersion: cudaVersion,
+            image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
+            workspaceSource: "host-copy",
+            script: '''
+set -ex
+
+# yf225 debug
+git log
+ls
+cat .jenkins/build.sh
+
+# Build PyTorch
+git clone https://github.com/pytorch/pytorch.git -b ${PYTORCH_VERSION}
+pushd pytorch
+git submodule update --init || git submodule update --init || git submodule update --init  # Reinitialize submodules
+.jenkins/pytorch/build.sh
+popd
+
+if test -x ".jenkins/build.sh"; then
+  .jenkins/build.sh
+else
+  exit 1
+fi
+
+mkdir -p ../docs_new
+# Save generated tutorials to a location outside of source, so that we can do a clean checkout to gh-pages
+cp -r docs/* ../docs_new
+
+git clean -xdf
+git checkout -- .
+git checkout gh-pages
+
+cp -r ../docs_new/* ./
+
+if [ "${TUTORIAL_PUSH:-true}" == "false" ]; then
+echo "Skipping tutorial push..."
+exit 0
+fi
+
+git status
+git add -A || true
+git config user.email "soumith+bot@pytorch.org"
+git config user.name "pytorchbot"
+git commit -m "Automated tutorials push" || true
+git status
+'''
+  }
+  // WARNING WARNING WARNING: This block is unusual!  Look twice before
+  // copy pasting!
+  publishers {
+    git {
+      // TODO: This has the race in the no-op case with TUTORIAL_PUSH=false. Oops.
+      pushOnlyIfSuccess()
+      branch('origin', 'gh-pages')
+    }
+  }
+}

@@ -243,7 +243,7 @@ Images.dockerCondaBuildEnvironments.each {
               image: "soumith/conda-cuda:latest",
               cudaVersion: 'native',
               workspaceSource: "docker",
-              usePipDockers: "true",
+              specialHomedir: "/remote/conda/",
               script: '''
 set -ex
 
@@ -331,7 +331,7 @@ Images.dockerPipBuildEnvironments.each {
               image: "soumith/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: 'native',
               workspaceSource: "docker",
-              usePipDockers: "true",
+              specialHomedir: "/remote/manywheel/",
               script: '''
 set -ex
 

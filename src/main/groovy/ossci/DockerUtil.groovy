@@ -98,7 +98,7 @@ docker_args+=" -d"
 # See: https://github.com/pytorch/pytorch/issues/2244
 docker_args+=" --shm-size 8G"
 
-if [ -z "$USE_PIP_DOCKERS" ]; then
+if [ -z "$SPECIAL_HOMEDIR" ]; then
   # This is the home directory, but isn't really used directly in any scripts
   docker_homedir="/var/lib/jenkins"
   # The github repo will be cloned to workspace, and most scripts do most of
@@ -113,7 +113,7 @@ else
   # /remote.
   docker_homedir="/"
   docker_workspace="/remote"
-  docker_host_workspace="/remote"
+  docker_host_workspace="$SPECIAL_HOMEDIR"
   docker_user=""
   docker_args+=" --ipc=host"
 fi
@@ -246,7 +246,7 @@ exit 0
         env('WORKSPACE_SOURCE', attrs.getOrDefault("workspaceSource", "host-mount"))
         env('COPY_WORKSPACE', attrs.getOrDefault("copyWorkspace", ""))
         env('IMPORT_ENV', attrs.getOrDefault("importEnv", 1))
-        env('USE_PIP_DOCKERS', attrs.getOrDefault("usePipDockers", ""))
+        env('SPECIAL_HOMEDIR', attrs.getOrDefault("specialHomedir", ""))
       }
 
       // If we're using Amazon ECR then we can't use fixed credentials

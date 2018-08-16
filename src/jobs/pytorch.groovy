@@ -1250,20 +1250,18 @@ def tutorialPullRequestJobSettings = { context, repo, commitSource ->
       }
 
       phase("Build") {
-        buildEnvironments.each {
-          phaseJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
-            parameters {
-              // Pass parameters of this job
-              currentBuild()
-              // Checkout this exact same revision in downstream builds.
-              gitRevision()
-              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-              predefinedProp('COMMIT_SOURCE', commitSource)
-              predefinedProp('GITHUB_REPO', repo)
-              // Ensure consistent merge behavior in downstream builds.
-              propertiesFile(gitPropertiesFile)
-            }
+        phaseJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
+          parameters {
+            // Pass parameters of this job
+            currentBuild()
+            // Checkout this exact same revision in downstream builds.
+            gitRevision()
+            // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+            predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+            predefinedProp('COMMIT_SOURCE', commitSource)
+            predefinedProp('GITHUB_REPO', repo)
+            // Ensure consistent merge behavior in downstream builds.
+            propertiesFile(gitPropertiesFile)
           }
         }
       }

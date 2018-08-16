@@ -138,12 +138,6 @@ class Images {
   }
 
   // Pip and conda packages
-  static final List<String> packageCudaVersions = [
-    "",
-    "-cuda80",
-    "-cuda90"
-  ];
-
   /**
    * Makes a list of 
    *   <prefix><cuda_version><python_version>-linux
@@ -153,13 +147,14 @@ class Images {
   private static final void populatePackageNames(
       String prefix,
       Collection<String> pythonVersions,
+      Collection<String> cudaVersions,
       Collection<String> linuxBuildEnvironments,
       Collection<String> macBuildEnvironments) {
 
     Collection<String> baseNames = pythonVersions
         .stream()
         .map { pyVer -> prefix + pyVer }
-        .flatMap { pyVer -> packageCudaVersions.stream().map { cudaTag -> pyVer + cudaTag } }
+        .flatMap { pyVer -> cudaVersions.stream().map { cudaTag -> pyVer + cudaTag } }
         .collect();
 
     linuxBuildEnvironments.addAll(
@@ -183,10 +178,15 @@ class Images {
     "cp36-cp36m",
     "cp37-cp37m",
   ];
+  static final List<String> pipCudaVersions = [
+    "",
+    "-cuda80",
+    "-cuda90"
+  ];
   static final Collection<String> dockerPipBuildEnvironments = [];
   static final Collection<String> macPipBuildEnvironments = [];
   static {
-    populatePackageNames("pip-", pipPythonVersions, dockerPipBuildEnvironments, macPipBuildEnvironments);
+    populatePackageNames("pip-", pipPythonVersions, pipCudaVersions, dockerPipBuildEnvironments, macPipBuildEnvironments);
     assert 'pip-cp27-cp27m-linux' in dockerPipBuildEnvironments
     assert 'pip-cp36-cp36m-cuda90-linux' in dockerPipBuildEnvironments
     assert 'pip-cp35-cp35m-macos10.13' in macPipBuildEnvironments
@@ -199,13 +199,16 @@ class Images {
     "3.6",
     "3.7",
   ];
+  static final List<String> condaCudaVersions = [
+    "-cuda80",
+    "-cuda90",
+    "-cuda92"
+  ];
   static final Collection<String> dockerCondaBuildEnvironments = [];
   static final Collection<String> macCondaBuildEnvironments = [];
   static {
-    populatePackageNames("conda", condaPythonVersions, dockerCondaBuildEnvironments, macCondaBuildEnvironments);
-    assert 'conda2.7-linux' in dockerCondaBuildEnvironments
+    populatePackageNames("conda", condaPythonVersions, condaCudaVersions, dockerCondaBuildEnvironments, macCondaBuildEnvironments);
     assert 'conda3.6-cuda90-linux' in dockerCondaBuildEnvironments
-    assert 'conda3.5-macos10.13' in macCondaBuildEnvironments
   }
 
 

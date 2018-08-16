@@ -98,7 +98,7 @@ scripts/build_anaconda.sh --name "$TORCH_PACKAGE_NAME"
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Docker conda
+// Docker Caffe2 conda
 //////////////////////////////////////////////////////////////////////////////
 Images.dockerCaffe2CondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
@@ -560,7 +560,7 @@ multiJob("nightly-conda-package-upload") {
         definePhaseJob(it)
       }
 
-      assert 'conda2.7-linux' in Images.dockerCondaBuildEnvironments
+      assert 'conda2.7-cuda80-linux' in Images.dockerCondaBuildEnvironments
       Images.dockerCondaBuildEnvironments.each {
         definePhaseJob(it)
       }

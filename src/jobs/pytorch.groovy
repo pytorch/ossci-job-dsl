@@ -618,7 +618,7 @@ git status
         ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
         booleanParam(
-          'DOC_PUSH',
+          'TUTORIAL_PUSH',
           false,
           'Whether to tutorial push or not',
         )
@@ -665,6 +665,16 @@ if [ "${TUTORIAL_PUSH:-true}" == "false" ]; then
   exit 0
 fi
 
+mkdir -p ../docs_new
+# Save generated tutorials to a location outside of source, so that we can do a clean checkout to gh-pages
+cp -r docs/* ../docs_new
+
+git clean -xdf
+git checkout -- .
+git checkout gh-pages
+
+cp -r ../docs_new/* ./
+
 git status
 git add -A || true
 git config user.email "soumith+bot@pytorch.org"
@@ -677,7 +687,7 @@ git status
       // copy pasting!
       publishers {
         git {
-          // TODO: This has the race in the no-op case with DOC_PUSH=false. Oops.
+          // TODO: This has the race in the no-op case with TUTORIAL_PUSH=false. Oops.
           pushOnlyIfSuccess()
           branch('origin', 'gh-pages')
         }
@@ -1261,6 +1271,12 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
     ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     ParametersUtil.COMMIT_SOURCE(delegate)
     ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+
+    booleanParam(
+      'TUTORIAL_PUSH',
+      false,
+      'Whether to push tutorial or not',
+    )
   }
 
   steps {
@@ -1272,26 +1288,27 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
       phaseJob("${buildBasePath}/${docAndTutorialEnvironment}-build") {
         parameters {
           currentBuild()
-          predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-          predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+          predefinedProp('GIT_COMMIT', 'master')
+          predefinedProp('GIT_MERGE_TARGET', '')
           predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
           predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
           predefinedProp('DOCKER_IMAGE_COMMIT_TAG', builtImageTag)
           predefinedProp('CAFFE2_DOCKER_IMAGE_COMMIT_TAG', caffe2BuiltImageTag)
           predefinedProp('IMAGE_COMMIT_ID', builtImageId)
-          predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+          predefinedProp('GITHUB_REPO', 'pytorch/pytorch')
         }
       }
     }
     phase("Test and Push") {
       phaseJob("${buildBasePath}/tutorial-push") {
         parameters {
+          predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+          predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
           predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
           predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-          predefinedProp('DOC_PUSH', '${DOC_PUSH}')
-          predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+          predefinedProp('TUTORIAL_PUSH', '${TUTORIAL_PUSH}')
+          predefinedProp('GITHUB_REPO', 'facebookmicrosites/pytorch-tutorials')
         }
-        PhaseJobUtil.condition(delegate, '"${COMMIT_SOURCE}" == "master"')
       }
     } // phase("Test and Push")
   } // steps

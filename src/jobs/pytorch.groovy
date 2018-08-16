@@ -656,13 +656,13 @@ git status
                 script: '''
 set -ex
 
+# yf225 debug
+cat .jenkins/build.sh
+
 if test -x ".jenkins/build.sh"; then
   .jenkins/build.sh
-fi
-
-if [ "${TUTORIAL_PUSH:-true}" == "false" ]; then
-  echo "Skipping tutorial push..."
-  exit 0
+else
+  exit 1
 fi
 
 mkdir -p ../docs_new
@@ -674,6 +674,11 @@ git checkout -- .
 git checkout gh-pages
 
 cp -r ../docs_new/* ./
+
+if [ "${TUTORIAL_PUSH:-true}" == "false" ]; then
+  echo "Skipping tutorial push..."
+  exit 0
+fi
 
 git status
 git add -A || true

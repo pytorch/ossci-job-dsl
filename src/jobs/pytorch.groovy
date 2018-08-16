@@ -1226,9 +1226,9 @@ fi
   } // if (buildEnvironment.contains("win"))
 } // buildEnvironments.each
 
-def tutorialPullRequestJobSettings = { context, repo, commitSource ->
+def tutorialPullRequestJobSettings = { context, tutorial_repo, commitSource ->
   context.with {
-    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    JobUtil.gitHubPullRequestTrigger(delegate, tutorial_repo, pytorchbotAuthId, Users)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
@@ -1259,7 +1259,7 @@ def tutorialPullRequestJobSettings = { context, repo, commitSource ->
             // See https://github.com/jenkinsci/ghprb-plugin/issues/591
             predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
             predefinedProp('COMMIT_SOURCE', commitSource)
-            predefinedProp('GITHUB_REPO', repo)
+            predefinedProp('GITHUB_REPO', "pytorch/pytorch")
             // Ensure consistent merge behavior in downstream builds.
             propertiesFile(gitPropertiesFile)
           }

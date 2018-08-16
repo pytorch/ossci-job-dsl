@@ -657,6 +657,7 @@ git status
 set -ex
 
 # yf225 debug
+git log
 ls
 cat .jenkins/build.sh
 

@@ -1309,6 +1309,7 @@ multiJob("pytorch-tutorial-push") {
 
 multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
   JobUtil.commonTrigger(delegate)
+  JobUtil.subJobDownstreamCommitStatus(delegate, buildEnvironment)
 
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)

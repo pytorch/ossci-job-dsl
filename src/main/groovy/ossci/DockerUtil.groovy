@@ -116,7 +116,7 @@ else
   docker_host_workspace="/remote"
   docker_user=""
   docker_args+=" --ipc=host"
-  sed -i 's#HOME="/var/lib/jenkins"#HOME="/"#g' ./etc
+  sed -i 's#HOME="/var/lib/jenkins"#HOME="/"#g' ./env
 fi
 
 # Mount the workspace to another location so we can copy files to it

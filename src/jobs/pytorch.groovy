@@ -693,13 +693,20 @@ sudo mkdir -p /home/ubuntu/facebook/datasets/celeba
 sudo chmod -R 0777 /home/ubuntu/facebook/datasets/celeba
 unzip img_align_celeba.zip -d /home/ubuntu/facebook/datasets/celeba > null
 
-# Download dataset for beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 mkdir data/
+
+# Download dataset for beginner_source/hybrid_frontend/introduction_to_hybrid_frontend_tutorial.py
 curl https://s3.amazonaws.com/pytorch-tutorial-assets/iris.data --output data/iris.data
+
+# Download dataset for beginner_source/chatbot_tutorial.py
+curl https://s3.amazonaws.com/pytorch-tutorial-assets/cornell_movie_dialogs_corpus.zip --output cornell_movie_dialogs_corpus.zip
+unzip cornell_movie_dialogs_corpus.zip -d data/ > null
 
 # Download dataset for beginner_source/audio_classifier_tutorial.py
 curl https://s3.amazonaws.com/pytorch-tutorial-assets/UrbanSound8K.tar.gz --output UrbanSound8K.tar.gz
 tar -xzf UrbanSound8K.tar.gz -C ./beginner_source
+
+
 
 # Download model for beginner_source/fgsm_tutorial.py
 curl https://s3.amazonaws.com/pytorch-tutorial-assets/lenet_mnist_model.pth --output ./beginner_source/lenet_mnist_model.pth
@@ -1218,6 +1225,55 @@ fi
     }
   } // if (buildEnvironment.contains("win"))
 } // buildEnvironments.each
+
+def tutorialPullRequestJobSettings = { context, repo, commitSource ->
+  context.with {
+    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    parameters {
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+    }
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    } // wrappers
+    steps {
+      def gitPropertiesFile = './git.properties'
+
+      GitUtil.mergeStep(delegate)
+      GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
+
+      environmentVariables {
+        propertiesFile(gitPropertiesFile)
+      }
+
+      phase("Build") {
+        buildEnvironments.each {
+          phaseJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
+            parameters {
+              // Pass parameters of this job
+              currentBuild()
+              // Checkout this exact same revision in downstream builds.
+              gitRevision()
+              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              predefinedProp('COMMIT_SOURCE', commitSource)
+              predefinedProp('GITHUB_REPO', repo)
+              // Ensure consistent merge behavior in downstream builds.
+              propertiesFile(gitPropertiesFile)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+multiJob("pytorch-tutorial-pull-request") {
+  tutorialPullRequestJobSettings(delegate, "facebookmicrosites/pytorch-tutorials", "pull-request")
+}
 
 multiJob("pytorch-tutorial-push") {
   delegate.with {

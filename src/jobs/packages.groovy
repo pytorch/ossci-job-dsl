@@ -230,7 +230,7 @@ Images.dockerCondaBuildEnvironments.each {
       }
 
       // Determine which python version to build
-      def condaVersion = buildEnvironment =~ /^conda([0-9])/
+      def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
 
       // Populate environment
       environmentVariables {

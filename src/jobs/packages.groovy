@@ -223,7 +223,7 @@ Images.dockerCondaBuildEnvironments.each {
       GitUtil.mergeStep(delegate)
 
       // Determine dockerfile, cpu builds on Dockerfile-cuda80
-      def desired_cuda = '80'
+      def desired_cuda = 'cpu'
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
         desired_cuda = cudaVer[0][1]

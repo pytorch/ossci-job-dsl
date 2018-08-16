@@ -652,7 +652,7 @@ git status
         DockerUtil.shell context: delegate,
                 cudaVersion: cudaVersion,
                 image: dockerImage(buildEnvironment, '${BUILD_ENVIRONMENT}', '${DOCKER_IMAGE_TAG}','${CAFFE2_DOCKER_IMAGE_TAG}'),
-                workspaceSource: "host-mount",
+                workspaceSource: "host-copy",
                 script: '''
 set -ex
 

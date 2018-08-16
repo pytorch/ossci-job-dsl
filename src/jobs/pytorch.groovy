@@ -657,6 +657,7 @@ git status
 set -ex
 
 # yf225 debug
+ls
 cat .jenkins/build.sh
 
 if test -x ".jenkins/build.sh"; then

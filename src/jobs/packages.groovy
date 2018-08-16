@@ -266,7 +266,8 @@ git checkout "$PYTORCH_BRANCH"
 popd
 
 # Build the conda packages
-/remote/conda/build_pytorch.sh $DESIRED_CUDA $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
+pushd /remote/conda
+./build_pytorch.sh $DESIRED_CUDA $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
 '''
     } // steps
   }

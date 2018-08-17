@@ -1229,8 +1229,11 @@ if ( buildEnvironment.contains('cuda9') ) {
 job("${buildBasePath}/tutorial-build-push") {
   JobUtil.common delegate, 'docker && gpu'
   JobUtil.timeoutAndFailAfter(delegate, 3000)
-  // Explicitly disable concurrent build because this job is racy.
-  concurrentBuild(false)
+  JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+  if ('${TUTORIAL_PUSH}' == 'true') {
+    // Explicitly disable concurrent build because this job is racy.
+    concurrentBuild(false)
+  }
   parameters {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
@@ -1251,14 +1254,16 @@ job("${buildBasePath}/tutorial-build-push") {
       usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
     }
   } // wrappers
-  scm {
-    git {
-      remote {
-        github('${GITHUB_REPO}', 'ssh')
-        credentials('pytorchbot')
+  if ('${TUTORIAL_PUSH}' == 'true') {
+    scm {
+      git {
+        remote {
+          github('${GITHUB_REPO}', 'ssh')
+          credentials('pytorchbot')
+        }
+        branch('origin/master')
+        GitUtil.defaultExtensions(delegate)
       }
-      branch('origin/master')
-      GitUtil.defaultExtensions(delegate)
     }
   }
   steps {
@@ -1321,11 +1326,13 @@ git status
   }
   // WARNING WARNING WARNING: This block is unusual!  Look twice before
   // copy pasting!
-  publishers {
-    git {
-      // TODO: This has the race in the no-op case with TUTORIAL_PUSH=false. Oops.
-      pushOnlyIfSuccess()
-      branch('origin', 'gh-pages')
+  if ('${TUTORIAL_PUSH}' == 'true') {
+    publishers {
+      git {
+        // TODO: This has the race in the no-op case with TUTORIAL_PUSH=false. Oops.
+        pushOnlyIfSuccess()
+        branch('origin', 'gh-pages')
+      }
     }
   }
 }

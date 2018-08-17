@@ -181,7 +181,8 @@ class Images {
   static final List<String> pipCudaVersions = [
     "",
     "-cuda80",
-    "-cuda90"
+    "-cuda90",
+    "-cuda92"
   ];
   static final Collection<String> dockerPipBuildEnvironments = [];
   static final Collection<String> macPipBuildEnvironments = [];

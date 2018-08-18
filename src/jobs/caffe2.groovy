@@ -314,7 +314,11 @@ git status
 
   // All docker builds
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, 'docker && cpu')
+    if (buildEnvironment.contains('rocm')) {
+      JobUtil.common(delegate, 'docker && bigcpu')
+    } else {
+      JobUtil.common(delegate, 'docker && cpu')
+    }
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {

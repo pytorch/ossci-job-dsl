@@ -540,6 +540,9 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
+  triggers {
+    cron('@daily')
+  }
 
   steps {
     def gitPropertiesFile = './git.properties'

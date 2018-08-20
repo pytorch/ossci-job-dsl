@@ -51,7 +51,7 @@ class ParametersUtil {
       stringParam(
           'EXTRA_CAFFE2_CMAKE_FLAGS',
           defaultValue,
-          'Additional arguments passed to build_pytorch_libs::build_caffe2',
+          'Additional arguments passed to build_pytorch_libs::build_caffe2 (all flags that need to hit root-level-cmake)',
       )
     }
   }
@@ -81,7 +81,7 @@ class ParametersUtil {
       stringParam(
           'PYTORCH_BRANCH',
           defaultValue,
-          'Branch of $GITHUB_ORG/pytorch repo to checkout to build wheels for'
+          'Branch of $GITHUB_ORG/pytorch repo to checkout to build wheels for. This can also be a commit hash. It will be passed straight into "git checkout <>"'
       )
     }
   }

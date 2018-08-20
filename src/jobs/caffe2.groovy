@@ -371,10 +371,6 @@ git status
               script: '''
 set -ex
 
-# Need to checkout fetch PRs for onnxbot tracking PRs
-git submodule update --init third_party/onnx || true
-cd third_party/onnx && git fetch --tags --progress origin +refs/pull/*:refs/remotes/origin/pr/* && cd -
-
 # Reinitialize submodules
 git submodule update --init --recursive
 
@@ -696,10 +692,6 @@ Images.macOsBuildEnvironments.each {
 
       MacOSUtil.sandboxShell delegate, '''
 set -ex
-
-# Need to checkout fetch PRs for onnxbot tracking PRs
-git submodule update --init third_party/onnx || true
-cd third_party/onnx && git fetch --tags --progress origin +refs/pull/*:refs/remotes/origin/pr/* && cd -
 
 # Reinitialize submodules
 git submodule update --init --recursive

@@ -386,26 +386,40 @@ popd
 if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
   /remote/manywheel/build.sh
   wheelhouse_dir="/remote/wheelhouse$CUDA_NO_DOT"
+  libtorch_house_dir="/remote/libtorch_house$CUDA_NO_DOT"
   s3_dir="cu$CUDA_NO_DOT"
 else
   /remote/manywheel/build_cpu.sh
   wheelhouse_dir="/remote/wheelhousecpu"
+  libtorch_house_dir="/remote/libtorch_housecpu"
   s3_dir="cpu"
 fi
 
 # Upload pip packages to s3, as they're too big for PyPI
 if [[ $UPLOAD_PACKAGE == true ]]; then
+  yes | /opt/python/cp27-cp27m/bin/pip install awscli==1.6.6
+
   # This logic is taken from builder/manywheel/upload.sh but is copied here so
   # that we can run just the one line we need and fail the job if the upload
   # fails
   echo "Uploading all of: $(ls $wheelhouse_dir) to: s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/"
-  yes | /opt/python/cp27-cp27m/bin/pip install awscli==1.6.6
   ls "$wheelhouse_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
+
+  echo "Uploading all of: $(ls $libtorch_house_dir) to: s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/"
+  ls "$libtorch_house_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $libtorch_house_dir/{} "s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 fi
 
 # Print sizes of all wheels
 echo "Succesfully built wheels of size:"
-du -h /remote/wheelhouse*/torch*.whl
+if ls /remote/wheelhouse*/torch*.whl >/dev/null 2>&1; then
+  du -h /remote/wheelhouse*/torch*.whl
+fi
+
+# Print sizes of all libtorch packages
+echo "Succesfully built libtorchs of size:"
+if ls /remote/libtorch_house*/libtorch*.zip >/dev/null 2>&1; then
+  du -h /remote/libtorch_house*/libtorch*.zip
+fi
 '''
     } // steps
   }

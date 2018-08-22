@@ -166,6 +166,13 @@ class Images {
     );
   }
 
+  static final List<String> packagesDockerBaseImages = [
+    "manylinux-cuda80",
+    "manylinux-cuda90",
+    "manylinux-cuda92",
+    "conda-cuda"
+  ];
+
   // Pip packages
   static final List<String> pipPythonVersions = [
     "cp27-cp27m",

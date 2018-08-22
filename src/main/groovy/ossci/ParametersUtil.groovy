@@ -56,6 +56,16 @@ class ParametersUtil {
     }
   }
 
+  static void RUN_TEST_PARAMS(BuildParametersContext context, defaultValue = '') {
+    context.with {
+      stringParam(
+          'RUN_TEST_PARAMS',
+          defaultValue,
+          'Passed to run_test.py as is. e.g. "-i c10d -v" for only c10d tests with verbose',
+      )
+    }
+  }
+
   static void HYPOTHESIS_SEED(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

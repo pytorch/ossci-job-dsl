@@ -75,6 +75,7 @@ fi
 
 # Build new image
 docker pull soumith/${JOB_BASE_NAME}
+docker tag soumith/${JOB_BASE_NAME} ${JOB_BASE_NAME}
 docker push "${image}:latest"
 '''
     }

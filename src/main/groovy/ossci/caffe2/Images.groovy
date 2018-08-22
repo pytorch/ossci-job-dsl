@@ -199,7 +199,6 @@ class Images {
   static final List<String> condaCudaVersions = [
     "-cuda80",
     "-cuda90",
-    "-cuda92"
   ];
   static final Collection<String> dockerCondaBuildEnvironments = [];
   static final Collection<String> macCondaBuildEnvironments = [];

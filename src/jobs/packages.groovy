@@ -22,10 +22,6 @@ folder(uploadCondaBasePath) {
   description 'Jobs for nightly uploads of Conda packages'
 }
 
-def dockerImage = { imageName ->
-  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/packages/${imageName}:latest"
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Mac
@@ -108,7 +104,7 @@ Images.dockerCaffe2CondaBuildEnvironments.each {
   // Capture variable for delayed evaluation
   def buildEnvironment = it
   def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
-  def caffe2DockerImage = { tag ->
+  def dockerImage = { tag ->
     // If image tag contains '/', we need to replace it with '-'
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
   }
@@ -160,7 +156,7 @@ Images.dockerCaffe2CondaBuildEnvironments.each {
       }
 
       DockerUtil.shell context: delegate,
-              image: caffe2DockerImage('${DOCKER_IMAGE_TAG}'),
+              image: dockerImage('${DOCKER_IMAGE_TAG}'),
               cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place
@@ -244,7 +240,7 @@ Images.dockerCondaBuildEnvironments.each {
       }
 
       DockerUtil.shell context: delegate,
-              image: dockerImage('conda-cuda'),
+              image: "soumith/conda-cuda:latest",
               cudaVersion: 'native',
               workspaceSource: "docker",
               usePipDockers: "true",
@@ -330,7 +326,7 @@ Images.dockerPipBuildEnvironments.each {
       }
 
       DockerUtil.shell context: delegate,
-              image: dockerImage("manylinux-cuda${cudaNoDot}"),
+              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: 'native',
               workspaceSource: "docker",
               usePipDockers: "true",

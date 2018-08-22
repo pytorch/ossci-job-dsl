@@ -326,7 +326,7 @@ Images.dockerPipBuildEnvironments.each {
       }
 
       DockerUtil.shell context: delegate,
-              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
+              image: "308535385114.dkr.ecr.us-east-1.amazonaws.com/packages/manylinux-cuda${cudaNoDot}:latest",
               cudaVersion: 'native',
               workspaceSource: "docker",
               usePipDockers: "true",

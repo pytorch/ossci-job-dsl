@@ -250,12 +250,9 @@ exit 0
         env('USE_PIP_DOCKERS', attrs.getOrDefault("usePipDockers", ""))
       }
 
-      // TODO For some reason, don't login if using the pip dockers
-      if (!attrs.containsKey('USE_PIP_DOCKERS')) {
-
-        // If we're using Amazon ECR then we can't use fixed credentials
-        if (attrs.image.contains(".ecr.us-east-1.amazonaws.com")) {
-          shell """#!/bin/bash
+      // If we're using Amazon ECR then we can't use fixed credentials
+      if (attrs.image.contains(".ecr.us-east-1.amazonaws.com")) {
+        shell """#!/bin/bash
 registry=\$(echo "\${DOCKER_IMAGE}" | awk -F/ '{print \$1}')
 echo "Logging into \${registry}"
 retry () {
@@ -269,16 +266,16 @@ do_login () {
 }
 retry do_login
 """
-        }
+      }
 
-        // Optionally login with registry before doing anything
-        def credentials = attrs.get("registryCredentials")
-        if (credentials != null) {
-          def username = credentials[0]
-          def password = credentials[1]
-          def registry = attrs.image.split('/').first()
+      // Optionally login with registry before doing anything
+      def credentials = attrs.get("registryCredentials")
+      if (credentials != null) {
+        def username = credentials[0]
+        def password = credentials[1]
+        def registry = attrs.image.split('/').first()
 
-          shell """#!/bin/bash
+        shell """#!/bin/bash
 echo "Logging into ${registry}"
 retry () {
     \$*  || (sleep 1 && \$*) || (sleep 2 && \$*)
@@ -288,10 +285,9 @@ do_login () {
 }
 retry do_login
 """
-        }
+      }
 
-        shell(prefix + attrs.script)
-      } // if not USE_PIP_DOCKERS
+      shell(prefix + attrs.script)
     }
   }
 }

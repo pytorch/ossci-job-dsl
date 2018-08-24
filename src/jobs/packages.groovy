@@ -170,7 +170,7 @@ source ${TMPDIR}/anaconda/bin/activate
 
 # Build
 # Build the conda packages
-pushd /remote/conda
+pushd conda
 ./build_pytorch.sh cpu $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
 '''
     }

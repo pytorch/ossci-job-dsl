@@ -482,12 +482,12 @@ fi
 if [[ $UPLOAD_PACKAGE == true ]]; then
   yes | /opt/python/cp27-cp27m/bin/pip install awscli==1.6.6
 
-  # This logic is taken from builder/manywheel/upload.sh but is copied here so
-  # that we can run just the one line we need and fail the job if the upload
-  # fails
-  echo "Uploading all of: $(ls $wheelhouse_dir) to: s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/"
-  ls "$wheelhouse_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $wheelhouse_dir/{} "s3://pytorch/whl/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
+  # Upload wheel
+  pushd /remote
+  PATH=/opt/python/cp27-cp-27m/bin/:$PATH CUDA_VERSIONS=$s3_dir /remote/manywheel/upload.sh
+  popd
 
+  # Upload libtorch
   echo "Uploading all of: $(ls $libtorch_house_dir) to: s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/"
   ls "$libtorch_house_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $libtorch_house_dir/{} "s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 fi

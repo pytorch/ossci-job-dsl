@@ -483,7 +483,7 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
 
   # Upload wheel
   pushd /remote
-  PATH=/opt/python/cp27-cp-27m/bin/:$PATH CUDA_VERSIONS=$s3_dir /remote/manywheel/upload.sh
+  PATH=/opt/python/cp27-cp27m/bin/:$PATH CUDA_VERSIONS=$s3_dir /remote/manywheel/upload.sh
   popd
 
   # Upload libtorch

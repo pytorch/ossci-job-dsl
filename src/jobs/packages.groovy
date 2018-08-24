@@ -112,6 +112,7 @@ Images.macCondaBuildEnvironments.each {
       ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'pytorch-nightly')
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+      ParametersUtil.RUN_TEST_PARAMS(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')

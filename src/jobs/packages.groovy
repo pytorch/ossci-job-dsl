@@ -30,12 +30,11 @@ Images.macCaffe2CondaBuildEnvironments.each {
   def buildEnvironment = it
   job("${caffe2OnlyCondaUploadBasePath}/${buildEnvironment}-build-upload") {
   JobUtil.common(delegate, 'osx')
-  JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
 
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
     ParametersUtil.UPLOAD_PACKAGE(delegate)
     ParametersUtil.TORCH_PACKAGE_NAME(delegate)
@@ -103,7 +102,7 @@ Images.macCondaBuildEnvironments.each {
   def buildEnvironment = it
   job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
   JobUtil.common(delegate, 'osx')
-  JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)

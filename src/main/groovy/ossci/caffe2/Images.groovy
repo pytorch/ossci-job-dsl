@@ -204,6 +204,7 @@ class Images {
     "3.7",
   ];
   static final List<String> condaCudaVersions = [
+    "",
     "-cuda80",
     "-cuda90",
   ];
@@ -211,6 +212,7 @@ class Images {
   static final Collection<String> macCondaBuildEnvironments = [];
   static {
     populatePackageNames("conda", condaPythonVersions, condaCudaVersions, dockerCondaBuildEnvironments, macCondaBuildEnvironments);
+    assert 'conda3.6-macos10.13' in macCondaBuildEnvironments
     assert 'conda3.6-cuda90-linux' in dockerCondaBuildEnvironments
   }
 

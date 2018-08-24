@@ -24,7 +24,7 @@ folder(uploadCondaBasePath) {
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Mac
+// Mac Caffe2 Conda
 //////////////////////////////////////////////////////////////////////////////
 Images.macCaffe2CondaBuildEnvironments.each {
   def buildEnvironment = it
@@ -94,7 +94,89 @@ scripts/build_anaconda.sh --name "$TORCH_PACKAGE_NAME"
 '''
     }
   }
-} // macOsBuildEnvironments.each
+} // macCaffe2CondaBuildEnvironments.each
+
+//////////////////////////////////////////////////////////////////////////////
+// Mac Conda
+//////////////////////////////////////////////////////////////////////////////
+Images.macCondaBuildEnvironments.each {
+  def buildEnvironment = it
+  job("${uploadCondaBasePath}/${buildEnvironment}-build-upload") {
+  JobUtil.common(delegate, 'osx')
+  JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'pytorch-nightly')
+      ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+      ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+      ParametersUtil.FULL_CAFFE2(delegate, false)
+      ParametersUtil.DEBUG(delegate, false)
+    }
+
+  wrappers {
+    credentialsBinding {
+      usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
+  steps {
+    GitUtil.mergeStep(delegate)
+
+    // Determine which python version to build
+    def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
+
+    // Populate environment
+    environmentVariables {
+      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      env('DESIRED_PYTHON', condaVersion[0][1])
+    }
+
+    MacOSUtil.sandboxShell delegate, '''
+set -ex
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
+else
+  unset DEBUG
+fi
+
+# TODO do we need these?
+# Reinitialize path (see man page for path_helper(8))
+eval `/usr/libexec/path_helper -s`
+# Fix for xcode-select in jenkins
+export DEVELOPER_DIR=/Applications/Xcode9.app/Contents/Developer
+
+# Install Anaconda
+rm -rf ${TMPDIR}/anaconda
+curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${DESIRED_PYTHON:0:1}-5.0.1-MacOSX-x86_64.sh"
+/bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
+rm -f ${TMPDIR}/anaconda.sh
+export PATH="${TMPDIR}/anaconda/bin:${PATH}"
+source ${TMPDIR}/anaconda/bin/activate
+
+# Build
+# Build the conda packages
+pushd /remote/conda
+./build_pytorch.sh cpu $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
+'''
+    }
+  }
+} // macCondaBuildEnvironments.each
 
 
 //////////////////////////////////////////////////////////////////////////////

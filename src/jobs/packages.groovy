@@ -12,6 +12,7 @@ import ossci.caffe2.DockerVersion
 def caffe2OnlyCondaUploadBasePath = 'caffe2-conda-packages'
 def uploadCondaBasePath = 'conda-packages'
 def uploadPipBasePath = 'pip-packages'
+def uploadLibtorchBasePath = "libtorch-packages"
 folder(caffe2OnlyCondaUploadBasePath) {
   description 'Jobs for nightly uploads of Caffe2 packages'
 }
@@ -20,6 +21,9 @@ folder(uploadPipBasePath) {
 }
 folder(uploadCondaBasePath) {
   description 'Jobs for nightly uploads of Conda packages'
+}
+folder(uploadLibtorchBasePath) {
+  description 'Jobs for nightly upload of libtorch packages'
 }
 
 
@@ -487,16 +491,145 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
   pushd /remote
   PATH=/opt/python/cp27-cp27m/bin/:$PATH CUDA_VERSIONS=$s3_dir /remote/manywheel/upload.sh
   popd
-
-  # Upload libtorch
-  echo "Uploading all of: $(ls $libtorch_house_dir) to: s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/"
-  ls "$libtorch_house_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $libtorch_house_dir/{} "s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 fi
 
 # Print sizes of all wheels
 echo "Succesfully built wheels of size:"
 if ls /remote/wheelhouse*/torch*.whl >/dev/null 2>&1; then
   du -h /remote/wheelhouse*/torch*.whl
+fi
+'''
+    } // steps
+  }
+} // dockerPipBuildEnvironments
+
+//////////////////////////////////////////////////////////////////////////////
+// Docker libtorch
+//////////////////////////////////////////////////////////////////////////////
+Images.dockerLibtorchBuildEnvironments.each {
+  def buildEnvironment = it
+
+  job("${uploadLibtorchBasePath}/${buildEnvironment}-build-upload") {
+    JobUtil.common(delegate, 'docker && gpu')
+    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_BRANCH(delegate)
+      ParametersUtil.CMAKE_ARGS(delegate)
+      ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+      ParametersUtil.RUN_TEST_PARAMS(delegate)
+      ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
+      ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+      ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
+      ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+      ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+      ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
+      ParametersUtil.FULL_CAFFE2(delegate, false)
+      ParametersUtil.DEBUG(delegate, false)
+    }
+
+    wrappers {
+      credentialsBinding {
+        usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PIP_S3_CREDENTIALS')
+        // This is needed so that Jenkins knows to hide these strings in all the console outputs
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+
+      // Determine dockerfile, cpu builds on Dockerfile-cuda80
+      def cudaNoDot = '80'
+      if (buildEnvironment.contains('cuda')) {
+        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
+        cudaNoDot = cudaVer[0][1]
+      }
+
+      // Determine which python version to build
+      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+
+      // Populate environment
+      environmentVariables {
+        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+        env('DESIRED_PYTHON', pyVersion[0][1])
+        env('CUDA_NO_DOT', cudaNoDot)
+      }
+
+      DockerUtil.shell context: delegate,
+              image: "soumith/manylinux-cuda${cudaNoDot}:latest",
+              cudaVersion: 'native',
+              workspaceSource: "docker",
+              usePipDockers: "true",
+              script: '''
+set -ex
+
+# Parameter checking
+###############################################################################
+if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
+  echo "Caffe2 Pypi credentials are not propogated correctly."
+  exit 1
+fi
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
+else
+  unset DEBUG
+fi
+
+# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
+export PYTORCH_BUILD_NUMBER=0
+if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
+  echo 'Using override-version'
+  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
+elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
+  echo 'Using the current date + VERSION_POSTFIX'
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
+else
+  echo "WARNING:"
+  echo "No version parameters were set, so this will use whatever the default"
+  echo "version logic within setup.py is."
+fi
+
+# Building
+###############################################################################
+# Clone the Pytorch branch into /pytorch, where the script below expects it
+# TODO error out if the branch doesn't exist, as that's probably a user error
+git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
+pushd /pytorch
+git checkout "$PYTORCH_BRANCH"
+popd
+
+export BUILD_PYTHONLESS=1
+
+# Build the pip packages, and define some variables used to upload the wheel
+if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
+  /remote/manywheel/build.sh
+  wheelhouse_dir="/remote/wheelhouse$CUDA_NO_DOT"
+  libtorch_house_dir="/remote/libtorch_house$CUDA_NO_DOT"
+  s3_dir="cu$CUDA_NO_DOT"
+else
+  /remote/manywheel/build_cpu.sh
+  wheelhouse_dir="/remote/wheelhousecpu"
+  libtorch_house_dir="/remote/libtorch_housecpu"
+  s3_dir="cpu"
+fi
+
+if [[ $UPLOAD_PACKAGE == true ]]; then
+  yes | /opt/python/cp27-cp27m/bin/pip install awscli==1.6.6
+
+  # Upload libtorch
+  echo "Uploading all of: $(ls $libtorch_house_dir) to: s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/"
+  ls "$libtorch_house_dir/" | xargs -I {} /opt/python/cp27-cp27m/bin/aws s3 cp $libtorch_house_dir/{} "s3://pytorch/libtorch/${PIP_UPLOAD_FOLDER}${s3_dir}/" --acl public-read
 fi
 
 # Print sizes of all libtorch packages

@@ -196,6 +196,19 @@ class Images {
     assert 'pip-cp35-cp35m-macos10.13' in macPipBuildEnvironments
   }
 
+  // Libtorch packages
+  static final List<String> libtorchPythonVersions = [
+    "cp27-cp27m",
+  ];
+  static final Collection<String> dockerLibtorchBuildEnvironments = [];
+  static final Collection<String> macLibtorchBuildEnvironments = [];
+  static {
+    populatePackageNames("libtorch-", libtorchPythonVersions, pipCudaVersions, dockerLibtorchBuildEnvironments, macLibtorchBuildEnvironments);
+    assert 'libtorch-cp27-cp27m-linux' in dockerLibtorchBuildEnvironments
+    assert 'libtorch-cp27-cp27m-cuda90-linux' in dockerLibtorchBuildEnvironments
+    assert 'libtorch-cp27-cp27m-macos10.13' in macLibtorchBuildEnvironments
+  }
+
   // Conda packages
   static final List<String> condaPythonVersions = [
     "2.7",

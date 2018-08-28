@@ -990,7 +990,7 @@ fi
     job("${buildBasePath}/${buildEnvironment}-build") {
       JobUtil.common delegate, 'windows && cpu'
       JobUtil.gitCommitFromPublicGitHub delegate, '${GITHUB_REPO}'
-      JobUtil.timeoutAndFailAfter(delegate, 40)
+      JobUtil.timeoutAndFailAfter(delegate, 90)
       // Windows builds are something like 9M a pop, so keep less of
       // them.
       publishers {

@@ -182,6 +182,101 @@ pushd conda
   }
 } // macCondaBuildEnvironments.each
 
+//////////////////////////////////////////////////////////////////////////////
+// Mac Pip
+//////////////////////////////////////////////////////////////////////////////
+Images.macPipBuildEnvironments.each {
+  def buildEnvironment = it
+  job("${uploadPipBasePath}/${buildEnvironment}-build-upload") {
+  JobUtil.common(delegate, 'osx')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
+
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.GITHUB_ORG(delegate, 'pytorch')
+    ParametersUtil.PYTORCH_BRANCH(delegate, 'master')
+    ParametersUtil.CMAKE_ARGS(delegate)
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+    ParametersUtil.RUN_TEST_PARAMS(delegate)
+    ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
+    ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+    ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
+    ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+    ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+    ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
+    ParametersUtil.FULL_CAFFE2(delegate, false)
+    ParametersUtil.DEBUG(delegate, false)
+  }
+
+  wrappers {
+    credentialsBinding {
+      usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PIP_S3_CREDENTIALS')
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
+  steps {
+    GitUtil.mergeStep(delegate)
+
+    // Determine which python version to build
+      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+
+    // Populate environment
+    environmentVariables {
+      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      env('DESIRED_PYTHON', pyVersion[0][1])
+    }
+
+    MacOSUtil.sandboxShell delegate, '''
+set -ex
+
+# Parameter checking
+###############################################################################
+if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
+  echo "Caffe2 Pypi credentials are not propogated correctly."
+  exit 1
+fi
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
+else
+  unset DEBUG
+fi
+
+# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
+export PYTORCH_BUILD_NUMBER=0
+if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
+  echo 'Using override-version'
+  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
+elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
+  echo 'Using the current date + VERSION_POSTFIX'
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
+else
+  echo "WARNING:"
+  echo "No version parameters were set, so this will use whatever the default"
+  echo "version logic within setup.py is."
+fi
+
+# TODO do we need this?
+# Reinitialize path (see man page for path_helper(8))
+eval `/usr/libexec/path_helper -s`
+
+# Building
+###############################################################################
+./wheel/build_wheel.sh "$DESIRED_PYTHON" "$PYTORCH_BUILD_VERSION" 0
+'''
+    }
+  }
+} // macCondaBuildEnvironments.each
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Docker Caffe2 conda
@@ -453,7 +548,7 @@ else
   echo "version logic within setup.py is."
 fi
 
-# Pip converts all - to _
+# Pip converts all - to _  #TODO move this to build_common.sh
 if [[ $TORCH_PACKAGE_NAME == *-* ]]; then
   export TORCH_PACKAGE_NAME="$(echo $TORCH_PACKAGE_NAME | tr '-' '_')"
   echo "WARNING:"

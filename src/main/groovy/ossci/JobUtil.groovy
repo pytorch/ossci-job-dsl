@@ -176,7 +176,7 @@ class JobUtil {
           // 'sending_pr' is a special case for ROCmSoftwarePlatform/pytorch
           // 'tensor-merge' is a temporary working branch for tensor
           // representation merge
-          whiteListTargetBranches(['master', 'fbsync', 'sending_pr', 'tensor-merge'])
+          whiteListTargetBranches(['master', 'fbsync', 'sending_pr', 'tensor-merge', 'export-.*'])
 
           // It would be nice to require the CLA Signed label,
           // but as the label is added by the facebook github bot,

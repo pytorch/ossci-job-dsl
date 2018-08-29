@@ -251,7 +251,7 @@ else
   unset DEBUG
 fi
 # TODO fix images.groovy instead of this ugly hack
-DESIRED_PYTHON="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
+desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
 export PYTORCH_BUILD_NUMBER=0
@@ -273,7 +273,7 @@ eval `/usr/libexec/path_helper -s`
 
 # Building
 ###############################################################################
-./wheel/build_wheel.sh "$DESIRED_PYTHON" "$PYTORCH_BUILD_VERSION" 0
+./wheel/build_wheel.sh "$desired_python" "$PYTORCH_BUILD_VERSION" 0
 '''
     }
   }

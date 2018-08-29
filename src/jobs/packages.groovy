@@ -251,7 +251,7 @@ else
   unset DEBUG
 fi
 # TODO fix images.groovy instead of this ugly hack
-DESIRED_PYTHON="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:4:1}"
+DESIRED_PYTHON="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
 export PYTORCH_BUILD_NUMBER=0

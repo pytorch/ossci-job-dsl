@@ -119,7 +119,7 @@ Images.macCondaBuildEnvironments.each {
       ParametersUtil.RUN_TEST_PARAMS(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
-      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
@@ -203,7 +203,7 @@ Images.macPipBuildEnvironments.each {
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-    ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+    ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
@@ -254,13 +254,10 @@ fi
 desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-export PYTORCH_BUILD_NUMBER=0
 if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
-  echo 'Using override-version'
   export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
 elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
-  echo 'Using the current date + VERSION_POSTFIX'
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
 else
   echo "WARNING:"
   echo "No version parameters were set, so this will use whatever the default"
@@ -391,7 +388,7 @@ Images.dockerCondaBuildEnvironments.each {
       ParametersUtil.RUN_TEST_PARAMS(delegate)
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
-      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
@@ -475,7 +472,7 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
       ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-      ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
@@ -537,13 +534,12 @@ else
 fi
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-export PYTORCH_BUILD_NUMBER=0
 if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
   echo 'Using override-version'
   export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
 elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
   echo 'Using the current date + VERSION_POSTFIX'
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
 else
   echo "WARNING:"
   echo "No version parameters were set, so this will use whatever the default"
@@ -622,7 +618,7 @@ Images.dockerLibtorchBuildEnvironments.each {
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
       ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-      ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+      ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
@@ -684,13 +680,10 @@ else
 fi
 
 # Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-export PYTORCH_BUILD_NUMBER=0
 if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
-  echo 'Using override-version'
   export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
 elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
-  echo 'Using the current date + VERSION_POSTFIX'
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)${VERSION_POSTFIX}"
+  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
 else
   echo "WARNING:"
   echo "No version parameters were set, so this will use whatever the default"
@@ -808,7 +801,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
     ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
-    ParametersUtil.VERSION_POSTFIX(delegate, '.dev01')
+    ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
@@ -866,7 +859,7 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.RUN_TEST_PARAMS(delegate)
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
-    ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '0')
+    ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }

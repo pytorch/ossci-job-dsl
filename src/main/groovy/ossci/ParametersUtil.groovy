@@ -116,16 +116,6 @@ class ParametersUtil {
     }
   }
 
-  static void VERSION_POSTFIX(BuildParametersContext context, defaultValue = '') {
-    context.with {
-      stringParam(
-          'VERSION_POSTFIX',
-          defaultValue,
-          "A string to be added as-is to the end of the version. Will get overwritten by OVERRIDE_PACKAGE_VERSION. Good to be used with USE_DATE_AS_VERSION"
-      )
-    }
-  }
-
   static void OVERRIDE_PACKAGE_VERSION(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

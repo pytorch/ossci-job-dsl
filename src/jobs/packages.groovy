@@ -273,7 +273,7 @@ eval `/usr/libexec/path_helper -s`
 
 # Building
 ###############################################################################
-./wheel/build_wheel.sh "$desired_python" "$PYTORCH_BUILD_VERSION" 0
+./wheel/build_wheel.sh "\$desired_python" "\$PYTORCH_BUILD_VERSION" 0
 '''
     }
   }

@@ -173,7 +173,6 @@ rm -f ${TMPDIR}/anaconda.sh
 export PATH="${TMPDIR}/anaconda/bin:${PATH}"
 source ${TMPDIR}/anaconda/bin/activate
 
-# Build
 # Build the conda packages
 pushd conda
 ./build_pytorch.sh cpu $PYTORCH_BUILD_VERSION $PYTORCH_BUILD_NUMBER
@@ -202,7 +201,7 @@ Images.macPipBuildEnvironments.each {
     ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
-    ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+    ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)
@@ -253,24 +252,13 @@ fi
 # TODO fix images.groovy instead of this ugly hack
 desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 
-# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
-  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
-elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
-else
-  echo "WARNING:"
-  echo "No version parameters were set, so this will use whatever the default"
-  echo "version logic within setup.py is."
-fi
-
 # TODO do we need this?
 # Reinitialize path (see man page for path_helper(8))
 eval `/usr/libexec/path_helper -s`
 
 # Building
 ###############################################################################
-./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" 0
+./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
 '''
     }
   }
@@ -471,7 +459,7 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
-      ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+      ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
@@ -531,19 +519,6 @@ if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
   unset DEBUG
-fi
-
-# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
-  echo 'Using override-version'
-  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
-elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
-  echo 'Using the current date + VERSION_POSTFIX'
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
-else
-  echo "WARNING:"
-  echo "No version parameters were set, so this will use whatever the default"
-  echo "version logic within setup.py is."
 fi
 
 # Pip converts all - to _  #TODO move this to build_common.sh
@@ -617,7 +592,7 @@ Images.dockerLibtorchBuildEnvironments.each {
       ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
-      ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+      ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
       ParametersUtil.FULL_CAFFE2(delegate, false)
@@ -677,17 +652,6 @@ if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
   unset DEBUG
-fi
-
-# Version: setup.py uses $PYTORCH_BUILD_VERSION.post$PYTORCH_BUILD_NUMBER
-if [[ -n "$OVERRIDE_PACKAGE_VERSION" ]]; then
-  export PYTORCH_BUILD_VERSION="$OVERRIDE_PACKAGE_VERSION"
-elif [[ "$USE_DATE_AS_VERSION" == true ]]; then
-  export PYTORCH_BUILD_VERSION="$(date +%Y.%m.%d)"
-else
-  echo "WARNING:"
-  echo "No version parameters were set, so this will use whatever the default"
-  echo "version logic within setup.py is."
 fi
 
 # Building
@@ -800,7 +764,7 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
     ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
-    ParametersUtil.USE_DATE_AS_VERSION(delegate, true)
+    ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.FULL_CAFFE2(delegate, false)

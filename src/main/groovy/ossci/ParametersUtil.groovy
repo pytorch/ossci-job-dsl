@@ -106,16 +106,6 @@ class ParametersUtil {
     }
   }
 
-  static void USE_DATE_AS_VERSION(BuildParametersContext context, defaultValue = true) {
-    context.with {
-      booleanParam(
-          'USE_DATE_AS_VERSION',
-          defaultValue,
-          "Check this to use the current date (on the executing machine) as the version"
-      )
-    }
-  }
-
   static void OVERRIDE_PACKAGE_VERSION(BuildParametersContext context, defaultValue = '') {
     context.with {
       stringParam(

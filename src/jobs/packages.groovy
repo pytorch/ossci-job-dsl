@@ -276,8 +276,103 @@ fi
 '''
     }
   }
-} // macCondaBuildEnvironments.each
+} // macPipBuildEnvironments.each
 
+
+//////////////////////////////////////////////////////////////////////////////
+// Mac Libtorch
+//////////////////////////////////////////////////////////////////////////////
+Images.macLibtorchBuildEnvironments.each {
+  def buildEnvironment = it
+  job("${uploadLibtorchBasePath}/${buildEnvironment}-build-upload") {
+  JobUtil.common(delegate, 'osx')
+  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')
+
+  parameters {
+    ParametersUtil.GIT_COMMIT(delegate)
+    ParametersUtil.GIT_MERGE_TARGET(delegate)
+    ParametersUtil.GITHUB_ORG(delegate, 'pytorch')
+    ParametersUtil.PYTORCH_BRANCH(delegate, 'master')
+    ParametersUtil.CMAKE_ARGS(delegate)
+    ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
+    ParametersUtil.RUN_TEST_PARAMS(delegate)
+    ParametersUtil.TORCH_PACKAGE_NAME(delegate, 'torch_nightly')
+    ParametersUtil.UPLOAD_PACKAGE(delegate, false)
+    ParametersUtil.PIP_UPLOAD_FOLDER(delegate, 'nightly/')
+    ParametersUtil.PYTORCH_BUILD_VERSION(delegate, 'nightly')
+    ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
+    ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
+    ParametersUtil.FULL_CAFFE2(delegate, false)
+    ParametersUtil.DEBUG(delegate, false)
+  }
+
+  wrappers {
+    credentialsBinding {
+      usernamePassword('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'PIP_S3_CREDENTIALS')
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
+  steps {
+    GitUtil.mergeStep(delegate)
+
+    // Determine which python version to build
+      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+
+    // Populate environment
+    environmentVariables {
+      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      env('DESIRED_PYTHON', pyVersion[0][1])
+    }
+
+    MacOSUtil.sandboxShell delegate, '''
+set -ex
+
+# Parameter checking
+###############################################################################
+if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
+  echo "Caffe2 Pypi credentials are not propogated correctly."
+  exit 1
+fi
+
+# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
+if [[ "$FULL_CAFFE2" == 'true' ]]; then
+  export FULL_CAFFE2=1
+else
+  unset FULL_CAFFE2
+fi
+if [[ "$DEBUG" == 'true' ]]; then
+  export DEBUG=1
+else
+  unset DEBUG
+fi
+# TODO fix images.groovy instead of this ugly hack
+desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
+
+# TODO do we need this?
+# Reinitialize path (see man page for path_helper(8))
+eval `/usr/libexec/path_helper -s`
+
+# Building
+###############################################################################
+export BUILD_PYTHONLESS=1
+./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
+
+# Upload the wheel
+if [[ "$UPLOAD_PACKAGE" == true ]]; then
+  pushd ./wheel
+  ./upload.sh
+  popd
+fi
+
+# Update html file
+# TODO this should be moved to its own job
+# ./update_s3_html.sh
+'''
+    }
+  }
+} // macLibtorchBuildEnvironments.each
 
 //////////////////////////////////////////////////////////////////////////////
 // Docker Caffe2 conda

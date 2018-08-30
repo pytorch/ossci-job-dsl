@@ -260,9 +260,11 @@ eval `/usr/libexec/path_helper -s`
 ./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
 
 # Upload the wheel
-# pushd ./wheel
-# ./upload.sh
-# popd
+if [[ "$UPLOAD_PACKAGE" == true ]]; then
+  pushd ./wheel
+  ./upload.sh
+  popd
+fi
 
 # Update html file
 # TODO this should be moved to its own job

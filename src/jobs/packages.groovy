@@ -261,6 +261,10 @@ eval `/usr/libexec/path_helper -s`
 
 # Upload the wheel
 if [[ "$UPLOAD_PACKAGE" == true ]]; then
+  export PATH=$(pwd)/tmp_conda/bin:$PATH
+  conda create -yn aws36 python=3.6
+  source activate aws36
+  conda install -y aws-cli
   pushd ./wheel
   ./upload.sh
   popd

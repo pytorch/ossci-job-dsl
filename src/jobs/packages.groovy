@@ -541,9 +541,9 @@ fi
 
 # Install mkldnn
 # TODO this is expensive and should be moved into the Docker images themselves
-#pushd /
-#$(find / -name install_mkldnn.sh)
-#popd
+pushd /
+#./remote/install_mkldnn.sh
+popd
 
 # Building
 ###############################################################################

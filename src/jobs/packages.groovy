@@ -256,9 +256,17 @@ desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 # Reinitialize path (see man page for path_helper(8))
 eval `/usr/libexec/path_helper -s`
 
-# Building
-###############################################################################
+# Build the wheel
 ./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
+
+# Upload the wheel
+# pushd ./wheel
+# ./upload.sh
+# popd
+
+# Update html file
+# TODO this should be moved to its own job
+# ./update_s3_html.sh
 '''
     }
   }
@@ -529,6 +537,12 @@ if [[ $TORCH_PACKAGE_NAME == *-* ]]; then
   echo "use $TORCH_PACKAGE_NAME as the package name"
 fi
 
+# Install mkldnn
+# TODO this is expensive and should be moved into the Docker images themselves
+#pushd /
+#$(find / -name install_mkldnn.sh)
+#popd
+
 # Building
 ###############################################################################
 # Clone the Pytorch branch into /pytorch, where the script below expects it
@@ -559,6 +573,10 @@ if [[ $UPLOAD_PACKAGE == true ]]; then
   pushd /remote
   PATH=/opt/python/cp27-cp27m/bin/:$PATH CUDA_VERSIONS=$s3_dir /remote/manywheel/upload.sh
   popd
+
+  # Update html file
+  # TODO this should be moved to its own job
+  #/remote/update_s3_html.sh
 fi
 
 # Print sizes of all wheels

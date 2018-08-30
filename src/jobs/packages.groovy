@@ -788,9 +788,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
-  triggers {
-    cron('@daily')
-  }
 
   steps {
     def gitPropertiesFile = './git.properties'
@@ -844,9 +841,6 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
-  }
-  triggers {
-    cron('@daily')
   }
 
   steps {

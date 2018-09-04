@@ -145,13 +145,14 @@ class JobUtil {
         ParametersUtil.GIT_MERGE_TARGET(delegate, 'origin/${ghprbTargetBranch}')
       }
       commonTrigger(delegate)
-      wrappers {
-        preScmSteps {
-          steps {
-            shell('cd /data/git-mirror/pytorch.git && git fetch')
-          }
-        }
-      }
+      // Use reference instead...
+      //wrappers {
+      //  preScmSteps {
+      //    steps {
+      //      shell('cd /data/git-mirror/pytorch.git && git fetch')
+      //    }
+      //  }
+      //}
       scm {
         git {
           remote {
@@ -161,9 +162,10 @@ class JobUtil {
             // accept a job or not.  If you omit it, all hooks will
             // start failing!
             github(ownerAndProject)
-            if (ownerAndProject == "pytorch/pytorch") {
-              url("/data/git-mirror/pytorch.git")
-            }
+            // // Actually, it's a better idea to use reference
+            // if (ownerAndProject == "pytorch/pytorch") {
+            //  url("/data/git-mirror/pytorch.git")
+            // }
             refspec([
                 // Fetch remote branches so we can merge the PR
                 '+refs/heads/*:refs/remotes/origin/*',
@@ -172,7 +174,15 @@ class JobUtil {
             ].join(' '))
           }
           branch('${GIT_COMMIT}')
-          GitUtil.defaultExtensions(delegate)
+          if (ownerAndProject == "pytorch/pytorch") {
+            extensions {
+              cloneOptions {
+                reference("/data/git-mirror/pytorch.git")
+              }
+            }
+          } else {
+            GitUtil.defaultExtensions(delegate)
+          }
         }
       }
 

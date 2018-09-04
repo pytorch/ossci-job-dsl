@@ -148,11 +148,11 @@ class JobUtil {
       scm {
         git {
           remote {
-            if (ownerAndProject == "pytorch/pytorch") {
-              url("git://localhost/pytorch")
-            } else {
+            //if (ownerAndProject == "pytorch/pytorch") {
+            //  url("git://localhost/pytorch")
+            //} else {
               github(ownerAndProject)
-            }
+            //}
             refspec([
                 // Fetch remote branches so we can merge the PR
                 '+refs/heads/*:refs/remotes/origin/*',

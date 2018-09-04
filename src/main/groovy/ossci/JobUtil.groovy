@@ -148,11 +148,15 @@ class JobUtil {
       scm {
         git {
           remote {
-            //if (ownerAndProject == "pytorch/pytorch") {
-            //  url("git://localhost/pytorch")
-            //} else {
-              github(ownerAndProject)
-            //}
+            // It's important to UNCONDITIONALLY call github() in the
+            // DSL, because it sets up com.coravy.hudson.plugins.github.GithubProjectProperty
+            // which is checked by ghprb when it decides if it wants to
+            // accept a job or not.  If you omit it, all hooks will
+            // start failing!
+            github(ownerAndProject)
+            if (ownerAndProject == "pytorch/pytorch") {
+              url("git://localhost/pytorch")
+            }
             refspec([
                 // Fetch remote branches so we can merge the PR
                 '+refs/heads/*:refs/remotes/origin/*',

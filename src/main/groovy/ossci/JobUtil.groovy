@@ -145,6 +145,13 @@ class JobUtil {
         ParametersUtil.GIT_MERGE_TARGET(delegate, 'origin/${ghprbTargetBranch}')
       }
       commonTrigger(delegate)
+      wrappers {
+        preScmSteps {
+          steps {
+            shell('cd /data/git-mirror/pytorch.git && git fetch')
+          }
+        }
+      }
       scm {
         git {
           remote {
@@ -155,7 +162,7 @@ class JobUtil {
             // start failing!
             github(ownerAndProject)
             if (ownerAndProject == "pytorch/pytorch") {
-              url("git://localhost/pytorch")
+              url("/data/git-mirror/pytorch.git")
             }
             refspec([
                 // Fetch remote branches so we can merge the PR

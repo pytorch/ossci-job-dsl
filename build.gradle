@@ -61,6 +61,7 @@ dependencies {
     testPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
     testPlugins 'org.jenkins-ci.plugins:jenkins-multijob-plugin:1.28'
     testPlugins 'org.jenkins-ci.plugins:matrix-project:1.12'
+    testPlugins 'org.jenkins-ci.plugins:preSCMbuildstep:0.3'
 
     // plugins used for auto-generated DSL. See example 9.
     testPlugins 'org.jenkins-ci.plugins:cvs:2.13'

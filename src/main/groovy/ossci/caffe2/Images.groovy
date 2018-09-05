@@ -244,9 +244,7 @@ class Images {
     'py2-ios-macos10.13',
 
     // Anaconda build environments
-    'conda2-macos10.13',
     'conda3-macos10.13',
-    'conda2-integrated-macos10.13',
   ];
 
   // macOs conda-builds referred to by the nightly upload job
@@ -265,7 +263,6 @@ class Images {
   static final List<String> buildAndTestEnvironments = [
     'py2-cuda8.0-cudnn6-ubuntu16.04',
     'py2-cuda9.0-cudnn7-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-aten-ubuntu16.04',
     'py2-cuda9.1-cudnn7-ubuntu16.04',
     'py2-mkl-ubuntu16.04',
 
@@ -275,10 +272,6 @@ class Images {
 
     // Vanilla Ubuntu 14.04
     'py2-gcc4.8-ubuntu14.04',
-
-    // Builds for Anaconda
-    'conda2-ubuntu16.04',
-    //'conda3-ubuntu16.04',
 
     'py2-clang3.8-rocm1.7.1-ubuntu16.04',
   ];
@@ -297,10 +290,6 @@ class Images {
     'py2-gcc6-ubuntu16.04',
     'py2-gcc7-ubuntu16.04',
 
-    // Aten
-    //'py2-mkl-aten-ubuntu16.04',
-    'py2-cuda8.0-cudnn7-aten-ubuntu16.04',
-
     // Build for Android
     'py2-android-ubuntu16.04',
 
@@ -313,10 +302,6 @@ class Images {
     // Windows builds
     // The python part is actually ignored by build_windows.bat
     'py2-cuda9.0-cudnn7-windows',
-
-    // Builds for Anaconda
-    //'conda2-macos10.13',
-    //'conda3-cuda9.0-cudnn7-ubuntu16.04',
 
     // Run a CentOS build (verifies compatibility with CMake 2.8.12)
     'py2-cuda9.0-cudnn7-centos7',

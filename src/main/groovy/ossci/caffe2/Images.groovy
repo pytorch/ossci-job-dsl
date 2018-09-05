@@ -288,7 +288,7 @@ class Images {
     // Compiler compatibility for 16.04 (build only)
     'py2-clang3.8-ubuntu16.04',
     'py2-clang3.9-ubuntu16.04',
-    'py2-gcc6-ubuntu16.04',
+    // 'py2-gcc6-ubuntu16.04',
     // should be covered by pytorch-linux-trusty-py3.6-gcc7
     //'py2-gcc7-ubuntu16.04',
 

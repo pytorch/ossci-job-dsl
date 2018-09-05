@@ -282,13 +282,15 @@ class Images {
     // 'py2-cuda8.0-cudnn5-ubuntu16.04',
 
     // Compiler compatibility for 14.04 (build only)
-    'py2-gcc4.9-ubuntu14.04',
+    // Should be covered by pytorch-linux-trusty-py3.6-gcc4.8
+    //'py2-gcc4.9-ubuntu14.04',
 
     // Compiler compatibility for 16.04 (build only)
     'py2-clang3.8-ubuntu16.04',
     'py2-clang3.9-ubuntu16.04',
     'py2-gcc6-ubuntu16.04',
-    'py2-gcc7-ubuntu16.04',
+    // should be covered by pytorch-linux-trusty-py3.6-gcc7
+    //'py2-gcc7-ubuntu16.04',
 
     // Build for Android
     'py2-android-ubuntu16.04',

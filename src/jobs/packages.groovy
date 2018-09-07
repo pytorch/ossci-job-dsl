@@ -256,9 +256,10 @@ desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 # Reinitialize path (see man page for path_helper(8))
 eval `/usr/libexec/path_helper -s`
 
-# Coordinate one output folder across scripts
-export WHEEL_FINAL_FOLDER="$(pwd)/final_wheel"
-mkdir -p "\\$WHEEL_FINAL_FOLDER"
+# Coordinate one output folder across scripts. This variable is expected in
+# both scripts called below.
+export MAC_PACKAGE_FINAL_FOLDER="$(pwd)/final_mac_pkg"
+mkdir -p "\\$MAC_PACKAGE_FINAL_FOLDER"
 
 # Build the wheel
 ./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
@@ -269,9 +270,7 @@ if [[ "$UPLOAD_PACKAGE" == true ]]; then
   conda create -yn aws36 python=3.6
   source activate aws36
   pip install awscli
-  pushd ./wheel
   ./upload.sh
-  popd
 fi
 
 # Update html file

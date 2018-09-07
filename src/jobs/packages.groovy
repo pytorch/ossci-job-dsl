@@ -258,7 +258,7 @@ eval `/usr/libexec/path_helper -s`
 
 # Coordinate one output folder across scripts
 export WHEEL_FINAL_FOLDER="$(pwd)/final_wheel"
-mkdir -p "$WHEEL_FINAL_FOLDER"
+mkdir -p "\\$WHEEL_FINAL_FOLDER"
 
 # Build the wheel
 ./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"

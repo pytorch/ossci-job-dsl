@@ -2,5 +2,5 @@
 // <DockerVersion>238</DockerVersion>  # This line is needed by CircleCI builds, please don't remove it
 package ossci.pytorch
 class DockerVersion {
-  static final String version = "238";
+  static final String version = "239";
 }

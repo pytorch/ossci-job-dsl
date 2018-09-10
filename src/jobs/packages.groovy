@@ -270,7 +270,7 @@ if [[ "$UPLOAD_PACKAGE" == true ]]; then
   conda create -yn aws36 python=3.6
   source activate aws36
   pip install awscli
-  ./upload.sh
+  ./wheel/upload.sh
 fi
 
 # Update html file

@@ -76,10 +76,10 @@ class ParametersUtil {
     }
   }
 
-  static void GITHUB_ORG(BuildParametersContext context, defaultValue = 'pytorch') {
+  static void PYTORCH_REPO(BuildParametersContext context, defaultValue = 'pytorch') {
     context.with {
       stringParam(
-          'GITHUB_ORG',
+          'PYTORCH_REPO',
           defaultValue,
           'The xxxx of https://github.com/xxxx/pytorch.git to build wheels for'
       )
@@ -91,7 +91,7 @@ class ParametersUtil {
       stringParam(
           'PYTORCH_BRANCH',
           defaultValue,
-          'Branch of $GITHUB_ORG/pytorch repo to checkout to build wheels for. This can also be a commit hash. It will be passed straight into "git checkout <>"'
+          'Branch of $PYTORCH_REPO/pytorch repo to checkout to build wheels for. This can also be a commit hash. It will be passed straight into "git checkout <>"'
       )
     }
   }

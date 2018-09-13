@@ -111,7 +111,7 @@ Images.macCondaBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_REPO(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'pytorch-nightly')
       ParametersUtil.CMAKE_ARGS(delegate)
@@ -193,7 +193,7 @@ Images.macPipBuildEnvironments.each {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.GITHUB_ORG(delegate, 'pytorch')
+    ParametersUtil.PYTORCH_REPO(delegate, 'pytorch')
     ParametersUtil.PYTORCH_BRANCH(delegate, 'master')
     ParametersUtil.CMAKE_ARGS(delegate)
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
@@ -294,7 +294,7 @@ Images.macLibtorchBuildEnvironments.each {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.GITHUB_ORG(delegate, 'pytorch')
+    ParametersUtil.PYTORCH_REPO(delegate, 'pytorch')
     ParametersUtil.PYTORCH_BRANCH(delegate, 'master')
     ParametersUtil.CMAKE_ARGS(delegate)
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
@@ -480,7 +480,7 @@ Images.dockerCondaBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_REPO(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'pytorch-nightly')
       ParametersUtil.CMAKE_ARGS(delegate)
@@ -563,7 +563,7 @@ Images.dockerPipBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_REPO(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
@@ -651,7 +651,7 @@ popd
 ###############################################################################
 # Clone the Pytorch branch into /pytorch, where the script below expects it
 # TODO error out if the branch doesn't exist, as that's probably a user error
-git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
+git clone "https://github.com/$PYTORCH_REPO/pytorch.git" /pytorch
 pushd /pytorch
 git checkout "$PYTORCH_BRANCH"
 popd
@@ -706,7 +706,7 @@ Images.dockerLibtorchBuildEnvironments.each {
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.GITHUB_ORG(delegate)
+      ParametersUtil.PYTORCH_REPO(delegate)
       ParametersUtil.PYTORCH_BRANCH(delegate)
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
@@ -780,7 +780,7 @@ fi
 ###############################################################################
 # Clone the Pytorch branch into /pytorch, where the script below expects it
 # TODO error out if the branch doesn't exist, as that's probably a user error
-git clone "https://github.com/$GITHUB_ORG/pytorch.git" /pytorch
+git clone "https://github.com/$PYTORCH_REPO/pytorch.git" /pytorch
 pushd /pytorch
 git checkout "$PYTORCH_BRANCH"
 popd
@@ -878,7 +878,7 @@ multiJob("nightly-pip-package-upload") {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.GITHUB_ORG(delegate)
+    ParametersUtil.PYTORCH_REPO(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
     ParametersUtil.CMAKE_ARGS(delegate)
     ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
@@ -937,7 +937,7 @@ multiJob("nightly-conda-package-upload") {
   parameters {
     ParametersUtil.GIT_COMMIT(delegate)
     ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.GITHUB_ORG(delegate)
+    ParametersUtil.PYTORCH_REPO(delegate)
     ParametersUtil.PYTORCH_BRANCH(delegate)
     ParametersUtil.TORCH_CONDA_BUILD_FOLDER(delegate, 'pytorch-nightly')
     ParametersUtil.CMAKE_ARGS(delegate)

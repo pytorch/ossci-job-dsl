@@ -116,7 +116,7 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
               predefinedProp('COMMIT_SOURCE', commitSource)
               predefinedProp('GITHUB_REPO', repo)
             }
-            if (!buildEnvironment.contains('linux')) {
+            if (!buildEnvironment.contains('linux') && !isRocmBuild(buildEnvironment)) {
               PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
             }
           }
@@ -194,6 +194,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
       phase("Build and test") {
         // PyTorch
         buildEnvironments.each {
+          def buildEnvironment = it
           phaseJob("${buildBasePath}/${it}-trigger") {
             parameters {
               // Pass parameters of this job
@@ -204,6 +205,9 @@ def pullRequestJobSettings = { context, repo, commitSource ->
               predefinedProp('GITHUB_REPO', repo)
               // Ensure consistent merge behavior in downstream builds.
               propertiesFile(gitPropertiesFile)
+              if (isRocmBuild(buildEnvironment)) {
+                booleanParam('RUN_TESTS', false)
+              }
             }
           }
         }
@@ -367,6 +371,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                   predefinedProp('IMAGE_COMMIT_ID', builtImageId)
                   predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
                 }
+                PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
               }
             }
           }
@@ -720,8 +725,6 @@ fi
           ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
           ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 
-          // TODO: Using this parameter is a bit wasteful because Jenkins
-          // still has to schedule the job and load the docker image
           booleanParam(
             'RUN_TESTS',
             true,
@@ -769,11 +772,6 @@ fi
                   workspaceSource: "docker",
                   script: '''
   set -ex
-
-  if [ "${RUN_TESTS:-true}" == "false" ]; then
-    echo "Skipping tests..."
-    exit 0
-  fi
 
   if test -x ".jenkins/pytorch/test.sh"; then
     .jenkins/pytorch/test.sh

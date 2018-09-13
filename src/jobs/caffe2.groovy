@@ -100,6 +100,12 @@ Images.allDockerBuildEnvironments.each {
 
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
+        booleanParam(
+          'RUN_TESTS',
+          true,
+          'Whether to run tests or not',
+        )
+
         if (runTests) {
           ParametersUtil.HYPOTHESIS_SEED(delegate)
         }
@@ -165,6 +171,7 @@ Images.allDockerBuildEnvironments.each {
                 predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
                 predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               }
+              PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
             }
           }
         }

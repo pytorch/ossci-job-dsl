@@ -124,39 +124,7 @@ class Images {
           .collect();
   }
 
-  // Pip and conda packages
-  /**
-   * Makes a list of 
-   *   <prefix><cuda_version><python_version>-linux
-   *   <prefix><python_version>-mac
-   * For every cuda version and python version
-   */
-  private static final void populatePackageNames(
-      String prefix,
-      Collection<String> pythonVersions,
-      Collection<String> cudaVersions,
-      Collection<String> linuxBuildEnvironments,
-      Collection<String> macBuildEnvironments) {
-
-    Collection<String> baseNames = pythonVersions
-        .stream()
-        .map { pyVer -> prefix + pyVer }
-        .flatMap { pyVer -> cudaVersions.stream().map { cudaTag -> pyVer + cudaTag } }
-        .collect();
-
-    linuxBuildEnvironments.addAll(
-        baseNames.stream()
-                 .map { base -> base + "-linux" }
-                 .collect()
-    );
-    macBuildEnvironments.addAll(
-        baseNames.stream()
-                 .filter { buildEnv -> !buildEnv.contains("cuda") }
-                 .map { buildEnv -> buildEnv + "-macos10.13" }
-                 .collect()
-    );
-  }
-
+  // Pip, conda, and libtorch packages
   static final List<String> packagesDockerBaseImages = [
     "manylinux-cuda80",
     "manylinux-cuda90",
@@ -164,61 +132,78 @@ class Images {
     "conda-cuda"
   ];
 
-  // Pip packages
-  static final List<String> pipPythonVersions = [
-    "cp27-cp27m",
-    "cp27-cp27mu",
-    "cp35-cp35m",
-    "cp36-cp36m",
-    "cp37-cp37m",
-  ];
-  static final List<String> pipCudaVersions = [
-    "",
-    "-cuda80",
-    "-cuda90",
-    "-cuda92"
-  ];
-  static final Collection<String> dockerPipBuildEnvironments = [];
-  static final Collection<String> macPipBuildEnvironments = [];
-  static {
-    populatePackageNames("pip-", pipPythonVersions, pipCudaVersions, dockerPipBuildEnvironments, macPipBuildEnvironments);
-    assert 'pip-cp27-cp27m-linux' in dockerPipBuildEnvironments
-    assert 'pip-cp36-cp36m-cuda90-linux' in dockerPipBuildEnvironments
-    assert 'pip-cp35-cp35m-macos10.13' in macPipBuildEnvironments
-  }
+  static final List<String> dockerPipBuildEnvironments = [
+    'pip-cp27-cp27m-linux',
+    'pip-cp27-cp27mu-linux',
+    'pip-cp35-cp35m-linux',
+    'pip-cp36-cp36m-linux',
+    'pip-cp37-cp37m-linux',
 
-  // Libtorch packages
-  static final List<String> libtorchPythonVersions = [
-    "cp27-cp27m",
-  ];
-  static final Collection<String> dockerLibtorchBuildEnvironments = [];
-  static final Collection<String> macLibtorchBuildEnvironments = [];
-  static {
-    populatePackageNames("libtorch-", libtorchPythonVersions, pipCudaVersions, dockerLibtorchBuildEnvironments, macLibtorchBuildEnvironments);
-    assert 'libtorch-cp27-cp27m-linux' in dockerLibtorchBuildEnvironments
-    assert 'libtorch-cp27-cp27m-cuda90-linux' in dockerLibtorchBuildEnvironments
-    assert 'libtorch-cp27-cp27m-macos10.13' in macLibtorchBuildEnvironments
-  }
+    'pip-cp27-cp27m-cuda80-linux',
+    'pip-cp27-cp27mu-cuda80-linux',
+    'pip-cp35-cp35m-cuda80-linux',
+    'pip-cp36-cp36m-cuda80-linux',
+    'pip-cp37-cp37m-cuda80-linux',
 
-  // Conda packages
-  static final List<String> condaPythonVersions = [
-    "2.7",
-    "3.5",
-    "3.6",
-    "3.7",
+    'pip-cp27-cp27m-cuda90-linux',
+    'pip-cp27-cp27mu-cuda90-linux',
+    'pip-cp35-cp35m-cuda90-linux',
+    'pip-cp36-cp36m-cuda90-linux',
+    'pip-cp37-cp37m-cuda90-linux',
+
+    'pip-cp27-cp27m-cuda92-linux',
+    'pip-cp27-cp27mu-cuda92-linux',
+    'pip-cp35-cp35m-cuda92-linux',
+    'pip-cp36-cp36m-cuda92-linux',
+    'pip-cp37-cp37m-cuda92-linux',
   ];
-  static final List<String> condaCudaVersions = [
-    "",
-    "-cuda80",
-    "-cuda90",
+
+  static final List<String> macPipBuildEnvironments = [
+    'pip-2.7-macos10.13',
+    'pip-3.5-macos10.13',
+    'pip-3.6-macos10.13',
+    'pip-3.7-macos10.13',
   ];
-  static final Collection<String> dockerCondaBuildEnvironments = [];
-  static final Collection<String> macCondaBuildEnvironments = [];
-  static {
-    populatePackageNames("conda", condaPythonVersions, condaCudaVersions, dockerCondaBuildEnvironments, macCondaBuildEnvironments);
-    assert 'conda3.6-macos10.13' in macCondaBuildEnvironments
-    assert 'conda3.6-cuda90-linux' in dockerCondaBuildEnvironments
-  }
+
+  static final List<String> dockerLibtorchBuildEnvironments = [
+    'libtorch-cp27-cp27m-linux',
+    'libtorch-cp27-cp27m-cuda80-linux',
+    'libtorch-cp27-cp27m-cuda90-linux',
+    'libtorch-cp27-cp27m-cuda92-linux',
+  ];
+
+  static final List<String> macLibtorchBuildEnvironments = [
+    'libtorch-cp27-cp27m-macos10.13',
+  ];
+
+  static final List<String> dockerCondaBuildEnvironments = [
+    'conda2.7-linux',
+    'conda3.5-linux',
+    'conda3.6-linux',
+    'conda3.7-linux',
+
+    'conda2.7-cuda80-linux',
+    'conda3.5-cuda80-linux',
+    'conda3.6-cuda80-linux',
+    'conda3.7-cuda80-linux',
+
+    'conda2.7-cuda90-linux',
+    'conda3.5-cuda90-linux',
+    'conda3.6-cuda90-linux',
+    'conda3.7-cuda90-linux',
+
+    'conda2.7-cuda92-linux',
+    'conda3.5-cuda92-linux',
+    'conda3.6-cuda92-linux',
+    'conda3.7-cuda92-linux',
+  ];
+
+  static final List<String> macCondaBuildEnvironments = [
+    'conda2.7-macos10.13',
+    'conda3.5-macos10.13',
+    'conda3.6-macos10.13',
+    'conda3.7-macos10.13',
+  ];
 
 
   ///////////////////////////////////////////////////////////////////////////////

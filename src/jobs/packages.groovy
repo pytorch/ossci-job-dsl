@@ -93,7 +93,7 @@ scripts/build_anaconda.sh --name "$TORCH_PACKAGE_NAME"
 } // macCaffe2CondaBuildEnvironments.each
 
 //////////////////////////////////////////////////////////////////////////////
-// Mac Conda
+// Mac Conda mac
 //////////////////////////////////////////////////////////////////////////////
 Images.macCondaBuildEnvironments.each {
   def buildEnvironment = it
@@ -206,7 +206,7 @@ Images.macPipBuildEnvironments.each {
     GitUtil.mergeStep(delegate)
 
     // Determine which python version to build
-      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+      def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
 
     // Populate environment
     environmentVariables {
@@ -230,8 +230,6 @@ if [[ "$DEBUG" == 'true' ]]; then
 else
   unset DEBUG
 fi
-# TODO fix images.groovy instead of this ugly hack
-desired_python="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
 
 # TODO do we need this?
 # Reinitialize path (see man page for path_helper(8))
@@ -243,7 +241,7 @@ export MAC_PACKAGE_FINAL_FOLDER="$(pwd)/final_mac_pkg"
 mkdir -p "\\$MAC_PACKAGE_FINAL_FOLDER"
 
 # Build the wheel
-./wheel/build_wheel.sh "\\$desired_python" "\\$PYTORCH_BUILD_VERSION" "\\$PYTORCH_BUILD_NUMBER"
+./wheel/build_wheel.sh
 
 # Upload the wheel
 if [[ "$UPLOAD_PACKAGE" == true ]]; then
@@ -440,7 +438,7 @@ PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.s
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Docker conda
+// Docker conda docker
 //////////////////////////////////////////////////////////////////////////////
 Images.dockerCondaBuildEnvironments.each {
   def buildEnvironment = it

@@ -446,7 +446,7 @@ fi
        label += ' && cpu'
     }
     JobUtil.common(delegate, label)
-    JobUtil.timeoutAndFailAfter(delegate, 60)
+    JobUtil.timeoutAndFailAfter(delegate, 90)
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {

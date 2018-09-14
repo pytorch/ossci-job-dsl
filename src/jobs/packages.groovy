@@ -120,7 +120,6 @@ Images.macCondaBuildEnvironments.each {
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
-      ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
 
@@ -147,12 +146,7 @@ Images.macCondaBuildEnvironments.each {
     MacOSUtil.sandboxShell delegate, '''
 set -ex
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -204,7 +198,6 @@ Images.macPipBuildEnvironments.each {
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
-    ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
 
@@ -238,12 +231,7 @@ if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
   exit 1
 fi
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -305,7 +293,6 @@ Images.macLibtorchBuildEnvironments.each {
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
-    ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
 
@@ -339,12 +326,7 @@ if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
   exit 1
 fi
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -489,7 +471,6 @@ Images.dockerCondaBuildEnvironments.each {
       ParametersUtil.UPLOAD_PACKAGE(delegate, false)
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
-      ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
 
@@ -528,12 +509,7 @@ Images.dockerCondaBuildEnvironments.each {
               script: '''
 set -ex
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -574,7 +550,6 @@ Images.dockerPipBuildEnvironments.each {
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
-      ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
 
@@ -621,12 +596,7 @@ if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
   exit 1
 fi
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -717,7 +687,6 @@ Images.dockerLibtorchBuildEnvironments.each {
       ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
       ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
       ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
-      ParametersUtil.FULL_CAFFE2(delegate, false)
       ParametersUtil.DEBUG(delegate, false)
     }
 
@@ -764,12 +733,7 @@ if [[ -z "$AWS_ACCESS_KEY_ID" ]]; then
   exit 1
 fi
 
-# Jenkins passes FULL_CAFFE2 as a string, change this to what the script expects
-if [[ "$FULL_CAFFE2" == 'true' ]]; then
-  export FULL_CAFFE2=1
-else
-  unset FULL_CAFFE2
-fi
+# Jenkins passes DEBUG as a string, change this to what the script expects
 if [[ "$DEBUG" == 'true' ]]; then
   export DEBUG=1
 else
@@ -889,7 +853,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
-    ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
   triggers {
@@ -946,7 +909,6 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.UPLOAD_PACKAGE(delegate, false)
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
-    ParametersUtil.FULL_CAFFE2(delegate, false)
     ParametersUtil.DEBUG(delegate, false)
   }
   triggers {

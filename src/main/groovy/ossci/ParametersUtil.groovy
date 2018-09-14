@@ -166,16 +166,6 @@ class ParametersUtil {
     }
   }
 
-  static void FULL_CAFFE2(BuildParametersContext context, defaultValue = false) {
-    context.with {
-      booleanParam(
-          'FULL_CAFFE2',
-          defaultValue,
-          "Check this to build with FULL_CAFFE2=1 or not"
-      )
-    }
-  }
-
   static void DEBUG(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(

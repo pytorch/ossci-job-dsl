@@ -55,13 +55,6 @@ Images.macCaffe2CondaBuildEnvironments.each {
   steps {
     GitUtil.mergeStep(delegate)
 
-    // Conda still has some 'integrated' builds
-    environmentVariables {
-      if (Images.integratedEnvironments.contains(buildEnvironment)) {
-        env('INTEGRATED', 1)
-      }
-    }
-
     // Read the python or conda version
     def condaVersion = buildEnvironment =~ /^conda([0-9])/
     environmentVariables {
@@ -396,9 +389,6 @@ Images.dockerCaffe2CondaBuildEnvironments.each {
       GitUtil.mergeStep(delegate)
       environmentVariables {
         env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-        if (Images.integratedEnvironments.contains(buildEnvironment)) {
-          env('INTEGRATED', 1)
-        }
         if (buildEnvironment.contains('slim')) {
           env('SLIM', 1)
         }

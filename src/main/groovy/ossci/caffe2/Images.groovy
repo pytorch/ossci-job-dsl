@@ -94,15 +94,6 @@ class Images {
 
     //////////////////////////////////////////////////////////////////////////
     // Additional builds that re-use dockerBaseImages below
-    // Conda integrated builds
-    baseImageOf.put("conda2-integrated-ubuntu16.04", "conda2-ubuntu16.04")
-    baseImageOf.put("conda3-integrated-ubuntu16.04", "conda3-ubuntu16.04")
-    baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
-    baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
-    baseImageOf.put("conda3-cuda8.0-cudnn7-integrated-ubuntu16.04", "conda3-cuda8.0-cudnn7-ubuntu16.04")
-    baseImageOf.put("conda3-cuda9.0-cudnn7-integrated-ubuntu16.04", "conda3-cuda9.0-cudnn7-ubuntu16.04")
-    //baseImageOf.put("conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda8.0-cudnn7-ubuntu16.04")
-    //baseImageOf.put("conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04", "conda2-cuda9.0-cudnn7-ubuntu16.04")
 
     // Aten builds
     baseImageOf.put("py2-mkl-aten-ubuntu16.04", "py2-mkl-ubuntu16.04")
@@ -325,13 +316,6 @@ class Images {
   static final List<String> integratedEnvironments = [
       'onnx-py2-gcc5-ubuntu16.04',
       // 'py3.6-gcc5-ubuntu16.04',
-      'conda2-integrated-macos10.13',
-      "conda2-integrated-ubuntu16.04",
-      "conda3-integrated-ubuntu16.04",
-      "conda2-cuda8.0-cudnn7-integrated-ubuntu16.04",
-      "conda2-cuda9.0-cudnn7-integrated-ubuntu16.04",
-      "conda2-cuda8.0-cudnn7-integrated-slim-ubuntu16.04",
-      "conda2-cuda9.0-cudnn7-integrated-slim-ubuntu16.04",
   ];
 
 

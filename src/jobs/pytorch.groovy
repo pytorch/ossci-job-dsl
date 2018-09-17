@@ -1215,7 +1215,7 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
           predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
           predefinedProp('TUTORIAL_PUSH', '${TUTORIAL_PUSH}')
           predefinedProp('GITHUB_REPO', 'pytorch/tutorials')
-          predefinedProp('PYTORCH_VERSION', 'rc1')
+          predefinedProp('PYTORCH_VERSION', 'master')
         }
       }
     } // phase("Build and Push")
@@ -1293,12 +1293,12 @@ git log
 ls
 cat .jenkins/build.sh
 
-# Build PyTorch
-git clone https://github.com/pytorch/pytorch.git -b ${PYTORCH_VERSION}
-pushd pytorch
-git submodule update --init || git submodule update --init || git submodule update --init  # Reinitialize submodules
-.jenkins/pytorch/build.sh
-popd
+# Skip Build PyTorch -- will be installed in .jenkins/build.sh
+# git clone https://github.com/pytorch/pytorch.git -b ${PYTORCH_VERSION}
+# pushd pytorch
+# git submodule update --init || git submodule update --init || git submodule update --init  # Reinitialize submodules
+# .jenkins/pytorch/build.sh
+# popd
 
 if test -x ".jenkins/build.sh"; then
   .jenkins/build.sh

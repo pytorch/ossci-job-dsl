@@ -1142,7 +1142,7 @@ def tutorialPullRequestJobSettings = { context, tutorial_repo, commitSource ->
 }
 
 multiJob("pytorch-tutorial-pull-request") {
-  tutorialPullRequestJobSettings(delegate, "facebookmicrosites/pytorch-tutorials", "pull-request")
+  tutorialPullRequestJobSettings(delegate, "pytorch/tutorials", "pull-request")
 }
 
 multiJob("pytorch-tutorial-master") {
@@ -1167,8 +1167,8 @@ multiJob("pytorch-tutorial-master") {
             gitRevision()
             propertiesFile(gitPropertiesFile)
             booleanParam('TUTORIAL_PUSH', true)
-            predefinedProp('COMMIT_SOURCE', "master")
-            predefinedProp('GITHUB_REPO', "facebookmicrosites/pytorch-tutorials")
+            predefinedProp('COMMIT_SOURCE', "rc1")
+            predefinedProp('GITHUB_REPO', "pytorch/tutorials")
           }
         }
       }
@@ -1190,7 +1190,7 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
     ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
     ParametersUtil.COMMIT_SOURCE(delegate)
-    ParametersUtil.GITHUB_REPO(delegate, 'facebookmicrosites/pytorch-tutorials')
+    ParametersUtil.GITHUB_REPO(delegate, 'pytorch/tutorials')
 
     booleanParam(
       'TUTORIAL_PUSH',
@@ -1214,8 +1214,8 @@ multiJob("${buildBasePath}/pytorch-tutorial-push-trigger") {
           predefinedProp('DOCKER_IMAGE_TAG', '${DOCKER_IMAGE_TAG}')
           predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
           predefinedProp('TUTORIAL_PUSH', '${TUTORIAL_PUSH}')
-          predefinedProp('GITHUB_REPO', 'facebookmicrosites/pytorch-tutorials')
-          predefinedProp('PYTORCH_VERSION', 'master')
+          predefinedProp('GITHUB_REPO', 'pytorch/tutorials')
+          predefinedProp('PYTORCH_VERSION', 'rc1')
         }
       }
     } // phase("Build and Push")
@@ -1312,7 +1312,7 @@ cp -r docs/* ../docs_new
 
 git clean -xdf
 git checkout -- .
-git checkout gh-pages
+git checkout gh-pages-rc1test
 
 cp -r ../docs_new/* ./
 

@@ -784,9 +784,6 @@ multiJob("nightly-caffe2-conda-package-upload") {
     ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
     ParametersUtil.UPLOAD_PACKAGE(delegate, true)
   }
-  triggers {
-    cron('@daily')
-  }
 
   steps {
     def gitPropertiesFile = './git.properties'

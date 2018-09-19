@@ -1259,6 +1259,11 @@ else
   exit 1
 fi
 
+RETVAL=$?
+if [[ "$RETVAL" != "0" ]]; then
+  exit $RETVAL
+fi
+
 mkdir -p ../docs_new
 # Save generated tutorials to a location outside of source, so that we can do a clean checkout to gh-pages
 cp -r docs/* ../docs_new || true

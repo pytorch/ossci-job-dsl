@@ -1265,7 +1265,7 @@ cp -r docs/* ../docs_new || true
 
 git clean -xdf
 git checkout -- .
-git checkout gh-pages-rc1test
+git checkout gh-pages
 git fetch
 
 # Sanity checks
@@ -1285,7 +1285,7 @@ git config user.name "pytorchbot"
 git commit -m "Automated tutorials push" || true
 git status
 
-git push origin gh-pages-rc1test
+git push origin gh-pages
   '''
     }
   }

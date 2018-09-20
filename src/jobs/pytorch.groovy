@@ -616,7 +616,7 @@ git status
         git {
           // TODO: This has the race in the no-op case with DOC_PUSH=false. Oops.
           pushOnlyIfSuccess()
-          branch('origin', 'master')
+          branch('origin', 'site')
         }
       }
     }

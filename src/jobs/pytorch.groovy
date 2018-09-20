@@ -549,7 +549,7 @@ exit 0
             github('pytorch/pytorch.github.io', 'ssh')
             credentials('pytorchbot')
           }
-          branch('origin/master')
+          branch('origin/site')
           GitUtil.defaultExtensions(delegate)
         }
       }

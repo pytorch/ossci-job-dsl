@@ -9,13 +9,9 @@ import ossci.caffe2.Images
 import ossci.caffe2.DockerVersion
 
 
-def caffe2OnlyCondaUploadBasePath = 'caffe2-conda-packages'
 def uploadCondaBasePath = 'conda-packages'
 def uploadPipBasePath = 'pip-packages'
 def uploadLibtorchBasePath = "libtorch-packages"
-folder(caffe2OnlyCondaUploadBasePath) {
-  description 'Jobs for nightly uploads of Caffe2 packages'
-}
 folder(uploadPipBasePath) {
   description 'Jobs for nightly uploads of Pip packages'
 }
@@ -26,71 +22,245 @@ folder(uploadLibtorchBasePath) {
   description 'Jobs for nightly upload of libtorch packages'
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// README
+// This contains the definitions of both -build-upload jobs and for -uploaded
+// jobs.
+//
+// *-build-upload jobs are legacy, but might be useful for debugging. Once upon
+// a time we wanted to build all the Pytorch nightly binaries on jenkins and we
+// set up these jobs to do that. These jobs are complete, allow for building of
+// arbitrary branches with arbitrary versions and uploading to arbitrary s3
+// locations and have the credentials to do so, but then we realized that
+// jenkins is not safe enough to release our official binaries. But these jobs
+// can still be useful because they are more parallel (1 job per machine as
+// opposed to 12 per machine on the cluster), so if you want to test out some
+// quick changes or upload non-official binaries to some other s3 location then
+// these are still helpful.
+//
+// -uploaded jobs just check that the nightly jobs uploaded for the day, by
+// downloading them from the public repos and checking the date in the version.
+// These run at 9am everday, which should give 3 hours for each job to finish
+// in the cluster (jobs start at 1am and the default timeout is less than 3
+// hours).
+// 
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////////////////////
-// Mac Caffe2 Conda
+// Uploaded jobs
 //////////////////////////////////////////////////////////////////////////////
-Images.macCaffe2CondaBuildEnvironments.each {
+// Mac conda mac uploaded
+Images.macCondaBuildEnvironments.each {
   def buildEnvironment = it
-  job("${caffe2OnlyCondaUploadBasePath}/${buildEnvironment}-build-upload") {
+  job("${uploadCondaBasePath}/${buildEnvironment}-uploaded") {
   JobUtil.common(delegate, 'osx')
-  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
-
-  parameters {
-    ParametersUtil.GIT_COMMIT(delegate)
-    ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
-    ParametersUtil.UPLOAD_PACKAGE(delegate)
-    ParametersUtil.TORCH_PACKAGE_NAME(delegate)
-  }
 
   wrappers {
     credentialsBinding {
-      usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
-      // This is needed so that Jenkins knows to hide these strings in all the console outputs
       usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
     }
   }
 
   steps {
-    GitUtil.mergeStep(delegate)
-
-    // Read the python or conda version
-    def condaVersion = buildEnvironment =~ /^conda([0-9])/
+    def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
     environmentVariables {
-      env('ANACONDA_VERSION', condaVersion[0][1])
+      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      env('DESIRED_PYTHON', condaVersion[0][1])
     }
-
     MacOSUtil.sandboxShell delegate, '''
 set -ex
 
-# Need to checkout fetch PRs for onnxbot tracking PRs
-git submodule update --init third_party/onnx || true
-cd third_party/onnx && git fetch --tags --progress origin +refs/pull/*:refs/remotes/origin/pr/* && cd -
-
-# Reinitialize submodules
-git submodule update --init --recursive
-
-# Reinitialize path (see man page for path_helper(8))
-eval `/usr/libexec/path_helper -s`
-
-# Fix for xcode-select in jenkins
-export DEVELOPER_DIR=/Applications/Xcode9.app/Contents/Developer
-
-# Install Anaconda if we need to
+# Install Anaconda
 rm -rf ${TMPDIR}/anaconda
-curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${ANACONDA_VERSION}-5.0.1-MacOSX-x86_64.sh"
+curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${DESIRED_PYTHON:0:1}-5.0.1-MacOSX-x86_64.sh"
 /bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
 rm -f ${TMPDIR}/anaconda.sh
 export PATH="${TMPDIR}/anaconda/bin:${PATH}"
 source ${TMPDIR}/anaconda/bin/activate
+conda create -yn test python="$DESIRED_PYTHON"
+source activate test
 
-# Build
-scripts/build_anaconda.sh --name "$TORCH_PACKAGE_NAME"
+# Download the package and check it
+conda install -y -c pytorch pytorch-nightly
+expected_date="$(date +%Y%m%d)"
+uploaded_version="$(conda list pytorch)"
+if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+    echo "The conda version $uploaded_version doesn't appear to be for today"
+    exit 1
+fi
 '''
     }
   }
-} // macCaffe2CondaBuildEnvironments.each
+} // macCondaBuildEnvironments.each --uploaded
+
+//////////////////////////////////////////////////////////////////////////////
+// Mac Pip
+//////////////////////////////////////////////////////////////////////////////
+Images.macPipBuildEnvironments.each {
+  def buildEnvironment = it
+  job("${uploadPipBasePath}/${buildEnvironment}-uploaded") {
+  JobUtil.common(delegate, 'osx')
+
+  wrappers {
+    credentialsBinding {
+      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+    }
+  }
+
+  steps {
+      def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
+    environmentVariables {
+      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
+      env('DESIRED_PYTHON', pyVersion[0][1])
+    }
+    MacOSUtil.sandboxShell delegate, '''
+set -ex
+
+# Install Anaconda
+rm -rf ${TMPDIR}/anaconda
+curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${DESIRED_PYTHON:0:1}-5.0.1-MacOSX-x86_64.sh"
+/bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
+rm -f ${TMPDIR}/anaconda.sh
+export PATH="${TMPDIR}/anaconda/bin:${PATH}"
+source ${TMPDIR}/anaconda/bin/activate
+conda create -yn test python="$DESIRED_PYTHON"
+source activate test
+
+# Download the package and check it
+pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+expected_date="$(date +%Y%m%d)"
+uploaded_version="$(pip freeze | grep pytorch)"
+if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+    echo "The pip version $uploaded_version doesn't appear to be for today"
+    exit 1
+fi
+'''
+    }
+  }
+} // macPipBuildEnvironments.each
+
+// Docker conda docker
+//////////////////////////////////////////////////////////////////////////////
+Images.dockerCondaBuildEnvironments.each {
+  def buildEnvironment = it
+
+  job("${uploadCondaBasePath}/${buildEnvironment}-uploaded") {
+    def label = 'docker'
+    if (buildEnvironment.contains('cuda')) {
+       label += ' && gpu'
+    } else {
+       label += ' && cpu'
+    }
+    JobUtil.common(delegate, label)
+    wrappers {
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
+    steps {
+      // Populate environment
+      def desired_cuda = 'cpu'
+      if (buildEnvironment.contains('cuda')) {
+        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
+        desired_cuda = cudaVer[0][1]
+      }
+      def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
+      environmentVariables {
+        env('DESIRED_PYTHON', condaVersion[0][1])
+        env('DESIRED_CUDA', desired_cuda)
+      }
+
+      DockerUtil.shell context: delegate,
+              image: "soumith/conda-cuda:latest",
+              cudaVersion: 'native',
+              workspaceSource: "docker",
+              usePipDockers: "true",
+              script: '''
+set -ex
+conda create -yn test python="$DESIRED_PYTHON" && source activate test
+conda install -y -c pytorch pytorch-nightly
+expected_date="$(date +%Y%m%d)"
+uploaded_version="$(conda list pytorch)"
+if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+    echo "The conda version $uploaded_version doesn't appear to be for today"
+    exit 1
+fi
+python -c 'import torch'
+python -c 'from caffe2.python import core'
+'''
+    } // steps
+  }
+} // dockerCondaBuildEnvironments --uploaded
+
+//////////////////////////////////////////////////////////////////////////////
+// Docker pip
+//////////////////////////////////////////////////////////////////////////////
+Images.dockerPipBuildEnvironments.each {
+  def buildEnvironment = it
+
+  job("${uploadPipBasePath}/${buildEnvironment}-uploaded") {
+    def label = 'docker'
+    if (buildEnvironment.contains('cuda')) {
+       label += ' && gpu'
+    } else {
+       label += ' && cpu'
+    }
+    JobUtil.common(delegate, label)
+    wrappers {
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
+    steps {
+      // Populate environment
+      def desiredCuda = 'cpu'
+      if (buildEnvironment.contains('cuda')) {
+        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
+        desiredCuda = 'cu' + cudaVer[0][1]
+      }
+      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
+      environmentVariables {
+        env('DESIRED_PYTHON', pyVersion[0][1])
+        env('DESIRED_CUDA', desiredCuda)
+      }
+
+      DockerUtil.shell context: delegate,
+              image: "soumith/conda-cuda:latest",
+              cudaVersion: 'native',
+              workspaceSource: "docker",
+              usePipDockers: "true",
+              script: '''
+set -ex
+"/opt/python/$DESIRED_PYTHON/pip" install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+expected_date="$(date +%Y%m%d)"
+uploaded_version="$(/opt/python/$DESIRED_PYTHON/pip freeze | grep pytorch)"
+if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+    echo "The installed version $uploaded_version doesn't appear to be for today"
+    exit 1
+fi
+"/opt/python/$DESIRED_PYTHON/python" -c 'import torch'
+"/opt/python/$DESIRED_PYTHON/python" -c 'from caffe2.python import core'
+'''
+    } // steps
+  }
+} // dockerPipBuildEnvironments
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// BUILD_UPLOAD JOBS
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // Mac Conda mac
@@ -349,92 +519,6 @@ fi
     }
   }
 } // macLibtorchBuildEnvironments.each
-
-//////////////////////////////////////////////////////////////////////////////
-// Docker Caffe2 conda
-//////////////////////////////////////////////////////////////////////////////
-Images.dockerCaffe2CondaBuildEnvironments.each {
-  // Capture variable for delayed evaluation
-  def buildEnvironment = it
-  def dockerBaseImage = Images.baseImageOf[(buildEnvironment)]
-  def dockerImage = { tag ->
-    // If image tag contains '/', we need to replace it with '-'
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
-  }
-
-  job("${caffe2OnlyCondaUploadBasePath}/${buildEnvironment}-build-upload") {
-    JobUtil.common(delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu')
-    JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
-
-    parameters {
-      ParametersUtil.GIT_COMMIT(delegate)
-      ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
-      ParametersUtil.UPLOAD_PACKAGE(delegate)
-      ParametersUtil.TORCH_PACKAGE_NAME(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    }
-
-    wrappers {
-      credentialsBinding {
-        usernamePassword('ANACONDA_USERNAME', 'CAFFE2_ANACONDA_ORG_ACCESS_TOKEN', 'caffe2_anaconda_org_access_token')
-        // This is needed so that Jenkins knows to hide these strings in all the console outputs
-        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-      }
-    }
-
-    steps {
-      GitUtil.mergeStep(delegate)
-      environmentVariables {
-        env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-        if (buildEnvironment.contains('slim')) {
-          env('SLIM', 1)
-        }
-      }
-
-      def cudaVersion = ''
-      if (buildEnvironment.contains('cuda')) {
-        cudaVersion = 'native';
-        // Populate CUDA and cuDNN versions in case we're building pytorch too,
-        // which expects these variables to be set
-        def cudaVer = buildEnvironment =~ /cuda(\d.\d)/
-        def cudnnVer = buildEnvironment =~ /cudnn(\d)/
-        environmentVariables {
-          env('CUDA_VERSION', cudaVer[0][1])
-          env('CUDNN_VERSION', cudnnVer[0][1])
-        }
-      }
-
-      DockerUtil.shell context: delegate,
-              image: dockerImage('${DOCKER_IMAGE_TAG}'),
-              cudaVersion: cudaVersion,
-              // TODO: use 'docker'. Make sure you copy out the test result XML
-              // to the right place
-              workspaceSource: "host-mount",
-              script: '''
-set -ex
-if [[ -z "$ANACONDA_USERNAME" ]]; then
-  echo "Caffe2 Anaconda credentials are not propogated correctly."
-  exit 1
-fi
-git submodule update --init --recursive
-if [[ -n $UPLOAD_PACKAGE ]]; then
-  upload_to_conda="--upload"
-fi
-if [[ -n $TORCH_PACKAGE_NAME ]]; then
-  package_name="--name $TORCH_PACKAGE_NAME"
-fi
-if [[ -n $SLIM ]]; then
-  slim="--slim"
-fi
-
-# All conda build logic should be in scripts/build_anaconda.sh
-# TODO move lang vars into Dockerfile
-PATH=/opt/conda/bin:$PATH LANG=C.UTF-8 LC_ALL=C.UTF-8 ./scripts/build_anaconda.sh $upload_to_conda $package_name $slim
-'''
-    }
-  }
-}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -773,54 +857,6 @@ fi
 //////////////////////////////////////////////////////////////////////////////
 // Nightly upload jobs - just trigger the jobs above in bulk
 //////////////////////////////////////////////////////////////////////////////
-multiJob("nightly-caffe2-conda-package-upload") {
-  JobUtil.commonTrigger(delegate)
-  JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/pytorch')
-  parameters {
-    ParametersUtil.GIT_COMMIT(delegate)
-    ParametersUtil.GIT_MERGE_TARGET(delegate)
-    ParametersUtil.EXTRA_CAFFE2_CMAKE_FLAGS(delegate)
-    ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-    ParametersUtil.CMAKE_ARGS(delegate, '-DCUDA_ARCH_NAME=ALL')
-    ParametersUtil.UPLOAD_PACKAGE(delegate, true)
-  }
-
-  steps {
-    def gitPropertiesFile = './git.properties'
-    GitUtil.mergeStep(delegate)
-    GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-    phase("Build") {
-      def definePhaseJob = { name ->
-        phaseJob("${caffe2OnlyCondaUploadBasePath}/${name}-build-upload") {
-          parameters {
-            currentBuild()
-            propertiesFile(gitPropertiesFile)
-          }
-        }
-      }
-
-      Images.macCaffe2CondaBuildEnvironments.each {
-        definePhaseJob(it)
-      }
-
-      assert 'conda2-ubuntu16.04' in Images.dockerCaffe2CondaBuildEnvironments
-      Images.dockerCaffe2CondaBuildEnvironments.each {
-        if (!it.contains('gcc4.8')) {
-          definePhaseJob(it)
-        }
-      }
-    } // phase(Build)
-
-    publishers {
-      groovyPostBuild {
-        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript('hellemn@fb.com'))
-      }
-    }
-  } // steps
-} // nightly conda
-
-// Pips
 multiJob("nightly-pip-package-upload") {
   JobUtil.commonTrigger(delegate)
   JobUtil.gitCommitFromPublicGitHub(delegate, 'pytorch/builder')

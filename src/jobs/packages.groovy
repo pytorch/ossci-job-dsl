@@ -77,7 +77,7 @@ set -ex
 
 # Install Anaconda
 rm -rf ${TMPDIR}/anaconda
-curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${DESIRED_PYTHON:0:1}-5.0.1-MacOSX-x86_64.sh"
+curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 /bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
 rm -f ${TMPDIR}/anaconda.sh
 export PATH="${TMPDIR}/anaconda/bin:${PATH}"
@@ -86,7 +86,7 @@ conda create -yn test python="$DESIRED_PYTHON"
 source activate test
 
 # Download the package and check it
-conda install -y -c pytorch pytorch-nightly
+conda install -yq -c pytorch pytorch-nightly
 expected_date="$(date +%Y%m%d)"
 uploaded_version="$(conda list pytorch)"
 if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
@@ -123,7 +123,7 @@ set -ex
 
 # Install Anaconda
 rm -rf ${TMPDIR}/anaconda
-curl -o ${TMPDIR}/anaconda.sh "https://repo.continuum.io/archive/Anaconda${DESIRED_PYTHON:0:1}-5.0.1-MacOSX-x86_64.sh"
+curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
 /bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
 rm -f ${TMPDIR}/anaconda.sh
 export PATH="${TMPDIR}/anaconda/bin:${PATH}"
@@ -184,7 +184,7 @@ Images.dockerCondaBuildEnvironments.each {
               script: '''
 set -ex
 conda create -yn test python="$DESIRED_PYTHON" && source activate test
-conda install -y -c pytorch pytorch-nightly
+conda install -yq -c pytorch pytorch-nightly
 expected_date="$(date +%Y%m%d)"
 uploaded_version="$(conda list pytorch)"
 if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
@@ -241,7 +241,7 @@ set -ex
 "/opt/python/$DESIRED_PYTHON/pip" install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
 expected_date="$(date +%Y%m%d)"
 uploaded_version="$(/opt/python/$DESIRED_PYTHON/pip freeze | grep pytorch)"
-if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+if [[ -z "$(grep -o $expected_date $uploaded_version)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"
     exit 1
 fi

@@ -153,6 +153,14 @@ Images.dockerImages.each {
     steps {
       GitUtil.mergeStep(delegate)
 
+      def cudaVersion = ''
+      if (buildEnvironment.contains('cuda')) {
+        // 'native' indicates to let the nvidia runtime figure out which version
+        // of CUDA to use. This is only possible when using the nvidia/cuda
+        // Docker images.
+        cudaVersion = 'native';
+      }
+
       environmentVariables {
         // TODO: Will be obsolete once this is baked into docker image
         env(
@@ -167,6 +175,7 @@ Images.dockerImages.each {
 
       DockerUtil.shell context: delegate,
               image: dockerImage('${BUILD_ENVIRONMENT}','${DOCKER_IMAGE_TAG}'),
+              cudaVersion: cudaVersion,
               workspaceSource: "host-copy",
               script: '''
 .jenkins/build.sh

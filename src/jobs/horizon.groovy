@@ -6,22 +6,22 @@ import ossci.PhaseJobUtil
 import ossci.WindowsUtil
 import ossci.GitUtil
 import ossci.EmailUtil
-import ossci.translate.DockerVersion
-import ossci.translate.Images
+import ossci.horizon.DockerVersion
+import ossci.horizon.Images
 import ossci.pytorch.Users
 
-def buildBasePath = 'translate-builds'
+def buildBasePath = 'horizon-builds'
 
 folder(buildBasePath) {
-  description 'Jobs for all translate build environments'
+  description 'Jobs for all horizon build environments'
 }
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
-  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/translate/${buildEnvironment}:${tag}"
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/horizon/${buildEnvironment}:${tag}"
 }
 
-def mailRecipients = "ezyang@fb.com weiho@fb.com juancarabina@fb.com"
+def mailRecipients = "kittipat@fb.com jjg@fb.com edoardoc@fb.com"
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
@@ -59,8 +59,8 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
   }
 }
 
-multiJob("translate-master") {
-  masterJobSettings(delegate, "pytorch/translate", "master", mailRecipients)
+multiJob("horizon-master") {
+  masterJobSettings(delegate, "facebookresearch/Horizon", "master", mailRecipients)
 }
 
 def pullRequestJobSettings = { context, repo, commitSource ->
@@ -99,8 +99,8 @@ def pullRequestJobSettings = { context, repo, commitSource ->
   }
 }
 
-multiJob("translate-pull-request") {
-  pullRequestJobSettings(delegate, "pytorch/translate", "pull-request")
+multiJob("horizon-pull-request") {
+  pullRequestJobSettings(delegate, "facebookresearch/Horizon", "pull-request")
 }
 
 // One job per build environment
@@ -117,7 +117,7 @@ Images.dockerImages.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.COMMIT_SOURCE(delegate)
-      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/translate')
+      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/Horizon')
     }
 
     steps {
@@ -147,7 +147,7 @@ Images.dockerImages.each {
 
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
-      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/translate')
+      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/Horizon')
     }
 
     steps {

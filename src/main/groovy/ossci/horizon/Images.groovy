@@ -1,7 +1,8 @@
-package ossci.translate
+package ossci.horizon
 
 class Images {
   static final List<String> dockerImages = [
-    "translate-xenial-cuda9-cudnn7-py3",
+    "horizon-xenial-py3",
+    "horizon-xenial-cuda9-cudnn7-py3",
   ]
 }

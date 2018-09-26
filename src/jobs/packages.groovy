@@ -83,7 +83,7 @@ Images.macCondaBuildEnvironments.each {
 set -ex
 
 # Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; thenj
+if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 
@@ -139,7 +139,7 @@ Images.macPipBuildEnvironments.each {
 set -ex
 
 # Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; thenj
+if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 
@@ -210,7 +210,7 @@ Images.dockerCondaBuildEnvironments.each {
 set -ex
 
 # Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; thenj
+if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 
@@ -275,7 +275,7 @@ Images.dockerPipBuildEnvironments.each {
 set -ex
 
 # Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; thenj
+if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH

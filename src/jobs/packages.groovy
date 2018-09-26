@@ -243,15 +243,16 @@ Images.dockerPipBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
-"/opt/python/$DESIRED_PYTHON/pip" install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
+pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
 expected_date="$(date +%Y%m%d)"
-uploaded_version="$(/opt/python/$DESIRED_PYTHON/pip freeze | grep pytorch)"
+uploaded_version="$(pip freeze | grep pytorch)"
 if [[ -z "$(grep -o $expected_date $uploaded_version)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
-"/opt/python/$DESIRED_PYTHON/python" -c 'import torch'
-"/opt/python/$DESIRED_PYTHON/python" -c 'from caffe2.python import core'
+python -c 'import torch'
+python -c 'from caffe2.python import core'
 '''
     } // steps
   }

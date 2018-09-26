@@ -1010,3 +1010,46 @@ multiJob("nightly-conda-package-upload") {
     }
   } // steps
 } // nightly conda
+
+// nightly uploaded
+multiJob("nightlies-uploaded") {
+  JobUtil.commonTrigger(delegate)
+  parameters {
+    ParametersUtil.DATE(delegate)
+  }
+  triggers {
+    cron('@daily')
+  }
+
+  steps {
+
+    phase("Build") {
+      def definePhaseJob = { name ->
+        phaseJob("${nightliesUploadedBasePath}/${name}-uploaded") {
+          parameters {
+            currentBuild()
+          }
+        }
+      }
+
+      Images.macCondaBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+      Images.macPipBuildEnvironments.each {
+        definePhaseJob(ot)
+      }
+      Images.dockerCondaBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+      Images.dockerPipBuildEnvironments.each {
+        definePhaseJob(it)
+      }
+    } // phase(Build)
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript('hellemn@fb.com'))
+      }
+    }
+  } // steps
+} // nightly conda

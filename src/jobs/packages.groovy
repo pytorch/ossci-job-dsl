@@ -1040,12 +1040,12 @@ multiJob("nightlies-finished") {
         }
       }
 
-      Images.macCondaBuildEnvironments.each {
-        definePhaseJob(it)
-      }
-      Images.macPipBuildEnvironments.each {
-        definePhaseJob(it)
-      }
+      //Images.macCondaBuildEnvironments.each {
+      //  definePhaseJob(it)
+      //}
+      //Images.macPipBuildEnvironments.each {
+      //  definePhaseJob(it)
+      //}
       Images.dockerCondaBuildEnvironments.each {
         definePhaseJob(it)
       }

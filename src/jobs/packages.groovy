@@ -106,7 +106,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
-conda install -y future numpy six
+conda install -y future numpy protobuf six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -161,7 +161,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The pip version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
-pip install future numpy six
+pip install future numpy protobuf six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -228,7 +228,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
-conda install -y future numpy six
+conda install -y future numpy protobuf six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -294,7 +294,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
-pip install future numpy six
+pip install future numpy protobuf six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -1025,8 +1025,12 @@ multiJob("nightlies-finished") {
   parameters {
     ParametersUtil.DATE(delegate)
   }
+
+  // These run at 9am everday, which should give 3 hours for each job to finish
+  // in the cluster (jobs start at 1am and the default timeout is less than 3
+  // hours).
   triggers {
-    cron('@daily')
+    cron('0 9 * * *')
   }
 
   steps {

@@ -193,9 +193,11 @@ Images.dockerCondaBuildEnvironments.each {
 
     steps {
       def desired_cuda = 'cpu'
+      def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
         desired_cuda = cudaVer[0][1]
+        cudaVersion = 'native'
       }
       def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
       environmentVariables {
@@ -205,7 +207,7 @@ Images.dockerCondaBuildEnvironments.each {
 
       DockerUtil.shell context: delegate,
               image: "soumith/conda-cuda:latest",
-              cudaVersion: 'native',
+              cudaVersion: cudaVersion,
               workspaceSource: "docker",
               usePipDockers: "true",
               script: '''
@@ -259,9 +261,11 @@ Images.dockerPipBuildEnvironments.each {
     steps {
       // Populate environment
       def desiredCuda = 'cpu'
+      def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
         desiredCuda = 'cu' + cudaVer[0][1]
+        cudaVersion = 'native'
       }
       def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
       environmentVariables {
@@ -271,7 +275,7 @@ Images.dockerPipBuildEnvironments.each {
 
       DockerUtil.shell context: delegate,
               image: "soumith/conda-cuda:latest",
-              cudaVersion: 'native',
+              cudaVersion: cudaVersion,
               workspaceSource: "docker",
               usePipDockers: "true",
               script: '''

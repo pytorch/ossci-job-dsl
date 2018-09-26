@@ -176,6 +176,16 @@ class ParametersUtil {
     }
   }
 
+  static void DATE(BuildParametersContext context, defaultValue = 'today') {
+    context.with {
+      stringParam(
+          'DATE',
+          defaultValue,
+          "The date to look for, in format YYYYmmdd or the string 'today'"
+      )
+    }
+  }
+
   static void GIT_COMMIT(BuildParametersContext context, String defaultValue = 'origin/master') {
     context.with {
       stringParam(

@@ -69,6 +69,9 @@ Images.macCondaBuildEnvironments.each {
       usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
     }
   }
+  parameters {
+    ParametersUtil.DATE(delegate)
+  }
 
   steps {
     def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
@@ -79,6 +82,11 @@ Images.macCondaBuildEnvironments.each {
     MacOSUtil.sandboxShell delegate, '''
 set -ex
 
+# Use today's date if none is given
+if [[ "$DATE" == 'today' ]]; thenj
+    DATE="$(date +%Y%m%d)"
+fi
+
 # Install Anaconda
 rm -rf ${TMPDIR}/anaconda
 curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
@@ -86,14 +94,15 @@ curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-lat
 rm -f ${TMPDIR}/anaconda.sh
 export PATH="${TMPDIR}/anaconda/bin:${PATH}"
 source ${TMPDIR}/anaconda/bin/activate
+
+# Create a test env of the requested python
 conda create -yn test python="$DESIRED_PYTHON"
 source activate test
 
 # Download the package and check it
 conda install -yq -c pytorch pytorch-nightly
-expected_date="$(date +%Y%m%d)"
-uploaded_version="$(conda list pytorch)"
-if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+uploaded_version="$(conda list pytorch | grep pytorch)"
+if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
@@ -116,6 +125,9 @@ Images.macPipBuildEnvironments.each {
       usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
     }
   }
+  parameters {
+    ParametersUtil.DATE(delegate)
+  }
 
   steps {
     def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
@@ -125,6 +137,11 @@ Images.macPipBuildEnvironments.each {
     }
     MacOSUtil.sandboxShell delegate, '''
 set -ex
+
+# Use today's date if none is given
+if [[ "$DATE" == 'today' ]]; thenj
+    DATE="$(date +%Y%m%d)"
+fi
 
 # Install Anaconda
 rm -rf ${TMPDIR}/anaconda
@@ -138,9 +155,8 @@ source activate test
 
 # Download the package and check it
 pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
-expected_date="$(date +%Y%m%d)"
-uploaded_version="$(pip freeze | grep pytorch)"
-if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+uploaded_version="$(pip freeze | grep torch)"
+if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The pip version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
@@ -169,6 +185,9 @@ Images.dockerCondaBuildEnvironments.each {
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }
     }
+  parameters {
+    ParametersUtil.DATE(delegate)
+  }
 
     steps {
       def desired_cuda = 'cpu'
@@ -189,11 +208,19 @@ Images.dockerCondaBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
+
+# Use today's date if none is given
+if [[ "$DATE" == 'today' ]]; thenj
+    DATE="$(date +%Y%m%d)"
+fi
+
+# Create a test env of the requested python
 conda create -yn test python="$DESIRED_PYTHON" && source activate test
 conda install -yq -c pytorch pytorch-nightly
-expected_date="$(date +%Y%m%d)"
-uploaded_version="$(conda list pytorch)"
-if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
+
+# Download the package and check it
+uploaded_version="$(conda list pytorch | grep pytorch)"
+if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
@@ -222,6 +249,9 @@ Images.dockerPipBuildEnvironments.each {
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }
     }
+  parameters {
+    ParametersUtil.DATE(delegate)
+  }
 
     steps {
       // Populate environment
@@ -243,11 +273,17 @@ Images.dockerPipBuildEnvironments.each {
               usePipDockers: "true",
               script: '''
 set -ex
+
+# Use today's date if none is given
+if [[ "$DATE" == 'today' ]]; thenj
+    DATE="$(date +%Y%m%d)"
+fi
 export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
+
+# Download the package and check it
 pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
-expected_date="$(date +%Y%m%d)"
-uploaded_version="$(pip freeze | grep pytorch)"
-if [[ -z "$(grep -o $expected_date $uploaded_version)" ]]; then
+uploaded_version="$(pip freeze | grep torch)"
+if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"
     exit 1
 fi

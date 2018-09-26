@@ -9,9 +9,13 @@ import ossci.caffe2.Images
 import ossci.caffe2.DockerVersion
 
 
+def nightliesUploadedBasePath = 'nightlies-uploaded'
 def uploadCondaBasePath = 'conda-packages'
 def uploadPipBasePath = 'pip-packages'
 def uploadLibtorchBasePath = "libtorch-packages"
+folder(nightliesUploadedBasePath) {
+  description 'Jobs to see if the nightly packages were uploaded for the day'
+}
 folder(uploadPipBasePath) {
   description 'Jobs for nightly uploads of Pip packages'
 }
@@ -57,7 +61,7 @@ folder(uploadLibtorchBasePath) {
 // Mac conda mac uploaded
 Images.macCondaBuildEnvironments.each {
   def buildEnvironment = it
-  job("${uploadCondaBasePath}/${buildEnvironment}-uploaded") {
+  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
   JobUtil.common(delegate, 'osx')
 
   wrappers {
@@ -93,17 +97,18 @@ if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+python -c 'import torch'
+python -c 'from caffe2.python import core'
 '''
     }
   }
 } // macCondaBuildEnvironments.each --uploaded
 
-//////////////////////////////////////////////////////////////////////////////
-// Mac Pip
+// Mac Pip mac uploaded
 //////////////////////////////////////////////////////////////////////////////
 Images.macPipBuildEnvironments.each {
   def buildEnvironment = it
-  job("${uploadPipBasePath}/${buildEnvironment}-uploaded") {
+  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
   JobUtil.common(delegate, 'osx')
 
   wrappers {
@@ -113,7 +118,7 @@ Images.macPipBuildEnvironments.each {
   }
 
   steps {
-      def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
+    def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
     environmentVariables {
       env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
       env('DESIRED_PYTHON', pyVersion[0][1])
@@ -139,17 +144,19 @@ if [[ -z "$(grep --only-matching $expected_date $uploaded_version)" ]]; then
     echo "The pip version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+python -c 'import torch'
+python -c 'from caffe2.python import core'
 '''
     }
   }
-} // macPipBuildEnvironments.each
+} // macPipBuildEnvironments.each --uploaded
 
-// Docker conda docker
+// Docker conda docker uploaded
 //////////////////////////////////////////////////////////////////////////////
 Images.dockerCondaBuildEnvironments.each {
   def buildEnvironment = it
 
-  job("${uploadCondaBasePath}/${buildEnvironment}-uploaded") {
+  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
     def label = 'docker'
     if (buildEnvironment.contains('cuda')) {
        label += ' && gpu'
@@ -164,7 +171,6 @@ Images.dockerCondaBuildEnvironments.each {
     }
 
     steps {
-      // Populate environment
       def desired_cuda = 'cpu'
       if (buildEnvironment.contains('cuda')) {
         def cudaVer = buildEnvironment =~ /cuda(\d\d)/
@@ -198,13 +204,12 @@ python -c 'from caffe2.python import core'
   }
 } // dockerCondaBuildEnvironments --uploaded
 
-//////////////////////////////////////////////////////////////////////////////
-// Docker pip
+// Docker pip docker uploaded
 //////////////////////////////////////////////////////////////////////////////
 Images.dockerPipBuildEnvironments.each {
   def buildEnvironment = it
 
-  job("${uploadPipBasePath}/${buildEnvironment}-uploaded") {
+  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
     def label = 'docker'
     if (buildEnvironment.contains('cuda')) {
        label += ' && gpu'
@@ -250,7 +255,7 @@ fi
 '''
     } // steps
   }
-} // dockerPipBuildEnvironments
+} // dockerPipBuildEnvironments --uploaded
 
 
 

@@ -106,6 +106,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+conda install -y future numpy six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -160,6 +161,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The pip version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+pip install future numpy six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -224,6 +226,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The conda version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+conda install -y future numpy six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -287,6 +290,7 @@ if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"
     exit 1
 fi
+pip install future numpy six
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
@@ -1012,7 +1016,7 @@ multiJob("nightly-conda-package-upload") {
 } // nightly conda
 
 // nightly uploaded
-multiJob("nightlies-uploaded") {
+multiJob("nightlies-finished") {
   JobUtil.commonTrigger(delegate)
   parameters {
     ParametersUtil.DATE(delegate)
@@ -1036,7 +1040,7 @@ multiJob("nightlies-uploaded") {
         definePhaseJob(it)
       }
       Images.macPipBuildEnvironments.each {
-        definePhaseJob(ot)
+        definePhaseJob(it)
       }
       Images.dockerCondaBuildEnvironments.each {
         definePhaseJob(it)

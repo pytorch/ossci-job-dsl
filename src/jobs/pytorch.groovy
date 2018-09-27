@@ -592,7 +592,7 @@ rm -rf source/torchvision
 cp -r ../vision/docs/source source/torchvision
 
 # Build the docs
-pip install -r requirements.txt --verbose || true
+pip install -r requirements.txt || true
 make html
 
 # Move them into the docs repo

@@ -592,7 +592,7 @@ rm -rf source/torchvision
 cp -r ../vision/docs/source source/torchvision
 
 # Build the docs
-pip install -r requirements.txt --verbose || true
+pip install -r requirements.txt || true
 make html
 
 # Move them into the docs repo
@@ -600,6 +600,10 @@ popd
 popd
 git rm -rf docs/master || true
 mv pytorch/docs/build/html docs/master
+pwd
+ls .gitignore
+cat .gitignore
+ls docs/master/_static/js
 find docs/master -name "*.html" -print0 | xargs -0 sed -i -E 's/master[[:blank:]]\\([[:digit:]]\\.[[:digit:]]\\.[[:xdigit:]]+\\+[[:xdigit:]]+[[:blank:]]\\)/<a href="http:\\/\\/pytorch.org\\/docs\\/versions.html">& \\&#x25BC<\\/a>/g'
 git add docs/master || true
 git status

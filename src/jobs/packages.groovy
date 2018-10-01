@@ -155,7 +155,7 @@ conda create -yn test python="$DESIRED_PYTHON"
 source activate test
 
 # Download the package and check it
-pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html -v --no-cache-dir
 uploaded_version="$(pip freeze | grep torch)"
 if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The pip version $uploaded_version doesn't appear to be for today"
@@ -288,7 +288,7 @@ fi
 export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
 
 # Download the package and check it
-pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" -v --no-cache-dir
 uploaded_version="$(pip freeze | grep torch)"
 if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
     echo "The installed version $uploaded_version doesn't appear to be for today"

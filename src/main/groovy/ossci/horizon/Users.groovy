@@ -1,8 +1,6 @@
-package ossci.tensorcomp
+package ossci.horizon
 
 class Users {
-  // Users that can ask @tensorcompbot to trigger build on behalf
-  // of a user that is not an admin or present in the whitelist.
   static final List<String> githubAdmins = [
     "MisterTea",
     "kittipatv",

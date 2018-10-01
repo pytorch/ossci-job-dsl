@@ -8,7 +8,7 @@ import ossci.GitUtil
 import ossci.EmailUtil
 import ossci.horizon.DockerVersion
 import ossci.horizon.Images
-import ossci.pytorch.Users
+import ossci.horizon.Users
 
 def buildBasePath = 'horizon-builds'
 
@@ -23,7 +23,7 @@ def dockerImage = { buildEnvironment, tag ->
 
 def mailRecipients = "kittipat@fb.com jjg@fb.com edoardoc@fb.com"
 
-def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
+def caffe2botAuthId = 'e8c3034a-549f-432f-b811-ec4bbc4b3d62'
 
 def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
   context.with {
@@ -65,7 +65,7 @@ multiJob("horizon-master") {
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {
-    JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
+    JobUtil.gitHubPullRequestTrigger(delegate, repo, caffe2botAuthId, Users)
     parameters {
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
     }
@@ -86,7 +86,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
               // Pass parameters of this job
               currentBuild()
               // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+              predefinedProp('ghprbCredentialsId', caffe2botAuthId)
               predefinedProp('COMMIT_SOURCE', commitSource)
               predefinedProp('GITHUB_REPO', repo)
               // Ensure consistent merge behavior in downstream builds.

@@ -1029,8 +1029,10 @@ multiJob("nightlies-finished") {
   // These run at 9am everday, which should give 3 hours for each job to finish
   // in the cluster (jobs start at 1am and the default timeout is less than 3
   // hours).
+  // By 9am, I meant 9am PST, because the nightly jobs run at 0:00 am PST. But
+  // the jenkins machines appear to run in GMT so we add 7 here
   triggers {
-    cron('0 9 * * *')
+    cron('0 16 * * *')
   }
 
   steps {

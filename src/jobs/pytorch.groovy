@@ -574,6 +574,7 @@ if [ "${DOC_PUSH:-true}" == "false" ]; then
   exit 0
 fi
 
+export LC_ALL=C
 export PATH=/opt/conda/bin:$PATH
 
 rm -rf pytorch || true
@@ -1176,6 +1177,7 @@ multiJob("pytorch-tutorial-master") {
     }
     publishers {
       mailer(mailRecipients, false, true)
+      downstream('pytorch-tutorial-push', 'FAILURE')
     }
   }
 }

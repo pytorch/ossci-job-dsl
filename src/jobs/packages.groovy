@@ -154,6 +154,9 @@ source ${TMPDIR}/anaconda/bin/activate
 conda create -yn test python="$DESIRED_PYTHON"
 source activate test
 
+# For debugging, also show what files pip /should/ be looking through
+curl https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+
 # Download the package and check it
 pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html -v --no-cache-dir
 uploaded_version="$(pip freeze | grep torch)"
@@ -286,6 +289,9 @@ if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
+
+# For debugging, also show what files pip /should/ be looking through
+curl https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
 
 # Download the package and check it
 pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" -v --no-cache-dir

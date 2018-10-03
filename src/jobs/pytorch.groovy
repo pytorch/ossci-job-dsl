@@ -1139,7 +1139,7 @@ multiJob("pytorch-tutorial-pull-request") {
   }
 }
 
-def tutorials_master_branch = "rc1";
+def tutorials_master_branch = "master";
 
 multiJob("pytorch-tutorial-master") {
   delegate.with {

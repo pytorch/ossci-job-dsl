@@ -14,6 +14,7 @@ def dockerImages = [
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
   "pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
+  "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7",
   "pytorch-linux-xenial-py3-clang5-asan",
   // "pytorch-linux-artful-cuda9-cudnn7-py3",
 

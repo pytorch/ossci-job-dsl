@@ -49,6 +49,7 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
+  "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7",
 ]
 
 def isRocmBuild = { buildEnvironment ->

@@ -969,16 +969,7 @@ multiJob("nightlies-finished") {
         }
       }
 
-      //Images.macCondaBuildEnvironments.each {
-      //  definePhaseJob(it)
-      //}
-      //Images.macPipBuildEnvironments.each {
-      //  definePhaseJob(it)
-      //}
-      Images.dockerCondaBuildEnvironments.each {
-        definePhaseJob(it)
-      }
-      Images.dockerPipBuildEnvironments.each {
+      Images.allNightlyBuildEnvironments.each {
         definePhaseJob(it)
       }
     } // phase(Build)

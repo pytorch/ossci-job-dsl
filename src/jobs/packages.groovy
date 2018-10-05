@@ -105,7 +105,7 @@ Images.allNightlyBuildEnvironments.each {
       } else if (buildForMac) {
         pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
       } else {
-        pyVersion = buildEnvironment =~ /cp\d\d-cp(\d\dmu?)/
+        pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
       }
 
       // Set Docker image
@@ -115,6 +115,7 @@ Images.allNightlyBuildEnvironments.each {
         if (buildEnvironment.contains('conda')) {
           dockerImage = 'soumith/conda-cuda'
         }
+        dockerImage = dockerImage + ':latest'
       }
 
       // Set the script before calling into it so that we don't have to copy it
@@ -135,7 +136,11 @@ elif [[ "$DESIRED_CUDA" == 'cpu' ]]; then
 else
   package_name='pytorch-nightly'
 fi
-package_name_and_version="${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
+if [[ "$(uname)" == 'Darwin' ]]; then
+  package_name_and_version="\\${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
+else
+  package_name_and_version="${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
+fi
 
 # Install Anaconda if we're on Mac
 if [[ "$(uname)" == 'Darwin' ]]; then
@@ -170,24 +175,40 @@ fi
 python --version
 which python
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
-  conda search -c pytorch "$package_name"
+  if [[ "(uname)" == 'Darwin' ]]; then
+    conda search -c pytorch "\\$package_name"
+  else
+    conda search -c pytorch "$package_name"
+  fi
 else
-  "curl https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+  curl "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
 fi
 
 # Install the package for the requested date
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   if [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
-    conda install -yq -c pytorch "$package_name_and_version
+    if [[ "(uname)" == 'Darwin' ]]; then
+      conda install -yq -c pytorch "\\$package_name_and_version
+    else
+      conda install -yq -c pytorch "$package_name_and_version
+    fi
   else
     conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
   fi
 else
-  pip install "$package_name_and_version" \
-      -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" \
-      --no-cache-dir \
-      --no-index \
-      -v
+  if [[ "(uname)" == 'Darwin' ]]; then
+    pip install "\\$package_name_and_version" \
+        -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" \
+        --no-cache-dir \
+        --no-index \
+        -v
+  else
+    pip install "$package_name_and_version" \
+        -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" \
+        --no-cache-dir \
+        --no-index \
+        -v
+  fi
 fi
 
 # Check that the package's date matches
@@ -196,9 +217,16 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
 else
   uploaded_version="$(pip freeze | grep torch)"
 fi
-if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-    echo "The installed version $uploaded_version doesn't appear to be for the date $DATE"
-    exit 1
+if [[ "(uname)" == 'Darwin' ]]; then
+  if [[ -z "$(echo \\$uploaded_version | grep $DATE)" ]]; then
+      echo "The installed version \\$uploaded_version doesn't appear to be for the date $DATE"
+      exit 1
+  fi
+else
+  if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
+      echo "The installed version $uploaded_version doesn't appear to be for the date $DATE"
+      exit 1
+  fi
 fi
 
 # Smoke test that it works

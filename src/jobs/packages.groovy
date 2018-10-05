@@ -111,9 +111,12 @@ Images.allNightlyBuildEnvironments.each {
       // Set Docker image
       def dockerImage = ''
       if (!buildForMac) {
-        dockerImage = 'soumith/manylinux-cuda' + desiredCuda.substring(2)
         if (buildEnvironment.contains('conda')) {
           dockerImage = 'soumith/conda-cuda'
+        } else if (buildEnvironment.contains('cuda')) {
+          dockerImage = 'soumith/manylinux-cuda' + desiredCuda.substring(2)
+        } else {
+          dockerImage = 'soumith/manylinux-cuda80'
         }
         dockerImage = dockerImage + ':latest'
       }

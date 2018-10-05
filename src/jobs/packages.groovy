@@ -137,9 +137,9 @@ else
   package_name='pytorch-nightly'
 fi
 if [[ "$(uname)" == 'Darwin' ]]; then
-  package_name_and_version="\\${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
+  package_name_and_version="\\${package_name}==\\${NIGHTLIES_DATE_PREAMBLE}\\${DATE}"
 else
-  package_name_and_version="${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
+  package_name_and_version="${package_name}==${NIGHTLIES_DATE_PREAMBLE}${DATE}"
 fi
 
 # Install Anaconda if we're on Mac
@@ -155,7 +155,7 @@ fi
 # Switch to the desired python
 if [[ "$PACKAGE_TYPE" == 'conda' || "$(uname)" == 'Darwin' ]]; then
   conda create -yn test python="$DESIRED_PYTHON" && source activate test
-  conda install -y future numpy protobuf six
+  conda install -yq future numpy protobuf six
 else
   export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
   pip install future numpy protobuf six
@@ -175,7 +175,7 @@ fi
 python --version
 which python
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
-  if [[ "(uname)" == 'Darwin' ]]; then
+  if [[ "$(uname)" == 'Darwin' ]]; then
     conda search -c pytorch "\\$package_name"
   else
     conda search -c pytorch "$package_name"
@@ -187,7 +187,7 @@ fi
 # Install the package for the requested date
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   if [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
-    if [[ "(uname)" == 'Darwin' ]]; then
+    if [[ "$(uname)" == 'Darwin' ]]; then
       conda install -yq -c pytorch "\\$package_name_and_version
     else
       conda install -yq -c pytorch "$package_name_and_version
@@ -196,7 +196,7 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
     conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
   fi
 else
-  if [[ "(uname)" == 'Darwin' ]]; then
+  if [[ "$(uname)" == 'Darwin' ]]; then
     pip install "\\$package_name_and_version" \
         -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" \
         --no-cache-dir \
@@ -208,24 +208,6 @@ else
         --no-cache-dir \
         --no-index \
         -v
-  fi
-fi
-
-# Check that the package's date matches
-if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
-  uploaded_version="$(conda list pytorch | grep pytorch)"
-else
-  uploaded_version="$(pip freeze | grep torch)"
-fi
-if [[ "(uname)" == 'Darwin' ]]; then
-  if [[ -z "$(echo \\$uploaded_version | grep $DATE)" ]]; then
-      echo "The installed version \\$uploaded_version doesn't appear to be for the date $DATE"
-      exit 1
-  fi
-else
-  if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-      echo "The installed version $uploaded_version doesn't appear to be for the date $DATE"
-      exit 1
   fi
 fi
 

@@ -958,6 +958,7 @@ multiJob("nightlies-finished") {
   JobUtil.commonTrigger(delegate)
   parameters {
     ParametersUtil.DATE(delegate)
+    ParametersUtil.NIGHTLIES_DATE_PREAMBLE(delegate)
   }
 
   // These run at 9am everday, which should give 3 hours for each job to finish

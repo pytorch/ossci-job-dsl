@@ -58,211 +58,38 @@ folder(uploadLibtorchBasePath) {
 //////////////////////////////////////////////////////////////////////////////
 // Uploaded jobs
 //////////////////////////////////////////////////////////////////////////////
-// Mac conda mac uploaded
-Images.macCondaBuildEnvironments.each {
-  def buildEnvironment = it
-  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
-  JobUtil.common(delegate, 'osx')
-
-  wrappers {
-    credentialsBinding {
-      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-    }
-  }
-  parameters {
-    ParametersUtil.DATE(delegate)
-  }
-
-  steps {
-    def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
-    environmentVariables {
-      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-      env('DESIRED_PYTHON', condaVersion[0][1])
-    }
-    MacOSUtil.sandboxShell delegate, '''
-set -ex
-
-# Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; then
-    DATE="$(date +%Y%m%d)"
-fi
-
-# Install Anaconda
-rm -rf ${TMPDIR}/anaconda
-curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-/bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
-rm -f ${TMPDIR}/anaconda.sh
-export PATH="${TMPDIR}/anaconda/bin:${PATH}"
-source ${TMPDIR}/anaconda/bin/activate
-
-# Create a test env of the requested python
-conda create -yn test python="$DESIRED_PYTHON"
-source activate test
-
-# Download the package and check it
-conda install -yq -c pytorch pytorch-nightly
-uploaded_version="$(conda list pytorch | grep pytorch)"
-if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-    echo "The conda version $uploaded_version doesn't appear to be for today"
-    exit 1
-fi
-conda install -y future numpy protobuf six
-python -c 'import torch'
-python -c 'from caffe2.python import core'
-'''
-    }
-  }
-} // macCondaBuildEnvironments.each --uploaded
-
-// Mac Pip mac uploaded
-//////////////////////////////////////////////////////////////////////////////
-Images.macPipBuildEnvironments.each {
-  def buildEnvironment = it
-  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
-  JobUtil.common(delegate, 'osx')
-
-  wrappers {
-    credentialsBinding {
-      usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-    }
-  }
-  parameters {
-    ParametersUtil.DATE(delegate)
-  }
-
-  steps {
-    def pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
-    environmentVariables {
-      env('BUILD_ENVIRONMENT', "${buildEnvironment}",)
-      env('DESIRED_PYTHON', pyVersion[0][1])
-    }
-    MacOSUtil.sandboxShell delegate, '''
-set -ex
-
-# Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; then
-    DATE="$(date +%Y%m%d)"
-fi
-
-# Install Anaconda
-rm -rf ${TMPDIR}/anaconda
-curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-/bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
-rm -f ${TMPDIR}/anaconda.sh
-export PATH="${TMPDIR}/anaconda/bin:${PATH}"
-source ${TMPDIR}/anaconda/bin/activate
-conda create -yn test python="$DESIRED_PYTHON"
-source activate test
-
-# For debugging, also show what files pip /should/ be looking through
-curl https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
-
-# Download the package and check it
-pip install torch_nightly -f https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html -v --no-cache-dir
-uploaded_version="$(pip freeze | grep torch)"
-if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-    echo "The pip version $uploaded_version doesn't appear to be for today"
-    exit 1
-fi
-pip install future numpy protobuf six
-python -c 'import torch'
-python -c 'from caffe2.python import core'
-'''
-    }
-  }
-} // macPipBuildEnvironments.each --uploaded
-
-// Docker conda docker uploaded
-//////////////////////////////////////////////////////////////////////////////
-Images.dockerCondaBuildEnvironments.each {
+Images.allNightlyBuildEnvironments.each {
   def buildEnvironment = it
 
   job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
-    def label = 'docker'
-    if (buildEnvironment.contains('cuda')) {
-       label += ' && gpu'
+    def buildForMac = buildEnvironment.contains('macos')
+
+    // Delegate to either a Mac or a Linux machine
+    if (buildForMac) {
+      JobUtil.common(delegate, 'osx')
     } else {
-       label += ' && cpu'
-    }
-    JobUtil.common(delegate, label)
-    wrappers {
-      credentialsBinding {
-        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
-      }
-    }
-  parameters {
-    ParametersUtil.DATE(delegate)
-  }
-
-    steps {
-      def desired_cuda = 'cpu'
-      def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
-        def cudaVer = buildEnvironment =~ /cuda(\d\d)/
-        desired_cuda = cudaVer[0][1]
-        cudaVersion = 'native'
+        JobUtil.common(delegate, 'docker && gpu')
+      } else {
+        JobUtil.common(delegate, 'docker && cpu')
       }
-      def condaVersion = buildEnvironment =~ /^conda(\d.\d)/
-      environmentVariables {
-        env('DESIRED_PYTHON', condaVersion[0][1])
-        env('DESIRED_CUDA', desired_cuda)
-      }
-
-      DockerUtil.shell context: delegate,
-              image: "soumith/conda-cuda:latest",
-              cudaVersion: cudaVersion,
-              workspaceSource: "docker",
-              usePipDockers: "true",
-              script: '''
-set -ex
-
-# Use today's date if none is given
-if [[ "$DATE" == 'today' ]]; then
-    DATE="$(date +%Y%m%d)"
-fi
-
-# Create a test env of the requested python
-conda create -yn test python="$DESIRED_PYTHON" && source activate test
-conda install -yq -c pytorch pytorch-nightly
-
-# Download the package and check it
-uploaded_version="$(conda list pytorch | grep pytorch)"
-if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-    echo "The conda version $uploaded_version doesn't appear to be for today"
-    exit 1
-fi
-conda install -y future numpy protobuf six
-python -c 'import torch'
-python -c 'from caffe2.python import core'
-'''
-    } // steps
-  }
-} // dockerCondaBuildEnvironments --uploaded
-
-// Docker pip docker uploaded
-//////////////////////////////////////////////////////////////////////////////
-Images.dockerPipBuildEnvironments.each {
-  def buildEnvironment = it
-
-  job("${nightliesUploadedBasePath}/${buildEnvironment}-uploaded") {
-    def label = 'docker'
-    if (buildEnvironment.contains('cuda')) {
-       label += ' && gpu'
-    } else {
-       label += ' && cpu'
     }
-    JobUtil.common(delegate, label)
+
     wrappers {
       credentialsBinding {
         usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
       }
     }
-  parameters {
-    ParametersUtil.DATE(delegate)
-  }
+
+    parameters {
+      ParametersUtil.DATE(delegate)
+      ParametersUtil.NIGHTLIES_DATE_PREAMBLE(delegate)
+    }
 
     steps {
-      // Populate environment
+      def packageType = buildEnvironment.contains('conda') ? 'conda' : 'wheel'
+
+      // Set DESIRED_CUDA to 'cpu' or 'cu##'
       def desiredCuda = 'cpu'
       def cudaVersion = ''
       if (buildEnvironment.contains('cuda')) {
@@ -270,43 +97,133 @@ Images.dockerPipBuildEnvironments.each {
         desiredCuda = 'cu' + cudaVer[0][1]
         cudaVersion = 'native'
       }
-      def pyVersion = buildEnvironment =~ /(cp\d\d-cp\d\dmu?)/
-      environmentVariables {
-        env('DESIRED_PYTHON', pyVersion[0][1])
-        env('DESIRED_CUDA', desiredCuda)
+
+      // Set Python to 'cp##-cp##mu?' or '#.#'
+      def pyVersion = ''
+      if (packageType == 'conda') {
+        pyVersion = buildEnvironment =~ /^conda(\d.\d)/
+      } else if (buildForMac) {
+        pyVersion = buildEnvironment =~ /^pip-(\d.\d)/
+      } else {
+        pyVersion = buildEnvironment =~ /cp\d\d-cp(\d\dmu?)/
       }
 
-      DockerUtil.shell context: delegate,
-              image: "soumith/conda-cuda:latest",
-              cudaVersion: cudaVersion,
-              workspaceSource: "docker",
-              usePipDockers: "true",
-              script: '''
+      // Set Docker image
+      def dockerImage = ''
+      if (!buildForMac) {
+        dockerImage = 'soumith/manylinux-cuda' + desiredCuda.substring(2)
+        if (buildEnvironment.contains('conda')) {
+          dockerImage = 'soumith/conda-cuda'
+        }
+      }
+
+      // Set the script before calling into it so that we don't have to copy it
+      // across jobs
+      def uploaded_job_script = '''
 set -ex
 
 # Use today's date if none is given
 if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
-export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
 
-# For debugging, also show what files pip /should/ be looking through
-curl https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html
+# Determine package name
+if [[ "$PACKAGE_TYPE" == *wheel ]]; then
+  package_name='torch-nightly'
+elif [[ "$DESIRED_CUDA" == 'cpu' ]]; then
+  package_name='pytorch-nightly-cpu'
+else
+  package_name='pytorch-nightly'
+fi
+package_name_and_version="${package_name}==${NIGHTLY_VERSION_PREAMBLE}${DATE}"
 
-# Download the package and check it
-pip install torch_nightly -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" -v --no-cache-dir
-uploaded_version="$(pip freeze | grep torch)"
+# Install Anaconda if we're on Mac
+if [[ "$(uname)" == 'Darwin' ]]; then
+  rm -rf ${TMPDIR}/anaconda
+  curl -o ${TMPDIR}/anaconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
+  /bin/bash ${TMPDIR}/anaconda.sh -b -p ${TMPDIR}/anaconda
+  rm -f ${TMPDIR}/anaconda.sh
+  export PATH="${TMPDIR}/anaconda/bin:${PATH}"
+  source ${TMPDIR}/anaconda/bin/activate
+fi
+
+# Switch to the desired python
+if [[ "$PACKAGE_TYPE" == 'conda' || "$(uname)" == 'Darwin' ]]; then
+  conda create -yn test python="$DESIRED_PYTHON" && source activate test
+  conda install -y future numpy protobuf six
+else
+  export PATH=/opt/python/$DESIRED_PYTHON/bin:$PATH
+  pip install future numpy protobuf six
+fi
+
+# Switch to the desired CUDA if using the conda-cuda Docker image
+if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  rm -rf /usr/local/cuda || true
+  if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
+    ln -s "/usr/local/cuda-${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3:1}" /usr/local/cuda
+    export CUDA_VERSION=$(ls /usr/local/cuda/lib64/libcudart.so.*|sort|tac | head -1 | rev | cut -d"." -f -3 | rev)
+    export CUDNN_VERSION=$(ls /usr/local/cuda/lib64/libcudnn.so.*|sort|tac | head -1 | rev | cut -d"." -f -3 | rev)
+  fi
+fi
+
+# Print some debugging info
+python --version
+which python
+if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  conda search -c pytorch "$package_name"
+else
+  "curl https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+fi
+
+# Install the package for the requested date
+if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  if [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
+    conda install -yq -c pytorch "$package_name_and_version
+  else
+    conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
+  fi
+else
+  pip install "$package_name_and_version" \
+      -f "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" \
+      --no-cache-dir \
+      --no-index \
+      -v
+fi
+
+# Check that the package's date matches
+if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  uploaded_version="$(conda list pytorch | grep pytorch)"
+else
+  uploaded_version="$(pip freeze | grep torch)"
+fi
 if [[ -z "$(echo $uploaded_version | grep $DATE)" ]]; then
-    echo "The installed version $uploaded_version doesn't appear to be for today"
+    echo "The installed version $uploaded_version doesn't appear to be for the date $DATE"
     exit 1
 fi
-pip install future numpy protobuf six
+
+# Smoke test that it works
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 '''
+
+      environmentVariables {
+        env('DESIRED_PYTHON', pyVersion[0][1])
+        env('DESIRED_CUDA', desiredCuda)
+        env('PACKAGE_TYPE', packageType)
+      }
+      if (buildForMac) {
+        MacOSUtil.sandboxShell delegate, uploaded_job_script
+      } else {
+        DockerUtil.shell context: delegate,
+                image: dockerImage,
+                cudaVersion: cudaVersion,
+                workspaceSource: "docker",
+                usePipDockers: "true",
+                script: uploaded_job_script
+      } // MacOSUtil.sandboxShell or DockerUtil.shell
     } // steps
   }
-} // dockerPipBuildEnvironments --uploaded
+} // allNightliesBuildEnvironments --uploaded
 
 
 

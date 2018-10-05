@@ -200,6 +200,8 @@ class Images {
     'conda3.7-macos10.13',
   ];
 
+  static final List<String> allNightlyBuildEnvironments = dockerCondaBuildEnvironments + dockerPipBuildEnvironments + macCondaBuildEnvironments + macPipBuildEnvironments;
+
 
   ///////////////////////////////////////////////////////////////////////////////
   // Mac environments

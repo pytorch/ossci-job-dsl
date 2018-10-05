@@ -186,6 +186,16 @@ class ParametersUtil {
     }
   }
 
+  static void NIGHTLIES_DATE_PREAMBLE(BuildParametersContext context, defaultValue = '1.0.0.dev') {
+    context.with {
+      stringParam(
+          'NIGHTLIES_DATE_PREAMBLE',
+          defaultValue,
+          'The part of the version string before the DATE above. Will be given exactly like $NIGHTLIES_DATE_PREAMBLE$DATE'
+      )
+    }
+  }
+
   static void GIT_COMMIT(BuildParametersContext context, String defaultValue = 'origin/master') {
     context.with {
       stringParam(

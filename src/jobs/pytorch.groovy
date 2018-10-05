@@ -276,6 +276,10 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     testConfigs.add("-NO_AVX2")
     testConfigs.add("-NO_AVX-NO_AVX2")
   }
+  if (buildEnvironment == "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7") {
+    // CUDA 10 driver is not installed yet, don't do tests
+    testConfigs = []
+  }
 
   // This is legacy, don't copy me.  The modern approach is done in caffe2, where
   // buildEnvironment is baked into the docker image so we don't have to

@@ -190,13 +190,11 @@ fi
 # Install the package for the requested date
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   if [[ "$(uname)" == 'Darwin' ]]; then
-    conda install -yq -c pytorch "\\$package_name_and_version
+    conda install -yq -c pytorch "\\$package_name_and_version"
+  elif [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
+    conda install -yq -c pytorch "$package_name_and_version"
   else
-    if [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
-      conda install -yq -c pytorch "$package_name_and_version
-    else
-      conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
-    fi
+    conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
   fi
 else
   if [[ "$(uname)" == 'Darwin' ]]; then

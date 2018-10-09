@@ -234,39 +234,44 @@ class Images {
   ///////////////////////////////////////////////////////////////////////////////
 
   static final List<String> buildAndTestEnvironments = [
-    'py2-cuda8.0-cudnn6-ubuntu16.04',
-    'py2-cuda9.0-cudnn7-ubuntu16.04',
-    'py2-cuda9.1-cudnn7-ubuntu16.04',
-    'py2-mkl-ubuntu16.04',
+    // These jobs are now running on CircleCI
+    // 'py2-cuda8.0-cudnn6-ubuntu16.04',
+    // 'py2-cuda9.0-cudnn7-ubuntu16.04',
+    // 'py2-cuda9.1-cudnn7-ubuntu16.04',
+    // 'py2-mkl-ubuntu16.04',
 
     // Vanilla Ubuntu 16.04 (Python 2/3)
-    'onnx-py2-gcc5-ubuntu16.04',
-    //'py3-gcc5-ubuntu16.04',
+    // 'onnx-py2-gcc5-ubuntu16.04',
+    // //'py3-gcc5-ubuntu16.04',
 
     // Vanilla Ubuntu 14.04
-    'py2-gcc4.8-ubuntu14.04',
+    // 'py2-gcc4.8-ubuntu14.04',
 
     'py2-clang7-rocmdeb-ubuntu16.04',
   ];
 
   static final List<String> buildOnlyEnvironments = [
-    // Compatibility check for CUDA 8 / cuDNN 7 (build only)
-    'py2-cuda8.0-cudnn7-ubuntu16.04',
-    // 'py2-cuda8.0-cudnn5-ubuntu16.04',
+    // These jobs are now running on CircleCI
+    // // Compatibility check for CUDA 8 / cuDNN 7 (build only)
+    // 'py2-cuda8.0-cudnn7-ubuntu16.04',
+    // // 'py2-cuda8.0-cudnn5-ubuntu16.04',
 
-    // Compiler compatibility for 14.04 (build only)
-    // Should be covered by pytorch-linux-trusty-py3.6-gcc4.8
-    //'py2-gcc4.9-ubuntu14.04',
+    // // Compiler compatibility for 14.04 (build only)
+    // // Should be covered by pytorch-linux-trusty-py3.6-gcc4.8
+    // //'py2-gcc4.9-ubuntu14.04',
 
-    // Compiler compatibility for 16.04 (build only)
-    'py2-clang3.8-ubuntu16.04',
-    'py2-clang3.9-ubuntu16.04',
-    // 'py2-gcc6-ubuntu16.04',
-    // should be covered by pytorch-linux-trusty-py3.6-gcc7
-    //'py2-gcc7-ubuntu16.04',
+    // // Compiler compatibility for 16.04 (build only)
+    // 'py2-clang3.8-ubuntu16.04',
+    // 'py2-clang3.9-ubuntu16.04',
+    // // 'py2-gcc6-ubuntu16.04',
+    // // should be covered by pytorch-linux-trusty-py3.6-gcc7
+    // //'py2-gcc7-ubuntu16.04',
 
-    // Build for Android
-    'py2-android-ubuntu16.04',
+    // // Build for Android
+    // 'py2-android-ubuntu16.04',
+
+    // // Run a CentOS build (verifies compatibility with CMake 2.8.12)
+    // 'py2-cuda9.0-cudnn7-centos7',
 
     // Build for iOS
     'py2-ios-macos10.13',
@@ -277,9 +282,6 @@ class Images {
     // Windows builds
     // The python part is actually ignored by build_windows.bat
     'py2-cuda9.0-cudnn7-windows',
-
-    // Run a CentOS build (verifies compatibility with CMake 2.8.12)
-    'py2-cuda9.0-cudnn7-centos7',
   ];
 
 
@@ -296,8 +298,9 @@ class Images {
   // Integrated environments
   /////////////////////////////////////////////////////////////////////////////
   static final List<String> integratedEnvironments = [
-      'onnx-py2-gcc5-ubuntu16.04',
-      // 'py3.6-gcc5-ubuntu16.04',
+      // These jobs are now running on CircleCI
+      // 'onnx-py2-gcc5-ubuntu16.04',
+      // // 'py3.6-gcc5-ubuntu16.04',
   ];
 
 

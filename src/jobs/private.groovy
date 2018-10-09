@@ -1,5 +1,3 @@
-import static ossci.caffe2.DockerVersion.version as caffe2DockerImageTag
-import static ossci.pytorch.DockerVersion.version as pyTorchDockerImageTag
 import static ossci.tensorcomp.DockerVersion.version as tensorcompDockerImageTag
 import static ossci.translate.DockerVersion.version as translateDockerImageTag
 import ossci.DockerUtil
@@ -11,8 +9,6 @@ folder(buildBasePath) {
 }
 
 def ignoreTags = [
-  'caffe2': caffe2DockerImageTag,
-  'pytorch': pyTorchDockerImageTag,
   'tensorcomp': tensorcompDockerImageTag,
   'translate': translateDockerImageTag,
 ]
@@ -46,15 +42,49 @@ def ignoreTags = [
       }
     }
     steps {
+      environmentVariables {
+        env(
+          'PROJECT',
+          "${project}",
+        )
+      }
+
       shell '''
 docker build -t ecr-gc resources/ecr-gc
 '''
 
-      shell """
-docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
-    --filter-prefix ${project} \
-    --ignore-tags ${ignoreTags[project]}
-"""
+      shell '''#!/bin/bash
+echo ${PROJECT}
+if [[ ${PROJECT} == *caffe2* ]]; then
+  curl -O https://raw.githubusercontent.com/pytorch/pytorch/master/.circleci/config.yml
+  while read line; do
+    if [[ "$line" == *Caffe2DockerVersion* ]]; then
+      export caffe2DockerImageTag=${line:22}  # len("# Caffe2DockerVersion:") == 22
+      echo "caffe2DockerImageTag: "${caffe2DockerImageTag}
+      break
+    fi
+  done < config.yml
+  docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
+    --filter-prefix ${PROJECT} \
+    --ignore-tags ${caffe2DockerImageTag}
+elif [[ ${PROJECT} == *pytorch* ]]; then
+  curl -O https://raw.githubusercontent.com/pytorch/pytorch/master/.circleci/config.yml
+  while read line; do
+    if [[ "$line" == *PyTorchDockerVersion* ]]; then
+      export pyTorchDockerImageTag=${line:23}  # len("# PyTorchDockerVersion:") == 23
+      echo "PyTorchDockerImageTag: "${pyTorchDockerImageTag}
+      break
+    fi
+  done < config.yml
+  docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
+    --filter-prefix ${PROJECT} \
+    --ignore-tags ${pyTorchDockerImageTag}
+else
+  docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
+      --filter-prefix ${PROJECT} \
+      --ignore-tags ${ignoreTags[project]}
+fi
+'''
     }
     publishers {
       mailer('ezyang@fb.com', false, false)

@@ -8,11 +8,6 @@ folder(buildBasePath) {
   description 'Jobs related to running this Jenkins setup'
 }
 
-def ignoreTags = [
-  'tensorcomp': tensorcompDockerImageTag,
-  'translate': translateDockerImageTag,
-]
-
 ['caffe2', 'pytorch', 'tensorcomp', 'translate'].each {
   def project = it
 
@@ -47,6 +42,14 @@ def ignoreTags = [
           'PROJECT',
           "${project}",
         )
+        env(
+          'TENSORCOMP_DOCKER_IMAGE_TAG',
+          "${tensorcompDockerImageTag}",
+        )
+        env(
+          'TRANSLATE_DOCKER_IMAGE_TAG',
+          "${translateDockerImageTag}",
+        )
       }
 
       shell '''
@@ -67,6 +70,7 @@ if [[ ${PROJECT} == *caffe2* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
     --ignore-tags ${caffe2DockerImageTag}
+
 elif [[ ${PROJECT} == *pytorch* ]]; then
   curl -O https://raw.githubusercontent.com/pytorch/pytorch/master/.circleci/config.yml
   while read line; do
@@ -79,10 +83,16 @@ elif [[ ${PROJECT} == *pytorch* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
     --ignore-tags ${pyTorchDockerImageTag}
-else
+
+elif [[ ${PROJECT} == *translate* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
       --filter-prefix ${PROJECT} \
-      --ignore-tags ${ignoreTags[project]}
+      --ignore-tags ${TRANSLATE_DOCKER_IMAGE_TAG}
+
+elif [[ ${PROJECT} == *tensorcomp* ]]; then
+  docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
+      --filter-prefix ${PROJECT} \
+      --ignore-tags ${TENSORCOMP_DOCKER_IMAGE_TAG}
 fi
 '''
     }

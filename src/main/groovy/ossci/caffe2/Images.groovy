@@ -27,6 +27,8 @@ class Images {
 
     // Python compatibility (Python 3.6 is not default)
     'py3.6-gcc5-ubuntu16.04',
+    'py3.6-clang6.0-ubuntu16.04',
+    'py3.6-clang7-ubuntu16.04',
 
     // Compatibility check for cuDNN 6 and 5 (build only)
     'py2-cuda8.0-cudnn6-ubuntu16.04',
@@ -44,6 +46,8 @@ class Images {
     'py2-clang3.9-ubuntu16.04',
     'py2-clang4.0-ubuntu16.04',
     'py2-clang5.0-ubuntu16.04',
+    'py2-clang6.0-ubuntu16.04',
+    'py2-clang7-ubuntu16.04',
 
     // Python 3 compiler compatibility
     'py3.5-gcc6-ubuntu16.04',

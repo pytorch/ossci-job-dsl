@@ -134,7 +134,7 @@ fi
 # Determine package name
 if [[ "$PACKAGE_TYPE" == *wheel ]]; then
   package_name='torch-nightly'
-elif [[ "$DESIRED_CUDA" == 'cpu' ]]; then
+elif [[ "$DESIRED_CUDA" == 'cpu' && "$(uname)" != 'Darwin' ]]; then
   package_name='pytorch-nightly-cpu'
 else
   package_name='pytorch-nightly'

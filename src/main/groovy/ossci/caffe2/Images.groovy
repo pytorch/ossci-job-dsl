@@ -275,11 +275,11 @@ class Images {
     // // Run a CentOS build (verifies compatibility with CMake 2.8.12)
     // 'py2-cuda9.0-cudnn7-centos7',
 
-    // Build for iOS
-    'py2-ios-macos10.13',
+    // // Build for iOS
+    // 'py2-ios-macos10.13',
 
-    // macOS builds
-    'py2-system-macos10.13',
+    // // macOS builds
+    // 'py2-system-macos10.13',
 
     // Windows builds
     // The python part is actually ignored by build_windows.bat

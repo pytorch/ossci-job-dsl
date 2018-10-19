@@ -41,8 +41,9 @@ def buildEnvironments = [
 
   "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7",
   "pytorch-win-ws2016-cuda9-cudnn7-py3",
-  "pytorch-macos-10.13-py3",
-  "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
+
+  // "pytorch-macos-10.13-py3",
+  // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // NB: This image is taken from Caffe2
   "py2-clang7-rocmdeb-ubuntu16.04",

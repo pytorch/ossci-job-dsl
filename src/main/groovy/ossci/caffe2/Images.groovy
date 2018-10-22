@@ -78,6 +78,7 @@ class Images {
 
     // AMD ROCM builds
     'py2-clang7-rocmdeb-ubuntu16.04',
+    'py2-devtoolset7-rocmrpm-centos7.5',
   ];
 
   /////////////////////////////////////////////////////////////////////////////

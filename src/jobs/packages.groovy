@@ -267,7 +267,7 @@ python -c 'from caffe2.python import core'
 python -c 'import torch; exit(0 if torch.backends.mkl.is_available() else 1)'
 
 # Test that CUDA builds are setup correctly
-if [[ "$DESIRED_CUDA " != 'cpu' ]]; then
+if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
   # Test CUDA archs
   timeout 20 python -c 'import torch; torch.randn([3,5]).cuda()'
 

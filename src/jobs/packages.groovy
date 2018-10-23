@@ -131,8 +131,13 @@ if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 
-# CUDA M.m format
+# M.m format
 cuda_majdotmin="${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3:1}"
+if [[ "${#DESIRED_PYTHON}" -gt 3 ]]; then
+  python_majdotmin="${DESIRED_PYTHON:2:1}.${DESIRED_PYTHON:3:1}"
+else
+  python_majdotmin="$DESIRED_PYTHON"
+fi
 
 # Determine package name
 if [[ "$PACKAGE_TYPE" == *wheel ]]; then
@@ -215,25 +220,26 @@ else
   fi
 fi
 
-# Check that conda didn't change the Python version out from under us
-if [[ "$(uname)" == 'Darwin' ]]; then
-  if [[ -z "\\$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
-    echo "The Python version has changed to \\$(python --version)"
-    echo "Probably the package for the version we want does not exist"
-    echo '(conda will change the Python version even if it was explicitly declared)'
-    exit 1
-  fi
-else
-  if [[ -z "$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
-    echo "The Python version has changed to $(python --version)"
-    echo "Probably the package for the version we want does not exist"
-    echo '(conda will change the Python version even if it was explicitly declared)'
-    exit 1
-  fi
-fi
-
-# Check that the CUDA feature is working
+# Check that conda didn't do something dumb
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  # Check that conda didn't change the Python version out from under us
+  if [[ "$(uname)" == 'Darwin' ]]; then
+    if [[ -z "\\$(python --version 2>&1 | grep -o \\$python_majdotmin)" ]]; then
+      echo "The Python version has changed to \\$(python --version)"
+      echo "Probably the package for the version we want does not exist"
+      echo '(conda will change the Python version even if it was explicitly declared)'
+      exit 1
+    fi
+  else
+    if [[ -z "$(python --version 2>&1 | grep -o $python_majdotmin)" ]]; then
+      echo "The Python version has changed to $(python --version)"
+      echo "Probably the package for the version we want does not exist"
+      echo '(conda will change the Python version even if it was explicitly declared)'
+      exit 1
+    fi
+  fi
+
+  # Check that the CUDA feature is working
   if [[ "$DESIRED_CUDA" == 'cpu' ]]; then
     if [[ "$(uname)" == 'Darwin' ]]; then
       if [[ -n "\\$(conda list torch | grep -o cuda)" ]]; then

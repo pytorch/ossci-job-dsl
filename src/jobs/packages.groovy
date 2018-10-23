@@ -216,7 +216,7 @@ else
 fi
 
 # Check that conda didn't change the Python version out from under us
-if [[ -z "$(python --version | grep -o $DESIRED_PYTHON)" ]]; then
+if [[ -z "$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
   echo "The Python version has changed to $(python --version)"
   echo "Probably the package for the version we want does not exist"
   echo '(conda will change the Python version even if it was explicitly declared)'

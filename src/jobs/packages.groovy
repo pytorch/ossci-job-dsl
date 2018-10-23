@@ -216,19 +216,35 @@ else
 fi
 
 # Check that conda didn't change the Python version out from under us
-if [[ -z "$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
-  echo "The Python version has changed to $(python --version)"
-  echo "Probably the package for the version we want does not exist"
-  echo '(conda will change the Python version even if it was explicitly declared)'
-  exit 1
+if [[ "$(uname)" == 'Darwin' ]]; then
+  if [[ -z "\\$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
+    echo "The Python version has changed to \\$(python --version)"
+    echo "Probably the package for the version we want does not exist"
+    echo '(conda will change the Python version even if it was explicitly declared)'
+    exit 1
+  fi
+else
+  if [[ -z "$(python --version 2>&1 | grep -o $DESIRED_PYTHON)" ]]; then
+    echo "The Python version has changed to $(python --version)"
+    echo "Probably the package for the version we want does not exist"
+    echo '(conda will change the Python version even if it was explicitly declared)'
+    exit 1
+  fi
 fi
 
 # Check that the CUDA feature is working
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   if [[ "$DESIRED_CUDA" == 'cpu' ]]; then
-    if [[ -n "$(conda list torch | grep -o cuda)" ]]; then
-      echo "The installed package is built for CUDA:: $(conda list torch)"
-      exit 1
+    if [[ "$(uname)" == 'Darwin' ]]; then
+      if [[ -n "\\$(conda list torch | grep -o cuda)" ]]; then
+        echo "The installed package is built for CUDA:: \\$(conda list torch)"
+        exit 1
+      fi
+    else
+      if [[ -n "$(conda list torch | grep -o cuda)" ]]; then
+        echo "The installed package is built for CUDA:: $(conda list torch)"
+        exit 1
+      fi
     fi
   elif [[ -z "$(conda list torch | grep -o cuda$cuda_majdotmin)" ]]; then
     echo "The installed package doesn't seem to be built for CUDA $cuda_majdotmin"

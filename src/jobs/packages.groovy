@@ -259,9 +259,34 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   fi
 fi
 
-# Smoke test that it works
+# Quick smoke test that it works
 python -c 'import torch'
 python -c 'from caffe2.python import core'
+
+# Test that MKL is there
+python -c 'import torch; exit(0 if torch.backends.mkl.is_available() else 1)'
+
+# Test that CUDA builds are setup correctly
+if [[ "$DESIRED_CUDA " != 'cpu' ]]; then
+  python -c 'import torch; exit(0 if torch.cuda.has_magma else 1)'
+  python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
+
+  # Test CUDA archs
+  timeout 20 python -c 'import torch; torch.randn([3,5]).cuda()'
+fi
+
+# Check that OpenBlas is not linked to on Macs
+if [[ "$(uname)" == 'Darwin' ]]; then
+  all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
+  for dylib in "\\${all_dylibs[@]}"; do
+    if [[ -n "\\$(otool -L \\$dylib | grep -i openblas)" ]]; then
+      echo "Found openblas as a dependency of \\$dylib"
+      echo "Full dependencies is: \\$(otool -L \\$dylib)"
+      exit 1
+    fi
+  done
+fi
+
 '''
 
       environmentVariables {

@@ -54,6 +54,7 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
+  "py2-devtoolset7-rocmrpm-centos7.5",
 ]
 
 def isRocmBuild = { buildEnvironment ->

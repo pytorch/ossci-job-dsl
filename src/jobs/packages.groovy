@@ -268,11 +268,12 @@ python -c 'import torch; exit(0 if torch.backends.mkl.is_available() else 1)'
 
 # Test that CUDA builds are setup correctly
 if [[ "$DESIRED_CUDA " != 'cpu' ]]; then
-  python -c 'import torch; exit(0 if torch.cuda.has_magma else 1)'
-  python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
-
   # Test CUDA archs
   timeout 20 python -c 'import torch; torch.randn([3,5]).cuda()'
+
+  # These have to run after CUDA is initialized
+  python -c 'import torch; torch.rand(1).cuda(); exit(0 if torch.cuda.has_magma else 1)'
+  python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
 fi
 
 # Check that OpenBlas is not linked to on Macs

@@ -131,6 +131,9 @@ if [[ "$DATE" == 'today' ]]; then
     DATE="$(date +%Y%m%d)"
 fi
 
+# CUDA M.m format
+cuda_majdotmin="${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3:1}"
+
 # Determine package name
 if [[ "$PACKAGE_TYPE" == *wheel ]]; then
   package_name='torch-nightly'
@@ -168,7 +171,7 @@ fi
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   rm -rf /usr/local/cuda || true
   if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
-    ln -s "/usr/local/cuda-${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3:1}" /usr/local/cuda
+    ln -s "/usr/local/cuda-$cuda_majdotmin" /usr/local/cuda
     export CUDA_VERSION=$(ls /usr/local/cuda/lib64/libcudart.so.*|sort|tac | head -1 | rev | cut -d"." -f -3 | rev)
     export CUDNN_VERSION=$(ls /usr/local/cuda/lib64/libcudnn.so.*|sort|tac | head -1 | rev | cut -d"." -f -3 | rev)
   fi
@@ -209,6 +212,28 @@ else
         --no-cache-dir \
         --no-index \
         -v
+  fi
+fi
+
+# Check that conda didn't change the Python version out from under us
+if [[ -z "$(python --version | grep -o $DESIRED_PYTHON" ]]; then
+  echo "The Python version has changed to $(python --version)"
+  echo "Probably the package for the version we want does not exist"
+  echo '(conda will change the Python version even if it was explicitly declared)'
+  exit 1
+fi
+
+# Check that the CUDA feature is working
+if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
+  if [[ "$DESIRED_CUDA" == 'cpu' ]]; then
+    if [[ -n "$(conda list torch | grep -o cuda)" ]]; then
+      echo "The installed package is built for CUDA:: $(conda list torch)"
+      exit 1
+    fi
+  elif [[ -z "$(conda list torch | grep -o cuda$cuda_majdotmin)" ]]; then
+    echo "The installed package doesn't seem to be built for CUDA $cuda_majdotmin"
+    echo "The full package is $(conda list torch)"
+    exit 1
   fi
 fi
 

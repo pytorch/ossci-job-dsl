@@ -121,8 +121,6 @@ Images.allDockerBuildEnvironments.each {
       steps {
         def gitPropertiesFile = './git.properties'
 
-        // GitUtil.mergeStep(delegate)
-
         // This is duplicated from the pull request trigger job such that
         // you don't need a pull request trigger job to test any branch
         // after merging it into any other branch (not just origin/master).
@@ -228,8 +226,6 @@ Images.allDockerBuildEnvironments.each {
       }
 
       steps {
-        GitUtil.mergeStep(delegate)
-
         environmentVariables {
           env(
             'BUILD_ENVIRONMENT',
@@ -354,8 +350,6 @@ git status
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
-
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
@@ -467,8 +461,6 @@ fi
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
-
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
@@ -610,8 +602,6 @@ Images.macOsBuildEnvironments.each {
       steps {
         def gitPropertiesFile = './git.properties'
 
-        GitUtil.mergeStep(delegate)
-
         // This is duplicated from the pull request trigger job such that
         // you don't need a pull request trigger job to test any branch
         // after merging it into any other branch (not just origin/master).
@@ -660,8 +650,6 @@ Images.macOsBuildEnvironments.each {
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
-
       environmentVariables {
         if (buildEnvironment.contains('ios')) {
           env('BUILD_IOS', "1")
@@ -770,7 +758,6 @@ Images.windowsBuildEnvironments.each {
 
     steps {
       def gitPropertiesFile = './git.properties'
-      GitUtil.mergeStep(delegate)
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
       phase("Build") {
@@ -804,8 +791,6 @@ Images.windowsBuildEnvironments.each {
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
-
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',

@@ -190,7 +190,6 @@ def pullRequestJobSettings = { context, repo, commitSource ->
     steps {
       def gitPropertiesFile = './git.properties'
 
-      GitUtil.mergeStep(delegate)
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
       environmentVariables {
@@ -480,8 +479,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     } // wrappers
 
     steps {
-      GitUtil.mergeStep(delegate)
-
       environmentVariables {
         // TODO: Will be obsolete once this is baked into docker image
         env(
@@ -875,8 +872,6 @@ exit 0
       }
 
       steps {
-        GitUtil.mergeStep(delegate)
-
         shell '''#!/bin/bash
 set -ex
 
@@ -919,8 +914,6 @@ fi
       }
 
       steps {
-        GitUtil.mergeStep(delegate)
-
         // Don't delete this envvar because we have Python script that uses it
         environmentVariables {
           env(
@@ -971,8 +964,6 @@ fi
           }
 
           steps {
-            GitUtil.mergeStep(delegate)
-
             // Don't delete this envvar because we have Python script that uses it
             environmentVariables {
               env(
@@ -1028,8 +1019,6 @@ fi
       }
 
       steps {
-        GitUtil.mergeStep(delegate)
-
         // Don't delete this envvar because we have Python script that uses it
         environmentVariables {
           env(
@@ -1079,8 +1068,6 @@ fi
         }
 
         steps {
-          GitUtil.mergeStep(delegate)
-
           // Don't delete this envvar because we have Python script that uses it
           environmentVariables {
             env(
@@ -1124,7 +1111,6 @@ multiJob("pytorch-tutorial-pull-request") {
     steps {
       def gitPropertiesFile = './git.properties'
 
-      GitUtil.mergeStep(delegate)
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
       environmentVariables {

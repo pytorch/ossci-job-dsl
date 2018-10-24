@@ -944,9 +944,6 @@ multiJob("nightly-pip-package-upload") {
     ParametersUtil.OVERRIDE_PACKAGE_VERSION(delegate, '')
     ParametersUtil.DEBUG(delegate, false)
   }
-  triggers {
-    cron('@daily')
-  }
 
   steps {
     def gitPropertiesFile = './git.properties'
@@ -999,9 +996,6 @@ multiJob("nightly-conda-package-upload") {
     ParametersUtil.PYTORCH_BUILD_VERSION(delegate, '0.5.0.dev20180913')
     ParametersUtil.PYTORCH_BUILD_NUMBER(delegate, '1')
     ParametersUtil.DEBUG(delegate, false)
-  }
-  triggers {
-    cron('@daily')
   }
 
   steps {

@@ -211,6 +211,11 @@ def pullRequestJobSettings = { context, repo, commitSource ->
               predefinedProp('GITHUB_REPO', repo)
               // Ensure consistent merge behavior in downstream builds.
               propertiesFile(gitPropertiesFile)
+              // Disable ROCM tests on pytorch/pytorch PRs; there is too
+              // much volume for three test machines to handle
+              if (isRocmBuild(buildEnvironment) && commitSource == "pull-request") {
+                booleanParam('RUN_TESTS', false)
+              }
             }
           }
         }

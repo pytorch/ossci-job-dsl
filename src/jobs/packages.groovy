@@ -260,24 +260,35 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
 fi
 
 # Quick smoke test that it works
+echo "Smoke testing imports"
 python -c 'import torch'
 python -c 'from caffe2.python import core'
 
 # Test that MKL is there
-python -c 'import torch; exit(0 if torch.backends.mkl.is_available() else 1)'
+if [[ "$(uname)" == 'Darwin' && "$PACKAGE_TYPE" == *wheel ]]; then
+  echo 'Not checking for MKL on Darwin wheel packages'
+else
+  echo "Checking that MKL is available"
+  python -c 'import torch; exit(0 if torch.backends.mkl.is_available() else 1)'
+fi
 
 # Test that CUDA builds are setup correctly
 if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
   # Test CUDA archs
+  echo "Checking that CUDA archs are setup correctly"
   timeout 20 python -c 'import torch; torch.randn([3,5]).cuda()'
 
   # These have to run after CUDA is initialized
+  echo "Checking that magma is available"
   python -c 'import torch; torch.rand(1).cuda(); exit(0 if torch.cuda.has_magma else 1)'
+
+  echo "Checking that CuDNN is available"
   python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
 fi
 
 # Check that OpenBlas is not linked to on Macs
 if [[ "$(uname)" == 'Darwin' ]]; then
+  echo "Checking the OpenBLAS is not linked to"
   all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
   for dylib in "\\${all_dylibs[@]}"; do
     if [[ -n "\\$(otool -L \\$dylib | grep -i openblas)" ]]; then

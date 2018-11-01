@@ -1044,9 +1044,8 @@ multiJob("nightlies-finished") {
   // hours).
   // By 9am, I meant 9am PST, because the nightly jobs run at 0:00 am PST. But
   // the jenkins machines appear to run in GMT so we add 7 here
-  // TODO changed this to be later after a manual restart, change it back
   triggers {
-    cron('15 22 * * *')
+    cron('15 16 * * *')
   }
 
   steps {

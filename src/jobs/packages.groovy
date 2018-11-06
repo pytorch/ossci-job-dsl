@@ -299,6 +299,16 @@ if [[ "$(uname)" == 'Darwin' ]]; then
   done
 fi
 
+# Echo the location of the logs
+if [[ "$(uname)" == 'Darwin' ]]; then
+  echo "The logfile for this run can be found at https://download.pytorch.org/nightly_logs/macos/\\${DATE:1:4}_\\${DATE:4:2}_\\${DATE:6:2}"/wheel_\\${python_majdotmin}_${DESIRED_CUDA}.log"
+else
+  if [[ "$PACKAGE_TYPE" == 'wheel' ]]; then
+    PACKAGE_TYPE=manywheel
+    python_majdotmin="$python_majdotmin${DESIRED_PYTHON:9:2}"
+  fi
+  echo "The logfile for this run can be found at https://download.pytorch.org/nightly_logs/macos/${DATE:1:4}_${DATE:4:2}_${DATE:6:2}"/${PACKAGE_TYPE}_${python_majdotmin}_${DESIRED_CUDA}.log"
+fi
 '''
 
       environmentVariables {

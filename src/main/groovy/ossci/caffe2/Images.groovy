@@ -131,36 +131,36 @@ class Images {
   ];
 
   static final List<String> dockerPipBuildEnvironments = [
-    'linux_pip_2.7m_cpu',
-    'linux_pip_2.7mu_cpu',
-    'linux_pip_3.5m_cpu',
-    'linux_pip_3.6m_cpu',
-    'linux_pip_3.7m_cpu',
+    'linux_manywheel_2.7m_cpu',
+    'linux_manywheel_2.7mu_cpu',
+    'linux_manywheel_3.5m_cpu',
+    'linux_manywheel_3.6m_cpu',
+    'linux_manywheel_3.7m_cpu',
 
-    'linux_pip_2.7m_cu80',
-    'linux_pip_2.7mu_cu80',
-    'linux_pip_3.5m_cu80',
-    'linux_pip_3.6m_cu80',
-    'linux_pip_3.7m_cu80',
+    'linux_manywheel_2.7m_cu80',
+    'linux_manywheel_2.7mu_cu80',
+    'linux_manywheel_3.5m_cu80',
+    'linux_manywheel_3.6m_cu80',
+    'linux_manywheel_3.7m_cu80',
 
-    'linux_pip_2.7m_cu90',
-    'linux_pip_2.7mu_cu90',
-    'linux_pip_3.5m_cu90',
-    'linux_pip_3.6m_cu90',
-    'linux_pip_3.7m_cu90',
+    'linux_manywheel_2.7m_cu90',
+    'linux_manywheel_2.7mu_cu90',
+    'linux_manywheel_3.5m_cu90',
+    'linux_manywheel_3.6m_cu90',
+    'linux_manywheel_3.7m_cu90',
 
-    'linux_pip_2.7m_cu92',
-    'linux_pip_2.7mu_cu92',
-    'linux_pip_3.5m_cu92',
-    'linux_pip_3.6m_cu92',
-    'linux_pip_3.7m_cu92',
+    'linux_manywheel_2.7m_cu92',
+    'linux_manywheel_2.7mu_cu92',
+    'linux_manywheel_3.5m_cu92',
+    'linux_manywheel_3.6m_cu92',
+    'linux_manywheel_3.7m_cu92',
   ];
 
   static final List<String> macPipBuildEnvironments = [
-    'macos_pip_2.7_cpu',
-    'macos_pip_3.5_cpu',
-    'macos_pip_3.6_cpu',
-    'macos_pip_3.7_cpu',
+    'macos_wheel_2.7_cpu',
+    'macos_wheel_3.5_cpu',
+    'macos_wheel_3.6_cpu',
+    'macos_wheel_3.7_cpu',
   ];
 
   static final List<String> dockerLibtorchBuildEnvironments = [

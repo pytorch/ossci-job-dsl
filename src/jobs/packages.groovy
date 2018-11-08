@@ -110,7 +110,7 @@ py_dot="${DESIRED_PYTHON:0:3}"
 py_long="cp${DESIRED_PYTHON:0:1}${DESIRED_PYTHON:2:1}-cp${DESIRED_PYTHON:0:1}${DESIRED_PYTHON:2}"
 
 # Determine package name
-if [[ "$PACKAGE_TYPE" == 'pip' ]]; then
+if [[ "$PACKAGE_TYPE" == *wheel ]]; then
   package_name='torch-nightly'
 elif [[ "$DESIRED_CUDA" == 'cpu' && "$(uname)" != 'Darwin' ]]; then
   package_name='pytorch-nightly-cpu'
@@ -235,7 +235,7 @@ python -c 'import torch'
 python -c 'from caffe2.python import core'
 
 # Test that MKL is there
-if [[ "$(uname)" == 'Darwin' && "$PACKAGE_TYPE" == *wheel ]]; then
+if [[ "$(uname)" == 'Darwin' && "$PACKAGE_TYPE" == wheel ]]; then
   echo 'Not checking for MKL on Darwin wheel packages'
 else
   echo "Checking that MKL is available"
@@ -271,11 +271,8 @@ fi
 
 # Echo the location of the logs
 if [[ "$(uname)" == 'Darwin' ]]; then
-  echo "The logfile for this run can be found at https://download.pytorch.org/nightly_logs/macos/\\${DATE:1:4}_\\${DATE:4:2}_\\${DATE:6:2}"/wheel_${DESIRED_PYTHON}_cpu.log"
+  echo "The logfile for this run can be found at https://download.pytorch.org/nightly_logs/macos/\\${DATE:1:4}_\\${DATE:4:2}_\\${DATE:6:2}"/${PACKAGE_TYPE}_${DESIRED_PYTHON}_cpu.log"
 else
-  if [[ "$PACKAGE_TYPE" == 'pip' ]]; then
-    PACKAGE_TYPE=manywheel
-  fi
   echo "The logfile for this run can be found at https://download.pytorch.org/nightly_logs/linux/${DATE:1:4}_${DATE:4:2}_${DATE:6:2}"/${PACKAGE_TYPE}_${DESIRED_PYTHON}_${DESIRED_CUDA}.log"
 fi
 '''

@@ -131,76 +131,76 @@ class Images {
   ];
 
   static final List<String> dockerPipBuildEnvironments = [
-    'pip-cp27-cp27m-linux',
-    'pip-cp27-cp27mu-linux',
-    'pip-cp35-cp35m-linux',
-    'pip-cp36-cp36m-linux',
-    'pip-cp37-cp37m-linux',
+    'linux_pip_2.7m_cpu',
+    'linux_pip_2.7mu_cpu',
+    'linux_pip_3.5m_cpu',
+    'linux_pip_3.6m_cpu',
+    'linux_pip_3.7m_cpu',
 
-    'pip-cp27-cp27m-cuda80-linux',
-    'pip-cp27-cp27mu-cuda80-linux',
-    'pip-cp35-cp35m-cuda80-linux',
-    'pip-cp36-cp36m-cuda80-linux',
-    'pip-cp37-cp37m-cuda80-linux',
+    'linux_pip_2.7m_cu80',
+    'linux_pip_2.7mu_cu80',
+    'linux_pip_3.5m_cu80',
+    'linux_pip_3.6m_cu80',
+    'linux_pip_3.7m_cu80',
 
-    'pip-cp27-cp27m-cuda90-linux',
-    'pip-cp27-cp27mu-cuda90-linux',
-    'pip-cp35-cp35m-cuda90-linux',
-    'pip-cp36-cp36m-cuda90-linux',
-    'pip-cp37-cp37m-cuda90-linux',
+    'linux_pip_2.7m_cu90',
+    'linux_pip_2.7mu_cu90',
+    'linux_pip_3.5m_cu90',
+    'linux_pip_3.6m_cu90',
+    'linux_pip_3.7m_cu90',
 
-    'pip-cp27-cp27m-cuda92-linux',
-    'pip-cp27-cp27mu-cuda92-linux',
-    'pip-cp35-cp35m-cuda92-linux',
-    'pip-cp36-cp36m-cuda92-linux',
-    'pip-cp37-cp37m-cuda92-linux',
+    'linux_pip_2.7m_cu92',
+    'linux_pip_2.7mu_cu92',
+    'linux_pip_3.5m_cu92',
+    'linux_pip_3.6m_cu92',
+    'linux_pip_3.7m_cu92',
   ];
 
   static final List<String> macPipBuildEnvironments = [
-    'pip-2.7-macos10.13',
-    'pip-3.5-macos10.13',
-    'pip-3.6-macos10.13',
-    'pip-3.7-macos10.13',
+    'macos_pip_2.7_cpu',
+    'macos_pip_3.5_cpu',
+    'macos_pip_3.6_cpu',
+    'macos_pip_3.7_cpu',
   ];
 
   static final List<String> dockerLibtorchBuildEnvironments = [
-    'libtorch-cp27-cp27m-linux',
-    'libtorch-cp27-cp27m-cuda80-linux',
-    'libtorch-cp27-cp27m-cuda90-linux',
-    'libtorch-cp27-cp27m-cuda92-linux',
+    'linux_libtorch_2.7m_cpu',
+    'linux_libtorch_2.7m_cu80',
+    'linux_libtorch_2.7m_cu90',
+    'linux_libtorch_2.7m_cu92',
   ];
 
   static final List<String> macLibtorchBuildEnvironments = [
-    'libtorch-cp27-cp27m-macos10.13',
+    'macos_libtorch_2.7m_cpu',
   ];
 
   static final List<String> dockerCondaBuildEnvironments = [
-    'conda2.7-linux',
-    'conda3.5-linux',
-    'conda3.6-linux',
-    'conda3.7-linux',
+    'linux_conda_2.7_cpu',
+    'linux_conda_3.5_cpu',
+    'linux_conda_3.6_cpu',
+    'linux_conda_3.7_cpu',
 
-    'conda2.7-cuda80-linux',
-    'conda3.5-cuda80-linux',
-    'conda3.6-cuda80-linux',
-    'conda3.7-cuda80-linux',
+    'linux_conda_2.7_cu80',
+    'linux_conda_3.5_cu80',
+    'linux_conda_3.6_cu80',
+    'linux_conda_3.7_cu80',
 
-    'conda2.7-cuda90-linux',
-    'conda3.5-cuda90-linux',
-    'conda3.6-cuda90-linux',
-    'conda3.7-cuda90-linux',
+    'linux_conda_2.7_cu90',
+    'linux_conda_3.5_cu90',
+    'linux_conda_3.6_cu90',
+    'linux_conda_3.7_cu90',
 
-    'conda2.7-cuda92-linux',
-    'conda3.5-cuda92-linux',
-    'conda3.6-cuda92-linux',
-    'conda3.7-cuda92-linux',
+    'linux_conda_2.7_cu92',
+    'linux_conda_3.5_cu92',
+    'linux_conda_3.6_cu92',
+    'linux_conda_3.7_cu92',
   ];
 
   static final List<String> macCondaBuildEnvironments = [
-    'conda2.7-macos10.13',
-    'conda3.5-macos10.13',
-    'conda3.6-macos10.13',
-    'conda3.7-macos10.13',
+    'macos_conda_2.7_cpu',
+    'macos_conda_3.5_cpu',
+    'macos_conda_3.6_cpu',
+    'macos_conda_3.7_cpu',
   ];
 
   static final List<String> allNightlyBuildEnvironments = dockerCondaBuildEnvironments + dockerPipBuildEnvironments + macCondaBuildEnvironments + macPipBuildEnvironments;

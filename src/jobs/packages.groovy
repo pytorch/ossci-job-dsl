@@ -37,7 +37,7 @@ Images.allNightlyBuildEnvironments.each {
 
   job("${nightliesUploadedBasePath}/${buildEnvironment}") {
     def buildForMac = buildEnvironment.contains('macos')
-    def packageType = buildEnvironment.contains('conda') ? 'conda' : 'pip'
+    def packageType = buildEnvironment.contains('conda') ? 'conda' : 'wheel'
     def buildForCpu = buildEnvironment.contains('_cpu')
 
     // Delegate to either a Mac or a Linux machine

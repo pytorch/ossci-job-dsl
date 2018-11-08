@@ -44,7 +44,7 @@ Images.allNightlyBuildEnvironments.each {
     if (buildForMac) {
       JobUtil.common(delegate, 'osx')
     } else {
-      if (buildEnvironment.contains('cuda')) {
+      if (!buildForCpu) {
         JobUtil.common(delegate, 'docker && gpu')
       } else {
         JobUtil.common(delegate, 'docker && cpu')

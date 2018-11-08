@@ -110,7 +110,7 @@ py_dot="${DESIRED_PYTHON:0:3}"
 py_long="cp${DESIRED_PYTHON:0:1}${DESIRED_PYTHON:2:1}-cp${DESIRED_PYTHON:0:1}${DESIRED_PYTHON:2}"
 
 # Determine package name
-if [[ "$PACKAGE_TYPE" == *wheel ]]; then
+if [[ "$PACKAGE_TYPE" == 'pip' ]]; then
   package_name='torch-nightly'
 elif [[ "$DESIRED_CUDA" == 'cpu' && "$(uname)" != 'Darwin' ]]; then
   package_name='pytorch-nightly-cpu'

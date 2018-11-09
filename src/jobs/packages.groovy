@@ -154,6 +154,7 @@ fi
 
 # Print some debugging info
 python --version
+pip --version
 which python
 if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   if [[ "$(uname)" == 'Darwin' ]]; then

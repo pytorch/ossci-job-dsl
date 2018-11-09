@@ -162,7 +162,7 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
     conda search -c pytorch "$package_name"
   fi
 else
-  curl "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html"
+  curl "https://download.pytorch.org/whl/nightly/$DESIRED_CUDA/torch_nightly.html" -v
 fi
 
 # Install the package for the requested date

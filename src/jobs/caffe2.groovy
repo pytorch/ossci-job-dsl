@@ -350,6 +350,8 @@ git status
     }
 
     steps {
+      GitUtil.mergeStep(delegate)
+
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',
@@ -461,6 +463,8 @@ fi
     }
 
     steps {
+      GitUtil.mergeStep(delegate)
+
       environmentVariables {
         env(
           'BUILD_ENVIRONMENT',

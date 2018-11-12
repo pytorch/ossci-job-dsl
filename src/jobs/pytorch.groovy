@@ -190,6 +190,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
     steps {
       def gitPropertiesFile = './git.properties'
 
+      GitUtil.mergeStep(delegate)
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
       environmentVariables {
@@ -469,6 +470,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     } // wrappers
 
     steps {
+      GitUtil.mergeStep(delegate)
+
       environmentVariables {
         // TODO: Will be obsolete once this is baked into docker image
         env(

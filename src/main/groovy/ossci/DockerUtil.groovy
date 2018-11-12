@@ -159,6 +159,9 @@ fi
 
 if [[ $(/bin/hostname) == *-rocm-* ]]; then
   docker_args+=" --device=/dev/kfd --device=/dev/dri --group-add video"
+  if hash getent 2>/dev/null; then
+    docker_args+=" --group-add $(getent group video | cut -d':' -f3)"
+  fi
 fi
 
 # Image

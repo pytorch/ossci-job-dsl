@@ -1,3 +1,5 @@
+import static ossci.caffe2.DockerVersion.allDeployedVersions as caffe2DockerImageTags
+import static ossci.pytorch.DockerVersion.allDeployedVersions as pyTorchDockerImageTags
 import static ossci.tensorcomp.DockerVersion.version as tensorcompDockerImageTag
 import static ossci.translate.DockerVersion.version as translateDockerImageTag
 import ossci.DockerUtil
@@ -43,6 +45,14 @@ folder(buildBasePath) {
           "${project}",
         )
         env(
+          'CAFFE2_DOCKER_IMAGE_TAGS',
+          "${caffe2DockerImageTags}",
+        )
+        env(
+          'PYTORCH_DOCKER_IMAGE_TAGS',
+          "${pyTorchDockerImageTags}",
+        )
+        env(
           'TENSORCOMP_DOCKER_IMAGE_TAG',
           "${tensorcompDockerImageTag}",
         )
@@ -59,30 +69,14 @@ docker build -t ecr-gc resources/ecr-gc
       shell '''#!/bin/bash
 echo ${PROJECT}
 if [[ ${PROJECT} == *caffe2* ]]; then
-  curl -O https://raw.githubusercontent.com/pytorch/pytorch/master/.circleci/config.yml
-  while read line; do
-    if [[ "$line" == *Caffe2DockerVersion* ]]; then
-      export caffe2DockerImageTag=${line:22}  # len("# Caffe2DockerVersion:") == 22
-      echo "caffe2DockerImageTag: "${caffe2DockerImageTag}
-      break
-    fi
-  done < config.yml
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
-    --ignore-tags ${caffe2DockerImageTag}
+    --ignore-tags ${CAFFE2_DOCKER_IMAGE_TAGS}
 
 elif [[ ${PROJECT} == *pytorch* ]]; then
-  curl -O https://raw.githubusercontent.com/pytorch/pytorch/master/.circleci/config.yml
-  while read line; do
-    if [[ "$line" == *PyTorchDockerVersion* ]]; then
-      export pyTorchDockerImageTag=${line:23}  # len("# PyTorchDockerVersion:") == 23
-      echo "PyTorchDockerImageTag: "${pyTorchDockerImageTag}
-      break
-    fi
-  done < config.yml
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
-    --ignore-tags ${pyTorchDockerImageTag}
+    --ignore-tags ${PYTORCH_DOCKER_IMAGE_TAGS}
 
 elif [[ ${PROJECT} == *translate* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \

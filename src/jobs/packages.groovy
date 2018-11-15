@@ -310,12 +310,12 @@ multiJob("nightlies-uploaded") {
   // When all tests are run then these should run at 9am everday, which should
   // give 3 hours for each job to finish in the cluster (jobs start at 00:05 am
   // and the default timeout is less than 3 hours).
+  // Note that only the Mac builds take so long. The linux ones usually finish
+  // under an hour.
   // By 9am, I meant 9am PST, because the nightly jobs run at 0:00 am PST. But
   // the jenkins machines appear to run in GMT so we add 7 here
-  // But right now only smoke tests are being run so the timeout on each job is
-  // 1 hour 20 minutes. This should run at 4:15 am PST.
   triggers {
-    cron('15 11 * * *')
+    cron('15 16 * * *')
   }
 
   steps {

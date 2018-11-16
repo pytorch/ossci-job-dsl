@@ -251,6 +251,7 @@ class Images {
     // 'py2-gcc4.8-ubuntu14.04',
 
     'py2-clang7-rocmdeb-ubuntu16.04',
+    'py2-devtoolset7-rocmrpm-centos7.5',
   ];
 
   static final List<String> buildOnlyEnvironments = [

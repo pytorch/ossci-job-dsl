@@ -262,7 +262,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then
   echo "Checking the OpenBLAS is not linked to"
   all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
   for dylib in "\\${all_dylibs[@]}"; do
-    echo "All dependencies of \\$dylib are \\$(otool -L \\$dylib)"
+    echo "All dependencies of \\$dylib are \\$(otool -L \\$dylib) with rpath \\$(otool -l \\$dylib | grep LC_RPATH -A2)"
     if [[ -n "\\$(otool -L \\$dylib | grep -i openblas)" ]]; then
       echo "Found openblas as a dependency of \\$dylib"
       echo "Full dependencies is: \\$(otool -L \\$dylib)"

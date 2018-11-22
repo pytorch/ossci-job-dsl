@@ -258,8 +258,9 @@ git submodule update --init --recursive
 # Ensure jenkins can write to the ccache root dir.
 sudo chown jenkins:jenkins "${HOME}/.ccache"
 
-# Go into the caffe2 directory within the PyTorch repo
-cd caffe2
+# Do not need to go into the caffe2 directory within the PyTorch 
+# repo since the root CMakeLists.txt handles the process of making 
+# caffe2 and its docs. So do the below from the pytorch repo root.
 
 # Make our build directory
 mkdir -p build

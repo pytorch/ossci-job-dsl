@@ -248,15 +248,18 @@ temp_dir=$(mktemp -d)
 trap "rm -rf ${temp_dir}" EXIT
 
 # Get all the documentation sources, put them in one place
-rm -rf caffe2_source || true
-git clone https://github.com/caffe2/caffe2 caffe2_source
-pushd caffe2_source
+rm -rf pytorch_source || true
+git clone https://github.com/pytorch/pytorch pytorch_source
+pushd pytorch_source
 
 # Reinitialize submodules
 git submodule update --init --recursive
 
 # Ensure jenkins can write to the ccache root dir.
 sudo chown jenkins:jenkins "${HOME}/.ccache"
+
+# Go into the caffe2 directory within the PyTorch repo
+cd caffe2
 
 # Make our build directory
 mkdir -p build
@@ -281,7 +284,7 @@ python caffe2/python/docs/github.py "${temp_dir}/operators-catalogue.md"
 popd
 
 # Remove source directory
-rm -rf caffe2_source || true
+rm -rf pytorch_source || true
 
 # Copy docs from the temp folder and git add
 git rm -rf doxygen-c || true

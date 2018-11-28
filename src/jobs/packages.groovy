@@ -257,17 +257,29 @@ if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
   python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
 fi
 
-# Check that OpenBlas is not linked to on Macs
+# Print out all dependencies of the shared libraries
 if [[ "$(uname)" == 'Darwin' ]]; then
-  echo "Checking the OpenBLAS is not linked to"
   all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
   for dylib in "\\${all_dylibs[@]}"; do
     echo "All dependencies of \\$dylib are \\$(otool -L \\$dylib) with rpath \\$(otool -l \\$dylib | grep LC_RPATH -A2)"
+
+    # Check that OpenBlas is not linked to on Macs
+    echo "Checking the OpenBLAS is not linked to"
     if [[ -n "\\$(otool -L \\$dylib | grep -i openblas)" ]]; then
       echo "Found openblas as a dependency of \\$dylib"
       echo "Full dependencies is: \\$(otool -L \\$dylib)"
       exit 1
     fi
+  done
+else 
+  if [[ "$PACKAGE_TYPE" == conda ]]; then
+    all_libs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.so'))
+  else
+    all_libs=($(find "/opt/python/${py_long}/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.so'))
+  fi
+
+  for lib in "${all_libs[@]}"; do
+    echo "All dependencies of $lib are $(ldd $lib) with runpath $(objump -p $lib | grep RUNPATH)"
   done
 fi
 

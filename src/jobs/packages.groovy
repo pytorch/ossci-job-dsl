@@ -258,6 +258,7 @@ if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
 fi
 
 # Print out all dependencies of the shared libraries
+set +x
 if [[ "$(uname)" == 'Darwin' ]]; then
   all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
   for dylib in "\\${all_dylibs[@]}"; do

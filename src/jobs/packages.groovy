@@ -273,9 +273,9 @@ if [[ "$(uname)" == 'Darwin' ]]; then
   done
 else 
   if [[ "$PACKAGE_TYPE" == conda ]]; then
-    all_libs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.so'))
+    all_libs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${py_dot}/site-packages/torch/" -name '*.so'))
   else
-    all_libs=($(find "/opt/python/${py_long}/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.so'))
+    all_libs=($(find "/opt/python/${py_long}/lib/python${py_dot}/site-packages/torch/" -name '*.so'))
   fi
 
   for lib in "${all_libs[@]}"; do

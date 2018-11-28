@@ -279,7 +279,7 @@ else
   fi
 
   for lib in "${all_libs[@]}"; do
-    echo "All dependencies of $lib are $(ldd $lib) with runpath $(objump -p $lib | grep RUNPATH)"
+    echo "All dependencies of $lib are $(ldd $lib) with runpath $(objdump -p $lib | grep RUNPATH)"
   done
 fi
 

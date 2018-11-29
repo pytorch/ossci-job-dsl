@@ -257,7 +257,10 @@ if [[ "$DESIRED_CUDA" != 'cpu' ]]; then
   python -c 'import torch; exit(0 if torch.backends.cudnn.is_available() else 1)'
 fi
 
-# Print out all dependencies of the shared libraries
+# Loop through all shared libraries and
+#  - Print out all the dependencies
+#  - (Mac) check that there is no openblas dependency
+#  - Check that there are no protobuf symbols
 set +x
 if [[ "$(uname)" == 'Darwin' ]]; then
   all_dylibs=($(find "${TMPDIR}/anaconda/envs/test/lib/python${DESIRED_PYTHON}/site-packages/torch/" -name '*.dylib'))
@@ -267,8 +270,16 @@ if [[ "$(uname)" == 'Darwin' ]]; then
     # Check that OpenBlas is not linked to on Macs
     echo "Checking the OpenBLAS is not linked to"
     if [[ -n "\\$(otool -L \\$dylib | grep -i openblas)" ]]; then
-      echo "Found openblas as a dependency of \\$dylib"
+      echo "ERROR: Found openblas as a dependency of \\$dylib"
       echo "Full dependencies is: \\$(otool -L \\$dylib)"
+      exit 1
+    fi
+
+    # Check for protobuf symbols
+    proto_symbols=\\$(nm \\$dylib | grep protobuf)
+    if [[ -n "\\$proto_symbols" ]]; then
+      echo "ERROR: Detected protobuf symbols in \\$dylib"
+      echo "Symbols are \\$proto_symbols"
       exit 1
     fi
   done
@@ -281,6 +292,14 @@ else
 
   for lib in "${all_libs[@]}"; do
     echo "All dependencies of $lib are $(ldd $lib) with runpath $(objdump -p $lib | grep RUNPATH)"
+
+    # Check for protobuf symbols
+    proto_symbols=$(nm $lib | grep protobuf)
+    if [[ -n "$proto_symbols" ]]; then
+      echo "ERROR: Detected protobuf symbols in $lib"
+      echo "Symbols are $proto_symbols"
+      exit 1
+    fi
   done
 fi
 

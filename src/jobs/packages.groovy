@@ -276,7 +276,7 @@ if [[ "$(uname)" == 'Darwin' ]]; then
     fi
 
     # Check for protobuf symbols
-    proto_symbols=\\$(nm \\$dylib | grep protobuf)
+    proto_symbols="\\$(nm \\$dylib | grep protobuf)" || true
     if [[ -n "\\$proto_symbols" ]]; then
       echo "ERROR: Detected protobuf symbols in \\$dylib"
       echo "Symbols are \\$proto_symbols"
@@ -294,7 +294,7 @@ else
     echo "All dependencies of $lib are $(ldd $lib) with runpath $(objdump -p $lib | grep RUNPATH)"
 
     # Check for protobuf symbols
-    proto_symbols=$(nm $lib | grep protobuf)
+    proto_symbols=$(nm $lib | grep protobuf) || true
     if [[ -n "$proto_symbols" ]]; then
       echo "ERROR: Detected protobuf symbols in $lib"
       echo "Symbols are $proto_symbols"

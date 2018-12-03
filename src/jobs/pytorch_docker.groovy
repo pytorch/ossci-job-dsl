@@ -205,7 +205,10 @@ fi
 # Build new image
 ./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}"
 
+docker tag "${image}:${tag}" "${image}:latest"
+
 docker push "${image}:${tag}"
+docker push "${image}:latest"
 '''
     }
   }

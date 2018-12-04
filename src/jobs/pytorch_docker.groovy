@@ -203,12 +203,10 @@ if [ -n "${last_tag}" ]; then
 fi
 
 # Build new image
-./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}"
+./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}" -t "${image}:latest"
 
-docker tag "${image}:${tag}" "${image}:latest"
-
-docker push "${image}:${tag}"
 docker push "${image}:latest"
+docker push "${image}:${tag}"
 '''
     }
   }

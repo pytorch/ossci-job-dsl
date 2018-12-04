@@ -71,22 +71,22 @@ echo ${PROJECT}
 if [[ ${PROJECT} == *caffe2* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
-    --ignore-tags ${CAFFE2_DOCKER_IMAGE_TAGS}
+    --ignore-tags ${CAFFE2_DOCKER_IMAGE_TAGS},latest
 
 elif [[ ${PROJECT} == *pytorch* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
     --filter-prefix ${PROJECT} \
-    --ignore-tags ${PYTORCH_DOCKER_IMAGE_TAGS}
+    --ignore-tags ${PYTORCH_DOCKER_IMAGE_TAGS},latest
 
 elif [[ ${PROJECT} == *translate* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
       --filter-prefix ${PROJECT} \
-      --ignore-tags ${TRANSLATE_DOCKER_IMAGE_TAG}
+      --ignore-tags ${TRANSLATE_DOCKER_IMAGE_TAG},latest
 
 elif [[ ${PROJECT} == *tensorcomp* ]]; then
   docker run -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ecr-gc \
       --filter-prefix ${PROJECT} \
-      --ignore-tags ${TENSORCOMP_DOCKER_IMAGE_TAG}
+      --ignore-tags ${TENSORCOMP_DOCKER_IMAGE_TAG},latest
 fi
 '''
     }

@@ -103,7 +103,7 @@ fi
 # DESIRED_CUDA is in format cu80 (or 'cpu')
 
 # Generate M.m formats for CUDA and Python versions
-cuda_dot="${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3:1}"
+cuda_dot="${DESIRED_CUDA:2:1}.${DESIRED_CUDA:3}"
 py_dot="${DESIRED_PYTHON:0:3}"
 
 # Generate "long" python versions cp27-cp27mu
@@ -173,7 +173,7 @@ if [[ "$PACKAGE_TYPE" == 'conda' ]]; then
   elif [[ "$DESIRED_CUDA" == 'cpu' || "$DESIRED_CUDA" == 'cu90' ]]; then
     conda install -yq -c pytorch "$package_name_and_version"
   else
-    conda install -yq -c pytorch "cuda${DESIRED_CUDA:2:2}" "$package_name_and_version"
+    conda install -yq -c pytorch "cuda${DESIRED_CUDA:2}" "$package_name_and_version"
   fi
 else
   if [[ "$(uname)" == 'Darwin' ]]; then

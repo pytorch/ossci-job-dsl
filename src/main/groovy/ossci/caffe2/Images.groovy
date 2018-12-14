@@ -126,7 +126,7 @@ class Images {
   static final List<String> packagesDockerBaseImages = [
     "manylinux-cuda80",
     "manylinux-cuda90",
-    "manylinux-cuda92",
+    "manylinux-cuda100",
     "conda-cuda"
   ];
 
@@ -149,11 +149,11 @@ class Images {
     'linux_manywheel_3.6m_cu90',
     'linux_manywheel_3.7m_cu90',
 
-    'linux_manywheel_2.7m_cu92',
-    'linux_manywheel_2.7mu_cu92',
-    'linux_manywheel_3.5m_cu92',
-    'linux_manywheel_3.6m_cu92',
-    'linux_manywheel_3.7m_cu92',
+    'linux_manywheel_2.7m_cu100',
+    'linux_manywheel_2.7mu_cu100',
+    'linux_manywheel_3.5m_cu100',
+    'linux_manywheel_3.6m_cu100',
+    'linux_manywheel_3.7m_cu100',
   ];
 
   static final List<String> macPipBuildEnvironments = [
@@ -167,7 +167,7 @@ class Images {
     'linux_libtorch_2.7m_cpu',
     'linux_libtorch_2.7m_cu80',
     'linux_libtorch_2.7m_cu90',
-    'linux_libtorch_2.7m_cu92',
+    'linux_libtorch_2.7m_cu100',
   ];
 
   static final List<String> macLibtorchBuildEnvironments = [
@@ -190,10 +190,10 @@ class Images {
     'linux_conda_3.6_cu90',
     'linux_conda_3.7_cu90',
 
-    'linux_conda_2.7_cu92',
-    'linux_conda_3.5_cu92',
-    'linux_conda_3.6_cu92',
-    'linux_conda_3.7_cu92',
+    'linux_conda_2.7_cu100',
+    'linux_conda_3.5_cu100',
+    'linux_conda_3.6_cu100',
+    'linux_conda_3.7_cu100',
   ];
 
   static final List<String> macCondaBuildEnvironments = [

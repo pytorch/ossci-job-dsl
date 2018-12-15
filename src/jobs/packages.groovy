@@ -67,7 +67,7 @@ Images.allNightlyBuildEnvironments.each {
       def desiredCuda = 'cpu'
       def cudaVersion = ''
       if (!buildForCpu) {
-        def cudaVer = buildEnvironment =~ /.*_(cu\d\d)/
+        def cudaVer = buildEnvironment =~ /.*_(cu\d+)/
         desiredCuda = cudaVer[0][1]
         cudaVersion = 'native'
       }

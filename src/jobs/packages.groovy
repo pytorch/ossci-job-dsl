@@ -104,7 +104,7 @@ fi
 
 # Generate M.m formats for CUDA and Python versions
 if [[ "$DESIRED_CUDA" != cpu ]]; then
-  cuda_dot="$(echo $DESIRED_CUDA | tr -d 'cpu')
+  cuda_dot="$(echo $DESIRED_CUDA | tr -d 'cpu')"
   if [[ "${#cuda_dot}" == 2 ]]; then
     cuda_dot="${cuda_dot:0:1:}.${cuda_dot:1}"
   else

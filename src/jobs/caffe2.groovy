@@ -165,7 +165,7 @@ Images.allDockerBuildEnvironments.each {
           }
         }
         if (runTests) {
-          phase("Test") {
+          phase("Run") {
             phaseJob("${buildBasePath}/${buildEnvironment}-test") {
               parameters {
                 currentBuild()
@@ -176,8 +176,6 @@ Images.allDockerBuildEnvironments.each {
               }
               PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
             }
-          }
-          phase("Bench") {
             phaseJob("${buildBasePath}/${buildEnvironment}-bench") {
               parameters {
                 currentBuild()

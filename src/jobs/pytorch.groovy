@@ -220,7 +220,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
         }
 
         // Caffe2
-        def definePhaseJob = { name, caffe2_only ->
+        def definePhaseJob = { name ->
           phaseJob("caffe2-builds/${name}") {
             parameters {
               // Pass parameters of this job
@@ -237,13 +237,11 @@ def pullRequestJobSettings = { context, repo, commitSource ->
         }
 
         Caffe2Images.buildAndTestEnvironments.each {
-          def caffe2_only = !Caffe2Images.integratedEnvironments.contains(it);
-          definePhaseJob(it + "-trigger-test", caffe2_only)
+          definePhaseJob(it + "-trigger-test")
         }
 
         Caffe2Images.buildOnlyEnvironments.each {
-          def caffe2_only = !Caffe2Images.integratedEnvironments.contains(it);
-          definePhaseJob(it + "-trigger-build", caffe2_only)
+          definePhaseJob(it + "-trigger-build")
         }
       }
     }

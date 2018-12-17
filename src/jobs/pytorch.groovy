@@ -127,7 +127,7 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
             }
           }
         }
-        def definePhaseJob = { name ->
+        def definePhaseJob = { name, run_bench ->
           phaseJob("caffe2-builds/${name}") {
             parameters {
               // Checkout this exact same revision in downstream builds.
@@ -137,16 +137,20 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
               propertiesFile(gitPropertiesFile)
               // Pass parameters of this job
               currentBuild()
+              // Enable running bench scripts in ROCm CI for master commits
+              if (run_bench) {
+                booleanParam('RUN_BENCH', true)
+              }
             }
           }
         }
 
         Caffe2Images.buildAndTestEnvironments.each {
-          definePhaseJob(it + "-trigger-test")
+          definePhaseJob(it + "-trigger-test", /* run_bench */ true)
         }
 
         Caffe2Images.buildOnlyEnvironments.each {
-          definePhaseJob(it + "-trigger-build")
+          definePhaseJob(it + "-trigger-build", /* run_bench */ false)
         }
       }
     }

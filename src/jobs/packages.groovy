@@ -106,9 +106,9 @@ fi
 if [[ "$DESIRED_CUDA" != cpu ]]; then
   cuda_dot="$(echo $DESIRED_CUDA | tr -d 'cpu')"
   if [[ "${#cuda_dot}" == 2 ]]; then
-    cuda_dot="${cuda_dot:0:1:}.${cuda_dot:1}"
+    cuda_dot="${cuda_dot:0:1}.${cuda_dot:1}"
   else
-    cuda_dot="${cuda_dot:0:2:}.${cuda_dot:2}"
+    cuda_dot="${cuda_dot:0:2}.${cuda_dot:2}"
   fi
 fi
 py_dot="${DESIRED_PYTHON:0:3}"

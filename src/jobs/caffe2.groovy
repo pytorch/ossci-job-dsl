@@ -105,6 +105,11 @@ Images.allDockerBuildEnvironments.each {
           true,
           'Whether to run tests or not',
         )
+        booleanParam(
+          'RUN_BENCH',
+          true,
+          'Whether to run benchmarks or not',
+        )
 
         if (runTests) {
           ParametersUtil.HYPOTHESIS_SEED(delegate)
@@ -170,6 +175,18 @@ Images.allDockerBuildEnvironments.each {
                 predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
               }
               PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
+            }
+          }
+          phase("Bench") {
+            phaseJob("${buildBasePath}/${buildEnvironment}-bench") {
+              parameters {
+                currentBuild()
+                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+              }
+              PhaseJobUtil.condition(delegate, '${RUN_BENCH}')
             }
           }
         }
@@ -404,11 +421,7 @@ if [[ "${BUILD_ENVIRONMENT}" == conda* ]]; then
 fi
 
 # Build
-if test -x ".jenkins/caffe2/build.sh"; then
-  ./.jenkins/caffe2/build.sh ${cmake_args[@]}
-else
-  ./.jenkins/build.sh ${cmake_args[@]}
-fi
+./.jenkins/caffe2/build.sh ${cmake_args[@]}
 
 # Show sccache stats if it is running
 if pgrep sccache > /dev/null; then
@@ -513,12 +526,8 @@ if [[ "${BUILD_ENVIRONMENT}" == conda* ]]; then
   export PATH=/opt/conda/bin:$PATH
 fi
 
-# Build
-if test -x ".jenkins/caffe2/test.sh"; then
-  ./.jenkins/caffe2/test.sh
-else
-  ./.jenkins/test.sh
-fi
+# Test
+./.jenkins/caffe2/test.sh
 
 # Remove benign core dumps.
 # These are tests for signal handling (including SIGABRT).
@@ -561,6 +570,89 @@ rm -f ./crash/core.logging_test.*
         }
         thresholdMode(ThresholdMode.PERCENT)
       }
+    }
+  }
+
+  job("${buildBasePath}/${buildEnvironment}-bench") {
+    def label = 'docker'
+    if (buildEnvironment.contains('cuda')) {
+       // Run tests on GPU machine if built with CUDA support
+       label += ' && gpu'
+    } else if (buildEnvironment.contains('rocm')) {
+       label += ' && rocm'
+    } else {
+       label += ' && cpu'
+    }
+    label += ' && bench'
+    JobUtil.common(delegate, label)
+    JobUtil.timeoutAndFailAfter(delegate, 90)
+    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+
+    parameters {
+      ParametersUtil.GIT_COMMIT(delegate)
+      ParametersUtil.GIT_MERGE_TARGET(delegate)
+
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.HYPOTHESIS_SEED(delegate)
+
+      ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
+    }
+
+    wrappers {
+      // This is needed so that Jenkins knows to hide these strings in all the console outputs
+      credentialsBinding {
+        usernamePassword('JENKINS_USERNAME', 'JENKINS_PASSWORD', 'JENKINS_USERNAME_AND_PASSWORD')
+      }
+    }
+
+    steps {
+      GitUtil.mergeStep(delegate)
+
+      environmentVariables {
+        env(
+          'BUILD_ENVIRONMENT',
+          "${buildEnvironment}",
+        )
+        if (Images.integratedEnvironments.contains(buildEnvironment)) {
+          env('INTEGRATED', 1)
+        }
+      }
+
+      def cudaVersion = ''
+      if (buildEnvironment.contains('cuda')) {
+        // 'native' indicates to let the nvidia runtime
+        // figure out which version of CUDA to use.
+        // This is only possible when using the nvidia/cuda
+        // Docker images.
+        cudaVersion = 'native';
+      }
+
+      DockerUtil.shell context: delegate,
+              image: dockerImage('${DOCKER_IMAGE_TAG}'),
+              cudaVersion: cudaVersion,
+              // TODO: use 'docker'. Make sure you copy out the test result XML
+              // to the right place
+              workspaceSource: "host-mount",
+              script: '''
+set -ex
+
+# libdc1394 (dependency of OpenCV) expects /dev/raw1394 to exist...
+sudo ln /dev/null /dev/raw1394
+
+# conda must be added to the path for Anaconda builds (this location must be
+# the same as that in install_anaconda.sh used to build the docker image)
+if [[ "${BUILD_ENVIRONMENT}" == conda* ]]; then
+  export PATH=/opt/conda/bin:$PATH
+fi
+
+# Bench
+./.jenkins/caffe2/bench.sh
+
+# Remove benign core dumps.
+# These are tests for signal handling (including SIGABRT).
+rm -f ./crash/core.fatal_signal_as.*
+rm -f ./crash/core.logging_test.*
+'''
     }
   }
 }

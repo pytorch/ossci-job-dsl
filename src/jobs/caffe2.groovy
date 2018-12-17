@@ -107,7 +107,7 @@ Images.allDockerBuildEnvironments.each {
         )
         booleanParam(
           'RUN_BENCH',
-          true,
+          false,
           'Whether to run benchmarks or not',
         )
 

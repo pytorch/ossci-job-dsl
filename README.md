@@ -73,6 +73,14 @@ and are built upon request at https://ci.pytorch.org/jenkins/job/caffe2-docker-t
     ssh ubuntu@$CPU_HOST
     docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i $DOCKER_IMAGE /bin/bash
 
+**Summary for ASAN builds (jobs like pytorch_linux_xenial_py3_clang5_asan_test)
+
+    ssh ubuntu@$CPU_HOST
+    docker run --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -t -u jenkins -i $DOCKER_IMAGE /bin/bash
+    export LD_PRELOAD=/usr/lib/llvm-5.0/lib/clang/5.0.0/lib/linux/libclang_rt.asan-x86_64.so
+    cd ~/workspace
+    # run your test repro
+
 **Summary for gdb-enabled NVIDIA/CUDA GPU**
 
     ssh ubuntu@$GPU_HOST
@@ -117,7 +125,8 @@ Read the actual [jobs](https://github.com/pietern/ossci-job-dsl/tree/master/jobs
 directory to see how to actually build/test (at the very least, you will
 need to set `PATH` to pick up the correct Python executable.)
 
-You **DO NOT** need to build PyTorch; it will already be installed.
+You **DO NOT** need to build PyTorch; it will already be installed. But
+if you want to inject debugging code - feel free to and use regular `python setup.py develop` instructions in `~/workspace`.
 
 #### Appendix
 

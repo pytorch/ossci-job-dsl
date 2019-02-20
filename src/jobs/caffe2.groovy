@@ -575,13 +575,12 @@ rm -f ./crash/core.logging_test.*
     def label = 'docker'
     if (buildEnvironment.contains('cuda')) {
        // Run tests on GPU machine if built with CUDA support
-       label += ' && gpu'
+       label += ' && gpu-bench'
     } else if (buildEnvironment.contains('rocm')) {
-       label += ' && rocm'
+       label += ' && rocm-bench'
     } else {
-       label += ' && cpu'
+       label += ' && cpu-bench'
     }
-    label += ' && bench'
     JobUtil.common(delegate, label)
     JobUtil.timeoutAndFailAfter(delegate, 90)
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')

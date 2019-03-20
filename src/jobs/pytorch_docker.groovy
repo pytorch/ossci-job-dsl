@@ -206,6 +206,9 @@ fi
 ./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}"
 
 docker push "${image}:${tag}"
+
+docker save -o "${image}_${tag}.tar" "${image}:${tag}"
+aws s3 cp "${image}_${tag}.tar" "s3://ossci-linux-build/pytorch/base/${image}_${tag}.tar" --acl public-read
 '''
     }
   }

@@ -167,6 +167,9 @@ fi
 mkdir -p bin
 ./build.sh ${JOB_BASE_NAME} -t "${image}:${tag}"
 docker push "${image}:${tag}"
+
+docker save -o "${image}_${tag}.tar" "${image}:${tag}"
+aws s3 cp "${image}_${tag}.tar" "s3://ossci-linux-build/caffe2/base/${image}_${tag}.tar" --acl public-read
 '''
     }
   }

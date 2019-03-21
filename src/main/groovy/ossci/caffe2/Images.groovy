@@ -76,7 +76,8 @@ class Images {
     'py2-cuda8.0-cudnn7-centos7',
     'py2-cuda9.0-cudnn7-centos7',
 
-    // AMD ROCM builds
+     // AMD ROCM builds
+    'py3.6-clang7-rocmdeb-ubuntu16.04',
     'py2-clang7-rocmdeb-ubuntu16.04',
     'py2-devtoolset7-rocmrpm-centos7.5',
   ];

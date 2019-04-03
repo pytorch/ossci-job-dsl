@@ -59,6 +59,7 @@ class Images {
 
     // Build for Android
     'py2-android-ubuntu16.04',
+    'py2-android-ndk-r19c-ubuntu16.04',
 
     // Builds for Anaconda
     'conda2-ubuntu16.04',

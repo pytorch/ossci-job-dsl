@@ -16,6 +16,7 @@ def dockerImages = [
   "pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
   "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7",
   "pytorch-linux-xenial-py3-clang5-asan",
+  "pytorch-linux-xenial-py3-clang5-android-ndk-r19c",
   // "pytorch-linux-artful-cuda9-cudnn7-py3",
 
   // yf225: remove this after new GCC 7 docker image is in and PyTorch Trusty GCC 7 job is enabled

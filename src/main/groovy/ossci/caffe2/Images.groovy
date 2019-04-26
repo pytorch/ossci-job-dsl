@@ -81,6 +81,7 @@ class Images {
     'py3.6-clang7-rocmdeb-ubuntu16.04',
     'py2-clang7-rocmdeb-ubuntu16.04',
     'py2-devtoolset7-rocmrpm-centos7.5',
+    'py3.6-devtoolset8-glibc2.26-rocmrpm-centos7.5',
   ];
 
   /////////////////////////////////////////////////////////////////////////////

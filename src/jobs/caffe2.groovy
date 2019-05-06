@@ -872,7 +872,7 @@ Images.windowsBuildEnvironments.each {
   job("${buildBasePath}/${buildEnvironment}-build") {
     JobUtil.common(delegate, 'windows && cpu')
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
-    JobUtil.timeoutAndFailAfter(delegate, 120)
+    JobUtil.timeoutAndFailAfter(delegate, 180)
 
     parameters {
       ParametersUtil.GIT_COMMIT(delegate)

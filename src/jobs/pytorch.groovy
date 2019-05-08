@@ -991,7 +991,11 @@ fi
 
   if (buildEnvironment.contains('win')) {
     job("${buildBasePath}/${buildEnvironment}-build") {
-      JobUtil.common delegate, 'windows && cpu'
+      if ("${buildEnvironment}".contains('dev')) {
+        JobUtil.common delegate, 'windows-dev && cpu'
+      } else {
+        JobUtil.common delegate, 'windows && cpu'
+      }
       JobUtil.gitCommitFromPublicGitHub delegate, '${GITHUB_REPO}'
       JobUtil.timeoutAndFailAfter(delegate, 180)
       // Windows builds are something like 9M a pop, so keep less of
@@ -1047,7 +1051,11 @@ fi
     for (i = 1; i <= numParallelTests; i++) {
       def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
       job("${buildBasePath}/${buildEnvironment}-test" + suffix) {
-        JobUtil.common delegate, 'windows && gpu'
+        if ("${buildEnvironment}".contains('dev')) {
+          JobUtil.common delegate, 'windows-dev && gpu'
+        } else {
+          JobUtil.common delegate, 'windows && gpu'
+        }
         JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
         JobUtil.timeoutAndFailAfter(delegate, 90)
 

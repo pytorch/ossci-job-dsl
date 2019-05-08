@@ -55,6 +55,7 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
+  "pytorch-win-ws2016-cuda9-cudnn7-py3-dev"
 ]
 
 def isRocmBuild = { buildEnvironment ->

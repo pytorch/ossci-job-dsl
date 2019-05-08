@@ -52,7 +52,16 @@ class GitUtil {
   // OTHER STUFF
 
   static void mergeStep(StepContext context) {
-    // This used to perform a merge, but I turned it off.
+    context.with {
+      // Merge GIT_COMMIT into GIT_MERGE_TARGET, if set
+      shell '''
+set -ex
+if [ -n "${GIT_MERGE_TARGET}" ]; then
+  git reset --hard ${GIT_COMMIT}
+  git merge --no-ff ${GIT_MERGE_TARGET}
+fi
+'''
+    }
   }
 
   static void resolveAndSaveParameters(StepContext context, String file) {

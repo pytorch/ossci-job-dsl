@@ -55,7 +55,8 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
-  "pytorch-win-ws2016-cuda9-cudnn7-py3-dev"
+  "pytorch-win-ws2016-cuda9-cudnn7-py3-dev",
+  "pytorch-win-ws2016-cuda10-cudnn7-py3-dev"
 ]
 
 def isRocmBuild = { buildEnvironment ->
@@ -288,6 +289,9 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
   }
   if ( buildEnvironment.contains('cuda9') ) {
     cudaVersion = '9'
+  }
+  if ( buildEnvironment.contains('cuda10') ) {
+    cudaVersion = '10'
   }
 
   multiJob("${buildBasePath}/${buildEnvironment}-trigger") {

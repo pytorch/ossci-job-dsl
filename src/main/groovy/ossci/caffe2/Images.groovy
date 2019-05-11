@@ -289,7 +289,7 @@ class Images {
     // Windows builds
     // The python part is actually ignored by build_windows.bat
     'py2-cuda9.0-cudnn7-windows',
-    'py2-cuda9.0-cudnn7-windows-dev'
+    // 'py2-cuda9.0-cudnn7-windows-dev'  // This is an experimental job and we don't show it in production CI
   ];
 
 

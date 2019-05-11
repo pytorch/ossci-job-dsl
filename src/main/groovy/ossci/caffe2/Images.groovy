@@ -289,6 +289,7 @@ class Images {
     // Windows builds
     // The python part is actually ignored by build_windows.bat
     'py2-cuda9.0-cudnn7-windows',
+    'py2-cuda9.0-cudnn7-windows-dev'
   ];
 
 
@@ -297,7 +298,8 @@ class Images {
   /////////////////////////////////////////////////////////////////////////////
 
   static final List<String>  windowsBuildEnvironments = [
-    'py2-cuda9.0-cudnn7-windows'
+    'py2-cuda9.0-cudnn7-windows',
+    'py2-cuda9.0-cudnn7-windows-dev'
   ];
 
 

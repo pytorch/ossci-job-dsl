@@ -870,7 +870,11 @@ Images.windowsBuildEnvironments.each {
 
   // Windows build jobs
   job("${buildBasePath}/${buildEnvironment}-build") {
-    JobUtil.common(delegate, 'windows && cpu')
+    if ("${buildEnvironment}".contains('dev')) {
+      JobUtil.common(delegate, 'windows-dev && cpu')
+    } else {
+      JobUtil.common(delegate, 'windows && cpu')
+    }
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
     JobUtil.timeoutAndFailAfter(delegate, 180)
 

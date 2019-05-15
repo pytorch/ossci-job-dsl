@@ -907,7 +907,7 @@ Images.windowsBuildEnvironments.each {
       }
       // TODO use WindowsUtil
       shell('''
-git submodule update --init
+git submodule update --init --recursive
 export PATH="$PATH:/c/Program Files/CMake/bin:"
 export USE_CUDA=ON
 

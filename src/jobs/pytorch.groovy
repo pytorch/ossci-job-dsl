@@ -499,7 +499,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 set -ex
 
 # Reinitialize submodules
-git submodule update --init || git submodule update --init || git submodule update --init
+git submodule update --init --recursive || git submodule update --init --recursive || git submodule update --init --recursive
 
 # sccache will fail for CUDA builds if all cores are used for compiling
 # TODO: move this into build.sh (https://github.com/pytorch/pytorch/pull/7361)

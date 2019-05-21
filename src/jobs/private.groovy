@@ -90,9 +90,6 @@ elif [[ ${PROJECT} == *tensorcomp* ]]; then
 fi
 '''
     }
-    publishers {
-      mailer('ezyang@fb.com', false, false)
-    }
   }
 }
 

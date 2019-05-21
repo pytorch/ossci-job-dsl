@@ -84,8 +84,8 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
 }
 
-def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com"
-def rocmMailRecipients = "ezyang@fb.com gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
+def mailRecipients = "pietern@fb.com willfeng@fb.com englund@fb.com"
+def rocmMailRecipients = "gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 

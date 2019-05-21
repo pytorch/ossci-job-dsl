@@ -21,7 +21,7 @@ def dockerImage = { buildEnvironment, tag ->
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/translate/${buildEnvironment}:${tag}"
 }
 
-def mailRecipients = "ezyang@fb.com weiho@fb.com juancarabina@fb.com"
+def mailRecipients = "weiho@fb.com juancarabina@fb.com"
 
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 

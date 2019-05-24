@@ -48,6 +48,7 @@ class Images {
     'py2-clang5.0-ubuntu16.04',
     'py2-clang6.0-ubuntu16.04',
     'py2-clang7-ubuntu16.04',
+    'py2-clang8-ubuntu16.04',
 
     // Python 3 compiler compatibility
     'py3.5-gcc6-ubuntu16.04',

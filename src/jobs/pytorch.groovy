@@ -47,7 +47,6 @@ def buildEnvironments = [
 
   // NB: This image is taken from Caffe2
   "py2-clang7-rocmdeb-ubuntu16.04",
-  "py2-devtoolset7-rocmrpm-centos7.5",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.

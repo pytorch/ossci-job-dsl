@@ -2,5 +2,5 @@
 package ossci.caffe2
 class DockerVersion {
   static final String version = "276";  // WARNING: if you change this to a new version number, you **MUST** also add that version number to the allDeployedVersions list below
-  static final String allDeployedVersions = "281,276,273,266,253,248,238,230,213";  // NOTE: this is a comma-separated list. E.g. "262,220,219"
+  static final String allDeployedVersions = "283,276,273,266,253,248,238,230,213";  // NOTE: this is a comma-separated list. E.g. "262,220,219"
 }

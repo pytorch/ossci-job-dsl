@@ -86,6 +86,9 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
 def mailRecipients = "pietern@fb.com willfeng@fb.com englund@fb.com"
 def rocmMailRecipients = "gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
+// This refers to a ghprb GitHub API entry (as seen on
+// the "GitHub Pull Request Builder" section https://ci.pytorch.org/jenkins/configure ), NOT
+// the actual Jenkins credential that contains the secret.
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commitSource, localMailRecipients ->

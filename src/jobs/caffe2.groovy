@@ -14,7 +14,7 @@ def buildBasePath = 'caffe2-builds'
 folder(buildBasePath) {
   description 'Jobs for all Caffe2 build environments'
 }
-def pytorchbotAuthId = '26733c20-e8e5-4c23-b632-f7c6380373c9'
+def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 // trigger jobs are in pytorch.groovy
 

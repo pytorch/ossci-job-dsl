@@ -86,7 +86,7 @@ def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
 def mailRecipients = "pietern@fb.com willfeng@fb.com englund@fb.com"
 def rocmMailRecipients = "gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Mayank.Daga@amd.com"
 
-def pytorchbotAuthId = '26733c20-e8e5-4c23-b632-f7c6380373c9'
+def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
 def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commitSource, localMailRecipients ->
   context.with {

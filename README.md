@@ -10,26 +10,24 @@ See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra).
 
 ### Cheat sheet
 
+- Search for `DOCKER_IMAGE:` line at the top of the `Test` phase; it should have a line
+  like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:tmp-173-5910`;
+  this is your docker image.  (If the tag is `tmp-###-####`, it comes with
+  a build of your source; if it's `###` that's the stock image.)  If you can't see it,
+  you might need to download the full log and look for it.
+- Run `aws configure` and set the default region to `us-east-1`.
+  If the aws command is not installed, install it via the instructions
+  in https://aws.amazon.com/cli/ (usually, you can use `pip install awscli` to install AWS CLI.)
 - Get the public access key and secret access key at https://fb.quip.com/oAX3ApaV35jU
   (Facebook employees only).  If you're a non-Facebook employee, talk
   to @ezyang about getting access.
-- Use them as username/password for `aws ecr get-login`
-  (our region is `us-east-1`).
-  The aws command comes with awscli; see https://aws.amazon.com/cli/
-  for more guidance.  Once you've done this step once, you no longer
-  need to do it again for that computer.
-- Search for `docker pull` in your build log and search for something
-  like `308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/pytorch-linux-trusty-py3.6-gcc5.4:tmp-173-5910`;
-  this is your docker image.  (If the tag is `tmp-###-####`, it comes with
-  a build of your source; if it's `###` that's the stock image.)
 - Run `aws ecr get-login` with your AWS credentials to get your Docker
   login command.  Run this command to login.
-    + Use `pip install awscli` to install AWS CLI.
-    + You may need to configure the region first using `aws configure`.
-      Our region is `us-east-1`.
-    + If you get the error `unknown shorthand flag: 'e' in -e`, try 
-      deleting `-e none` from the command line.
-- Run `docker run -it $DOCKER_IMAGE /bin/bash`
+    + If you get the error `unknown shorthand flag: 'e' in -e`, 
+      delete `-e none` from the command line.
+    + If you can't connect to the Docker daemon, you need to `sudo addgroup $username docker`
+      and then log out and then re-login
+- Run `docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -it $DOCKER_IMAGE /bin/bash`
 
 Try prepending sudo if you get the `permission denied` error for the docker commands
 (and later figure out why your user doesn't have permissions to connect

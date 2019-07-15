@@ -6,6 +6,8 @@ import javaposse.jobdsl.dsl.helpers.scm.RemoteContext
 import javaposse.jobdsl.dsl.helpers.step.StepContext
 import javaposse.jobdsl.dsl.helpers.triggers.TriggerContext
 
+int gitCloneDepth = 70
+
 class GitUtil {
 
   // Use this inside scm { git { ... } }
@@ -20,7 +22,7 @@ class GitUtil {
           // Same as Travis default (NB: must set shallow,
           // otherwise depth has no effect.)
           shallow()
-          depth(70 as int)
+          depth(gitCloneDepth)
         }
       }
     }

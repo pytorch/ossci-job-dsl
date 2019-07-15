@@ -10,7 +10,6 @@ class GitUtil {
 
   // Use this inside scm { git { ... } }
   static void defaultExtensions(GitContext context) {
-    int gitCloneDepth = 70
     context.with {
       extensions {
         // NB: Not done here, instead we rely on JobUtil.common to take care of this for us.
@@ -21,7 +20,7 @@ class GitUtil {
           // Same as Travis default (NB: must set shallow,
           // otherwise depth has no effect.)
           shallow()
-          depth(gitCloneDepth)
+          depth(70)
         }
       }
     }

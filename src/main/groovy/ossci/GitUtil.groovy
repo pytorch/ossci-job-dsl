@@ -6,12 +6,11 @@ import javaposse.jobdsl.dsl.helpers.scm.RemoteContext
 import javaposse.jobdsl.dsl.helpers.step.StepContext
 import javaposse.jobdsl.dsl.helpers.triggers.TriggerContext
 
-int gitCloneDepth = 70
-
 class GitUtil {
 
   // Use this inside scm { git { ... } }
   static void defaultExtensions(GitContext context) {
+    int gitCloneDepth = 70
     context.with {
       extensions {
         // NB: Not done here, instead we rely on JobUtil.common to take care of this for us.

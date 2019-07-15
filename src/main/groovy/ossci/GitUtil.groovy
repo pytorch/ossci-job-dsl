@@ -20,6 +20,7 @@ class GitUtil {
           // Same as Travis default (NB: must set shallow,
           // otherwise depth has no effect.)
           shallow()
+          depth(70)
         }
       }
     }

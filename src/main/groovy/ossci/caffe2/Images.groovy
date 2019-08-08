@@ -15,6 +15,7 @@ class Images {
     'py2-cuda8.0-cudnn7-ubuntu16.04',
     'py2-cuda9.0-cudnn7-ubuntu16.04',
     'py2-cuda9.1-cudnn7-ubuntu16.04',
+    'py2-cuda10.1-cudnn7-ubuntu16.04',
     'py2-gcc5-ubuntu16.04',
     'py2-mkl-ubuntu16.04',
 
@@ -22,6 +23,7 @@ class Images {
     'py3.5-cuda8.0-cudnn7-ubuntu16.04',
     'py3.5-cuda9.0-cudnn7-ubuntu16.04',
     'py3.5-cuda9.1-cudnn7-ubuntu16.04',
+    'py3.5-cuda10.1-cudnn7-ubuntu16.04',
     'py3.5-gcc5-ubuntu16.04',
     'py3.5-mkl-ubuntu16.04',
 
@@ -65,9 +67,11 @@ class Images {
 
     // Builds for Anaconda
     'conda2-ubuntu16.04',
+    'conda2-cuda10.1-cudnn7-ubuntu16.04',
     'conda2-cuda9.0-cudnn7-ubuntu16.04',
     'conda2-cuda8.0-cudnn7-ubuntu16.04',
     'conda3-ubuntu16.04',
+    'conda3-cuda10.1-cudnn7-ubuntu16.04',
     'conda3-cuda9.0-cudnn7-ubuntu16.04',
     'conda3-cuda8.0-cudnn7-ubuntu16.04',
 
@@ -78,6 +82,7 @@ class Images {
     'py2-centos7',
     'py2-cuda8.0-cudnn7-centos7',
     'py2-cuda9.0-cudnn7-centos7',
+    'py2-cuda10.1-cudnn7-centos7',
 
      // AMD ROCM builds
     'py3.6-clang7-rocmdeb-ubuntu16.04',

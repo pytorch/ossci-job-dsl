@@ -2,13 +2,13 @@ import javaposse.jobdsl.dsl.helpers.step.MultiJobStepContext
 import ossci.pytorch.Users
 
 def dockerImages = [
-  "pytorch-linux-trusty-py2.7.9",
-  "pytorch-linux-trusty-py2.7",
-  "pytorch-linux-trusty-py3.5",
-  "pytorch-linux-trusty-py3.6-gcc5.4",
-  "pytorch-linux-trusty-py3.6-gcc4.8",
-  "pytorch-linux-trusty-py3.6-gcc7",
-  "pytorch-linux-trusty-pynightly",
+  "pytorch-linux-xenial-py2.7.9",
+  "pytorch-linux-xenial-py2.7",
+  "pytorch-linux-xenial-py3.5",
+  "pytorch-linux-xenial-py3.6-gcc5.4",
+  "pytorch-linux-xenial-py3.6-gcc4.8",
+  "pytorch-linux-xenial-py3.6-gcc7",
+  "pytorch-linux-xenial-pynightly",
   "pytorch-linux-xenial-cuda8-cudnn7-py2",
   "pytorch-linux-xenial-cuda8-cudnn7-py3",
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
@@ -21,7 +21,7 @@ def dockerImages = [
   // "pytorch-linux-artful-cuda9-cudnn7-py3",
 
   // yf225: remove this after new GCC 7 docker image is in and PyTorch Trusty GCC 7 job is enabled
-  "pytorch-linux-trusty-py3.6-gcc7.2",
+  "pytorch-linux-xenial-py3.6-gcc7.2",
 ]
 
 def dockerBasePath = 'pytorch-docker'

@@ -457,7 +457,7 @@ fi
        label += ' && cpu'
     }
     JobUtil.common(delegate, label)
-    JobUtil.timeoutAndFailAfter(delegate, 90)
+    JobUtil.timeoutAndFailAfter(delegate, 120)
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
@@ -582,7 +582,7 @@ rm -f ./crash/core.logging_test.*
        label += ' && cpu-bench'
     }
     JobUtil.common(delegate, label)
-    JobUtil.timeoutAndFailAfter(delegate, 90)
+    JobUtil.timeoutAndFailAfter(delegate, 120)
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {

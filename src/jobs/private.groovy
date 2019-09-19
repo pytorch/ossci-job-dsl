@@ -3,8 +3,11 @@ import static ossci.pytorch.DockerVersion.allDeployedVersions as pyTorchDockerIm
 import static ossci.tensorcomp.DockerVersion.version as tensorcompDockerImageTag
 import static ossci.translate.DockerVersion.version as translateDockerImageTag
 import ossci.DockerUtil
+import ossci.EmailUtil
 
 def buildBasePath = 'private'
+
+def mailRecipients = "ezyang@fb.com pietern@fb.com willfeng@fb.com englund@fb.com suo@fb.com kostmo@fb.com zrphercule@fb.com mingbo@fb.com kimishpatel@fb.com"
 
 folder(buildBasePath) {
   description 'Jobs related to running this Jenkins setup'
@@ -89,6 +92,12 @@ elif [[ ${PROJECT} == *tensorcomp* ]]; then
       --ignore-tags ${TENSORCOMP_DOCKER_IMAGE_TAG}
 fi
 '''
+    }
+
+    publishers {
+      groovyPostBuild {
+        script(EmailUtil.sendEmailScript + EmailUtil.ciFailureEmailScript(mailRecipients))
+      }
     }
   }
 }

@@ -738,7 +738,7 @@ fi
         } else {
           JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
         }
-        JobUtil.timeoutAndFailAfter(delegate, 120)
+        JobUtil.timeoutAndFailAfter(delegate, 180)
 
         parameters {
           ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)

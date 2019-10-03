@@ -158,7 +158,7 @@ if [ -n "${CPU_PERF_TEST:-}" ] && [[ $(/bin/hostname) == *packet* ]]; then
 fi
 
 if [[ $(/bin/hostname) == *-rocm-* ]]; then
-  docker_args+=" --device=/dev/kfd --device=/dev/dri --group-add video"
+  docker_args+=" --security-opt seccomp=unconfined --device=/dev/kfd --device=/dev/dri --group-add video"
   if hash getent 2>/dev/null; then
     docker_args+=" --group-add $(getent group video | cut -d':' -f3)"
   fi

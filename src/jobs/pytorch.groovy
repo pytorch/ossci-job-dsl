@@ -46,7 +46,7 @@ def buildEnvironments = [
   // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
   // NB: This image is taken from Caffe2
-  "py2-clang7-rocmdeb-ubuntu16.04",
+  "py3.6-clang7-rocmdeb-ubuntu16.04",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.
@@ -56,7 +56,6 @@ def buildEnvironments = [
 def experimentalBuildEnvironments = [
   "pytorch-win-ws2016-cuda9-cudnn7-py3-dev",
   "pytorch-win-ws2016-cuda10-cudnn7-py3-dev",
-  "py3.6-clang7-rocmdeb-ubuntu16.04",
 ]
 
 def isRocmBuild = { buildEnvironment ->
@@ -73,7 +72,6 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda9-cudnn7-py3",
   "pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
   "pytorch-linux-xenial-py3-clang5-asan",
-  "py2-clang7-rocmdeb-ubuntu16.04",
   "py3.6-clang7-rocmdeb-ubuntu16.04",
 ]
 def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"

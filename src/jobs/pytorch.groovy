@@ -248,7 +248,10 @@ def pullRequestJobSettings = { context, repo, commitSource ->
         }
 
         Caffe2Images.buildOnlyEnvironments.each {
-          definePhaseJob(it + "-trigger-build")
+          // disable caffe2 Windows on PR
+          if (it != 'py2-cuda9.0-cudnn7-windows') {
+            definePhaseJob(it + "-trigger-build")
+          }
         }
       }
     }

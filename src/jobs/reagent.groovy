@@ -6,19 +6,19 @@ import ossci.PhaseJobUtil
 import ossci.WindowsUtil
 import ossci.GitUtil
 import ossci.EmailUtil
-import ossci.horizon.DockerVersion
-import ossci.horizon.Images
-import ossci.horizon.Users
+import ossci.reagent.DockerVersion
+import ossci.reagent.Images
+import ossci.reagent.Users
 
-def buildBasePath = 'horizon-builds'
+def buildBasePath = 'reagent-builds'
 
 folder(buildBasePath) {
-  description 'Jobs for all horizon build environments'
+  description 'Jobs for all reagent build environments'
 }
 
 // Every build environment has its own Docker image
 def dockerImage = { buildEnvironment, tag ->
-  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/horizon/${buildEnvironment}:${tag}"
+  return "308535385114.dkr.ecr.us-east-1.amazonaws.com/reagent/${buildEnvironment}:${tag}"
 }
 
 def mailRecipients = "kittipat@fb.com jjg@fb.com edoardoc@fb.com"
@@ -59,8 +59,8 @@ def masterJobSettings = { context, repo, commitSource, localMailRecipients ->
   }
 }
 
-multiJob("horizon-master") {
-  masterJobSettings(delegate, "facebookresearch/Horizon", "master", mailRecipients)
+multiJob("reagent-master") {
+  masterJobSettings(delegate, "facebookresearch/ReAgent", "master", mailRecipients)
 }
 
 def pullRequestJobSettings = { context, repo, commitSource ->
@@ -99,8 +99,8 @@ def pullRequestJobSettings = { context, repo, commitSource ->
   }
 }
 
-multiJob("horizon-pull-request") {
-  pullRequestJobSettings(delegate, "facebookresearch/Horizon", "pull-request")
+multiJob("reagent-pull-request") {
+  pullRequestJobSettings(delegate, "facebookresearch/ReAgent", "pull-request")
 }
 
 // One job per build environment
@@ -117,7 +117,7 @@ Images.dockerImages.each {
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.COMMIT_SOURCE(delegate)
-      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/Horizon')
+      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/ReAgent')
     }
 
     steps {
@@ -147,7 +147,7 @@ Images.dockerImages.each {
 
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
-      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/Horizon')
+      ParametersUtil.GITHUB_REPO(delegate, 'facebookresearch/ReAgent')
     }
 
     steps {

@@ -1,4 +1,4 @@
-package ossci.horizon
+package ossci.reagent
 
 class Users {
   static final List<String> githubAdmins = [

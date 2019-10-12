@@ -74,6 +74,7 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
   "pytorch-linux-xenial-py3-clang5-asan",
   "py3.6-clang7-rocmdeb-ubuntu16.04",
+  "py3.6-clang8-rocmdeb-ubuntu16.04",
 ]
 def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 

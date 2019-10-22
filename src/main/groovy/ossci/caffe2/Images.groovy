@@ -78,11 +78,10 @@ class Images {
     'conda2-gcc4.8-ubuntu16.04',
     'conda3-gcc4.8-ubuntu16.04',
 
-    // CentOS images (Python 2 only)
-    'py2-centos7',
-    'py2-cuda8.0-cudnn7-centos7',
-    'py2-cuda9.0-cudnn7-centos7',
-    'py2-cuda10.1-cudnn7-centos7',
+    // CentOS images
+    'py3.6-devtoolset7-centos7',
+    'py3.6-devtoolset7-cuda9.0-cudnn7-centos7',
+    'py3.6-devtoolset7-cuda10.1-cudnn7-centos7',
 
      // AMD ROCM builds
     'py3.6-clang7-rocmdeb-ubuntu16.04',

@@ -79,7 +79,7 @@ class Images {
 
     // CentOS images
     'py3.6-devtoolset7-centos7',
-    'py3.6-devtoolset7-cuda9.0-cudnn7-centos7',
+    'py3.6-devtoolset7-cuda9.2-cudnn7-centos7',
     'py3.6-devtoolset7-cuda10.1-cudnn7-centos7',
 
      // AMD ROCM builds

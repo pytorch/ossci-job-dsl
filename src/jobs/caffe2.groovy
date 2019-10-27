@@ -270,18 +270,12 @@ pushd pytorch_source
 # Reinitialize submodules
 git submodule update --init --recursive
 
-# Ensure jenkins can write to the ccache root dir.
-sudo chown jenkins:jenkins "${HOME}/.ccache"
-
 # Do not need to go into the caffe2 directory within the PyTorch 
 # repo since the root CMakeLists.txt handles the process of making 
 # caffe2 and its docs. So do the below from the pytorch repo root.
 
 # Make our build directory
 mkdir -p build
-
-# Make ccache log to the workspace, so we can archive it after the build
-ccache -o log_file=$PWD/build/ccache.log
 
 # Build doxygen docs
 cd build
@@ -395,13 +389,6 @@ set -ex
 
 # Reinitialize submodules
 git submodule update --init --recursive
-
-# Ensure jenkins can write to the ccache root dir.
-sudo chown jenkins:jenkins "${HOME}/.ccache"
-
-# Make ccache log to the workspace, so we can archive it after the build
-mkdir -p build
-ccache -o log_file=$PWD/build/ccache.log
 
 # Configure additional cmake arguments
 cmake_args=()

@@ -823,7 +823,7 @@ Images.windowsBuildEnvironments.each {
 
   multiJob(jobName) {
     JobUtil.commonTrigger(delegate)
-    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+    // JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
     JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
     parameters {

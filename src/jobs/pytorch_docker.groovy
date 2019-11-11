@@ -2,6 +2,7 @@ import javaposse.jobdsl.dsl.helpers.step.MultiJobStepContext
 import ossci.pytorch.Users
 
 def dockerImages = [
+  "pytorch-linux-bionic-clang9-thrift-llvmdev",
   "pytorch-linux-xenial-py2.7.9",
   "pytorch-linux-xenial-py2.7",
   "pytorch-linux-xenial-py3.5",

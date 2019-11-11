@@ -58,7 +58,7 @@ For historical reasons, there are two sets of Docker images, one for
 PyTorch and one for Caffe2 (we intend to merge these at some point, but
 we haven't finished yet.
 
-PyTorch Dockerfiles source lives at https://github.com/pietern/pytorch-dockerfiles
+PyTorch Dockerfiles source lives at https://github.com/pytorch/pytorch-ci-dockerfiles
 and are built every week at https://ci.pytorch.org/jenkins/job/pytorch-docker-master/
 
 Caffe2 Dockerfiles source lives at https://github.com/pytorch/pytorch/tree/master/docker/caffe2/jenkins
@@ -119,7 +119,7 @@ will have a `workspace` directory.
 
 **What do I do once I'm in?**
 
-Read the actual [jobs](https://github.com/pietern/ossci-job-dsl/tree/master/jobs)
+Read the actual [jobs](https://github.com/pytorch/ossci-job-dsl/tree/master/jobs)
 directory to see how to actually build/test (at the very least, you will
 need to set `PATH` to pick up the correct Python executable.)
 
@@ -178,7 +178,7 @@ Taking PyTorch as an example (much of the same applies to Caffe2),
 here is how we structure our jobs:
 
 * The pytorch-docker builds are responsible for taking the Dockerfiles
-  from [pytorch-dockerfiles](https://github.com/pietern/pytorch-dockerfiles) and building
+  from [pytorch-dockerfiles](https://github.com/pytorch/pytorch-ci-dockerfiles) and building
   Docker images.  These images are uploaded to
   `registry.pytorch.org/pytorch`.  Every new built Docker image gets a new
   tag, which is a sequentially incrementing number.

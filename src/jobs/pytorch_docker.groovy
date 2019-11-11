@@ -44,7 +44,7 @@ multiJob("${dockerBasePath}-master") {
   scm {
     git {
       remote {
-        github('pietern/pytorch-dockerfiles')
+        github('pytorch/pytorch-ci-dockerfiles')
         refspec([
             // Fetch all branches
             '+refs/heads/*:refs/remotes/origin/*',
@@ -88,7 +88,7 @@ job("${dockerBasePath}-pull-request") {
   scm {
     git {
       remote {
-        github('pietern/pytorch-dockerfiles')
+        github('pytorch/pytorch-ci-dockerfiles')
         refspec('+refs/pull/*:refs/remotes/origin/pr/*')
       }
       branch('${sha1}')
@@ -146,7 +146,7 @@ dockerImages.each {
     scm {
       git {
         remote {
-          github('pietern/pytorch-dockerfiles')
+          github('pytorch/pytorch-ci-dockerfiles')
           refspec([
               // Fetch all branches
               '+refs/heads/*:refs/remotes/origin/*',

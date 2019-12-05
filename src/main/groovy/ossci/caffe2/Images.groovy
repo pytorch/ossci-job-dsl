@@ -302,8 +302,8 @@ class Images {
   /////////////////////////////////////////////////////////////////////////////
 
   static final List<String>  windowsBuildEnvironments = [
-    'py2-cuda9.0-cudnn7-windows',
-    'py2-cuda9.0-cudnn7-windows-dev'
+    //'py2-cuda9.0-cudnn7-windows',
+    //'py2-cuda9.0-cudnn7-windows-dev'
   ];
 
 

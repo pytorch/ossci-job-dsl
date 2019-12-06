@@ -40,7 +40,7 @@ def buildEnvironments = [
   // "pytorch-linux-trusty-pynightly",
   // "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7",
 
-  "pytorch-win-ws2016-cuda9-cudnn7-py3",
+  // "pytorch-win-ws2016-cuda9-cudnn7-py3",
 
   // "pytorch-macos-10.13-py3",
   // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
@@ -54,8 +54,8 @@ def buildEnvironments = [
 ]
 
 def experimentalBuildEnvironments = [
-  "pytorch-win-ws2016-cuda9-cudnn7-py3-dev",
-  "pytorch-win-ws2016-cuda10-cudnn7-py3-dev",
+  // "pytorch-win-ws2016-cuda9-cudnn7-py3-dev",
+  // "pytorch-win-ws2016-cuda10-cudnn7-py3-dev",
   "py3.6-clang8-rocmdeb-ubuntu16.04",
 ]
 
@@ -67,7 +67,7 @@ def docAndTutorialEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def perfTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 def splitTestEnvironments = [
   "pytorch-macos-10.13-py3",
-  "pytorch-win-ws2016-cuda9-cudnn7-py3",
+  // "pytorch-win-ws2016-cuda9-cudnn7-py3",
   "pytorch-linux-xenial-cuda8-cudnn6-py3",
   "pytorch-linux-xenial-cuda9-cudnn7-py2",
   "pytorch-linux-xenial-cuda9-cudnn7-py3",

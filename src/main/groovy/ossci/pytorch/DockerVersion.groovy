@@ -1,4 +1,8 @@
 // This file is manually managed
+//
+// WARNING: THIS FILE IS OBSOLETE
+// For the new location check
+// https://github.com/pytorch/pytorch/blob/4dce482acb2f0b248e4886b3069dca8e3a1b7681/.circleci/config.yml#L5787
 package ossci.pytorch
 class DockerVersion {
   // WARNING: if you change this to a new version number,

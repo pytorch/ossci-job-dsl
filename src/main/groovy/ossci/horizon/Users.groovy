@@ -6,6 +6,7 @@ class Users {
     "kittipatv",
     "econti",
     "czxttkl",
+    "badrinarayan",
   ]
 
   // GitHub users for who pull request builds are automatically started.
@@ -14,5 +15,6 @@ class Users {
     "kittipatv",
     "econti",
     "czxttkl",
+    "badrinarayan",
   ]
 }

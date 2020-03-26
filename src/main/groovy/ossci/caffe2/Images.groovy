@@ -16,7 +16,7 @@ class Images {
     //'py2-cuda9.0-cudnn7-ubuntu16.04',
     //'py2-cuda9.1-cudnn7-ubuntu16.04',
     //'py2-cuda10.1-cudnn7-ubuntu16.04',
-    //'py2-gcc5-ubuntu16.04',
+    'py2-gcc5-ubuntu16.04', // onnx
     //'py2-mkl-ubuntu16.04',
 
     //// Primary builds (Python 3.5, available by default on Ubuntu)
@@ -30,7 +30,7 @@ class Images {
     //// Python compatibility (Python 3.6 is not default)
     //'py3.6-gcc5-ubuntu16.04',
     //'py3.6-clang6.0-ubuntu16.04',
-    //'py3.6-clang7-ubuntu16.04',
+    'py3.6-clang7-ubuntu16.04', // onnx
 
     //// Compatibility check for cuDNN 6 and 5 (build only)
     //'py2-cuda8.0-cudnn6-ubuntu16.04',

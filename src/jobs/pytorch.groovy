@@ -275,7 +275,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   def numParallelTests = 1;
   if (splitTestEnvironments.any { it.contains(buildEnvironment) }) {
-    numParallelTests = 3
+    numParallelTests = 2
   }
 
   def testConfigs = [""]  // "" is the default config

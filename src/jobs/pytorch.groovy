@@ -45,8 +45,8 @@ def buildEnvironments = [
   // "pytorch-macos-10.13-py3",
   // "pytorch-macos-10.13-cuda9.2-cudnn7-py3",
 
-  // NB: This image is taken from Caffe2
-  "py3.6-clang7-rocmdeb-ubuntu16.04",
+  // NB: This image is taken from CircleCI
+  "pytorch-linux-xenial-rocm3.3-py3.6",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.
@@ -75,14 +75,12 @@ def splitTestEnvironments = [
   "pytorch-linux-xenial-py3-clang5-asan",
   "py3.6-clang7-rocmdeb-ubuntu16.04",
   "py3.6-clang8-rocmdeb-ubuntu16.04",
+  "pytorch-linux-xenial-rocm3.3-py3.6",
 ]
 def avxConfigTestEnvironment = "pytorch-linux-xenial-cuda8-cudnn6-py3"
 
 // Every build environment has its own Docker image
 def dockerImage = { staticBuildEnv, buildEnvironment, tag, caffe2_tag ->
-  if (isRocmBuild(staticBuildEnv)) {
-    return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${buildEnvironment}:${caffe2_tag}"
-  }
   return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${buildEnvironment}:${tag}"
 }
 

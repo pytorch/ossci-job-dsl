@@ -67,6 +67,9 @@ Images.allDockerBuildEnvironments.each {
 
   // Every build environment has its own Docker image
   def dockerImage = { tag ->
+    if (buildEnvironment.contains("rocm")) {
+      return "308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${dockerBaseImage}:${tag}"
+    }
     return "308535385114.dkr.ecr.us-east-1.amazonaws.com/caffe2/${dockerBaseImage}:${tag}"
   }
 

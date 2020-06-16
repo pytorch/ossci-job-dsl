@@ -21,12 +21,13 @@ See [fairinternal/ossci-infra](https://github.com/fairinternal/ossci-infra).
 - Get the public access key and secret access key at https://fb.quip.com/oAX3ApaV35jU
   (Facebook employees only).  If you're a non-Facebook employee, talk
   to @ezyang about getting access.
-- Run `aws ecr get-login` with your AWS credentials to get your Docker
+- If you have AWS CLI v1 run `aws ecr get-login` with your AWS credentials to get your Docker
   login command.  Run this command to login.
     + If you get the error `unknown shorthand flag: 'e' in -e`, 
       delete `-e none` from the command line.
     + If you can't connect to the Docker daemon, you need to `sudo addgroup $username docker`
       and then log out and then re-login
+- If you have AWS CLI v2 run `aws ecr get-login-password | docker login --username AWS --password-stdin 308535385114.dkr.ecr.us-east-1.amazonaws.com`
 - Run `docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined -it $DOCKER_IMAGE /bin/bash`
 
 Try prepending sudo if you get the `permission denied` error for the docker commands

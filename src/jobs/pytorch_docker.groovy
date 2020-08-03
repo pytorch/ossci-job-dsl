@@ -2,28 +2,28 @@ import javaposse.jobdsl.dsl.helpers.step.MultiJobStepContext
 import ossci.pytorch.Users
 
 def dockerImages = [
-  "pytorch-linux-bionic-clang9-thrift-llvmdev",
-  "pytorch-linux-xenial-py2.7.9",
-  "pytorch-linux-xenial-py2.7",
-  "pytorch-linux-xenial-py3.5",
-  "pytorch-linux-xenial-py3.6-gcc5.4",
-  "pytorch-linux-xenial-py3.6-gcc4.8",
-  "pytorch-linux-xenial-py3.6-gcc7",
-  "pytorch-linux-xenial-pynightly",
-  "pytorch-linux-xenial-cuda8-cudnn7-py2",
-  "pytorch-linux-xenial-cuda8-cudnn7-py3",
-  "pytorch-linux-xenial-cuda9-cudnn7-py2",
-  "pytorch-linux-xenial-cuda9-cudnn7-py3",
-  "pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
-  "pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7", // TODO: To be removed
-  "pytorch-linux-xenial-cuda10.1-cudnn7-py3-gcc7",
-  "pytorch-linux-xenial-py3-clang5-asan",
-  "pytorch-linux-xenial-py3-clang5-android-ndk-r19c",
-  "pytorch-linux-xenial-py3.6-clang7",
-  // "pytorch-linux-artful-cuda9-cudnn7-py3",
+//"pytorch-linux-bionic-clang9-thrift-llvmdev",
+//"pytorch-linux-xenial-py2.7.9",
+//"pytorch-linux-xenial-py2.7",
+//"pytorch-linux-xenial-py3.5",
+//"pytorch-linux-xenial-py3.6-gcc5.4",
+//"pytorch-linux-xenial-py3.6-gcc4.8",
+//"pytorch-linux-xenial-py3.6-gcc7",
+//"pytorch-linux-xenial-pynightly",
+//"pytorch-linux-xenial-cuda8-cudnn7-py2",
+//"pytorch-linux-xenial-cuda8-cudnn7-py3",
+//"pytorch-linux-xenial-cuda9-cudnn7-py2",
+//"pytorch-linux-xenial-cuda9-cudnn7-py3",
+//"pytorch-linux-xenial-cuda9.2-cudnn7-py3-gcc7",
+//"pytorch-linux-xenial-cuda10-cudnn7-py3-gcc7", // TODO: To be removed
+//"pytorch-linux-xenial-cuda10.1-cudnn7-py3-gcc7",
+//"pytorch-linux-xenial-py3-clang5-asan",
+//"pytorch-linux-xenial-py3-clang5-android-ndk-r19c",
+//"pytorch-linux-xenial-py3.6-clang7",
+//// "pytorch-linux-artful-cuda9-cudnn7-py3",
 
-  // yf225: remove this after new GCC 7 docker image is in and PyTorch Trusty GCC 7 job is enabled
-  "pytorch-linux-xenial-py3.6-gcc7.2",
+//// yf225: remove this after new GCC 7 docker image is in and PyTorch Trusty GCC 7 job is enabled
+//"pytorch-linux-xenial-py3.6-gcc7.2",
 ]
 
 def dockerBasePath = 'pytorch-docker'

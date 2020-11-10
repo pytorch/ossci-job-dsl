@@ -51,6 +51,17 @@ class GitUtil {
 
   // OTHER STUFF
 
+  static void generateImageTag(StepContext context) {
+    context.with {
+      shell '''
+set -ex
+export GENERATED_DOCKER_IMAGE_TAG=$(git rev-parse HEAD:.circleci/docker)
+export DOCKER_IMAGE_TAG=${DOCKER_IMAGE_TAG:-$GENERATED_DOCKER_IMAGE_TAG}
+export CAFFE2_DOCKER_IMAGE_TAG=${CAFFE2_DOCKER_IMAGE_TAG:-$GENERATED_DOCKER_IMAGE_TAG}
+'''
+    }
+  }
+
   static void mergeStep(StepContext context) {
     context.with {
       // Merge GIT_COMMIT into GIT_MERGE_TARGET, if set
@@ -83,6 +94,10 @@ if [ -z "\${GIT_COMMIT}" ]; then
 else
   echo "GIT_COMMIT=\$(git rev-parse \${GIT_COMMIT})" >> "${file}"
 fi
+
+echo "GENERATED_DOCKER_IMAGE_TAG=\$(git rev-parse HEAD:.circleci/docker)" >> "${file}"
+echo "DOCKER_IMAGE_TAG=\${DOCKER_IMAGE_TAG:-\$GENERATED_DOCKER_IMAGE_TAG}" >> "${file}"
+echo "CAFFE2_DOCKER_IMAGE_TAG=\${CAFFE2_DOCKER_IMAGE_TAG:-\$GENERATED_DOCKER_IMAGE_TAG}" >> "${file}"
 
 if [ -n "\${GIT_MERGE_TARGET}" ]; then
   echo "GIT_MERGE_TARGET=\$(git rev-parse \${GIT_MERGE_TARGET})" >> "${file}"

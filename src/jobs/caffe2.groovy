@@ -99,7 +99,7 @@ Images.allDockerBuildEnvironments.each {
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-        ParametersUtil.DOCKER_IMAGE_TAG(delegate)
+        ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
         ParametersUtil.CMAKE_ARGS(delegate)
 
         ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
@@ -134,8 +134,6 @@ Images.allDockerBuildEnvironments.each {
         // you don't need a pull request trigger job to test any branch
         // after merging it into any other branch (not just origin/master).
         // GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-
-        GitUtil.generateImageTag(delegate)
 
         // Different triggers (build and run tests or build only)
         // means we have to use different tags, or we risk conflicting
@@ -348,7 +346,7 @@ git status
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
@@ -371,7 +369,6 @@ git status
 
     steps {
       GitUtil.mergeStep(delegate)
-      GitUtil.generateImageTag(delegate)
 
       environmentVariables {
         env(
@@ -460,7 +457,7 @@ fi
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
@@ -475,7 +472,6 @@ fi
 
     steps {
       GitUtil.mergeStep(delegate)
-      GitUtil.generateImageTag(delegate)
 
       environmentVariables {
         env(
@@ -587,7 +583,7 @@ rm -f ./crash/core.logging_test.*
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
@@ -602,7 +598,6 @@ rm -f ./crash/core.logging_test.*
 
     steps {
       GitUtil.mergeStep(delegate)
-      GitUtil.generateImageTag(delegate)
 
       environmentVariables {
         env(

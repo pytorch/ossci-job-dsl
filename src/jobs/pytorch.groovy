@@ -99,8 +99,8 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
     parameters {
       ParametersUtil.IN_CI(delegate)
       ParametersUtil.RUN_DOCKER_ONLY(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate, defaultCmakeArgs)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
@@ -113,7 +113,6 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
     steps {
       def gitPropertiesFile = './git.properties'
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-      GitUtil.generateImageTag(delegate)
 
       phase("Master jobs") {
         buildEnvironments.each {
@@ -189,8 +188,8 @@ def pullRequestJobSettings = { context, repo, commitSource ->
     JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
     parameters {
       ParametersUtil.IN_CI(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
@@ -205,7 +204,6 @@ def pullRequestJobSettings = { context, repo, commitSource ->
 
       GitUtil.mergeStep(delegate)
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
-      GitUtil.generateImageTag(delegate)
 
       environmentVariables {
         propertiesFile(gitPropertiesFile)
@@ -313,8 +311,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.COMMIT_SOURCE(delegate)
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
@@ -339,8 +337,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     } // wrappers
 
     steps {
-      GitUtil.generateImageTag(delegate)
-
       def builtImageTag = 'tmp-${DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
       def caffe2BuiltImageTag = 'tmp-${CAFFE2_DOCKER_IMAGE_TAG}-${GIT_COMMIT}'
       def builtImageId = '${GIT_COMMIT}'
@@ -466,8 +462,8 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
-      ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate)
+      ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 
       ParametersUtil.GITHUB_REPO(delegate, 'pytorch/pytorch')
 
@@ -493,7 +489,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
     steps {
       GitUtil.mergeStep(delegate)
-      GitUtil.generateImageTag(delegate)
 
       environmentVariables {
         // TODO: Will be obsolete once this is baked into docker image
@@ -754,8 +749,8 @@ fi
 
         parameters {
           ParametersUtil.IN_CI(delegate)
-          ParametersUtil.DOCKER_IMAGE_TAG(delegate)
-          ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate)
+          ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
+          ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 
           booleanParam(
             'RUN_TESTS',
@@ -790,8 +785,6 @@ fi
         }
 
         steps {
-          GitUtil.generateImageTag(delegate)
-
           // TODO: Will be obsolete once this is baked into docker image
           environmentVariables {
             env(

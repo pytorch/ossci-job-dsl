@@ -95,6 +95,7 @@ Images.allDockerBuildEnvironments.each {
       JobUtil.subJobDownstreamCommitStatus(delegate, gitHubName)
 
       parameters {
+        ParametersUtil.IN_CI(delegate)
         ParametersUtil.GIT_COMMIT(delegate)
         ParametersUtil.GIT_MERGE_TARGET(delegate)
 
@@ -341,6 +342,7 @@ git status
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
@@ -451,6 +453,7 @@ fi
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
@@ -576,6 +579,7 @@ rm -f ./crash/core.logging_test.*
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 

@@ -97,6 +97,7 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
   context.with {
     JobUtil.masterTrigger(delegate, repo, "master", triggerOnPush)
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.RUN_DOCKER_ONLY(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
@@ -186,6 +187,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {
     JobUtil.gitHubPullRequestTrigger(delegate, repo, pytorchbotAuthId, Users)
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
       ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate)
@@ -306,6 +308,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     JobUtil.subJobDownstreamCommitStatus(delegate, buildEnvironment)
 
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
@@ -455,6 +458,7 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
     JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
+      ParametersUtil.IN_CI(delegate)
       ParametersUtil.GIT_COMMIT(delegate)
       ParametersUtil.GIT_MERGE_TARGET(delegate)
 
@@ -744,6 +748,7 @@ fi
         JobUtil.timeoutAndFailAfter(delegate, 180)
 
         parameters {
+          ParametersUtil.IN_CI(delegate)
           ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
           ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
 

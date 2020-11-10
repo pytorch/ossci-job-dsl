@@ -6,6 +6,16 @@ import javaposse.jobdsl.dsl.helpers.BuildParametersContext
  * Helper functions to use in 'parameters' contexts (in 'job'/'multiJob'/etc)
  */
 class ParametersUtil {
+  static void IN_CI(BuildParametersContext context, defaultValue = true) {
+    context.with {
+      booleanParam(
+          'IN_CI',
+          defaultValue,
+          'Indicate this is a CI job to enable special behavior for CI runs'
+      )
+    }
+  }
+
   static void RUN_DOCKER_ONLY(BuildParametersContext context, defaultValue = false) {
     context.with {
       booleanParam(

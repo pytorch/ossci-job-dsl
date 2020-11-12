@@ -388,7 +388,7 @@ git status
               image: dockerImage('${DOCKER_IMAGE_TAG}'),
               commitImage: dockerImage('${DOCKER_COMMIT_TAG}'),
               // TODO: use 'host-copy'. Make sure you copy out the archived artifacts
-              workspaceSource: "host-mount",
+              workspaceSource: "host-copy",
               script: '''
 set -ex
 
@@ -497,7 +497,7 @@ fi
               cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place
-              workspaceSource: "host-mount",
+              workspaceSource: "docker",
               script: '''
 set -ex
 
@@ -623,7 +623,7 @@ rm -f ./crash/core.logging_test.*
               cudaVersion: cudaVersion,
               // TODO: use 'docker'. Make sure you copy out the test result XML
               // to the right place
-              workspaceSource: "host-mount",
+              workspaceSource: "docker",
               script: '''
 set -ex
 

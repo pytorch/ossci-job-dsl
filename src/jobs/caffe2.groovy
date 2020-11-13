@@ -450,7 +450,8 @@ fi
     }
     JobUtil.common(delegate, label)
     JobUtil.timeoutAndFailAfter(delegate, 180)
-    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+    // test job no longer needs to clone since 'host-copy' of workspace is used
+    //JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
       ParametersUtil.IN_CI(delegate)
@@ -577,7 +578,8 @@ rm -f ./crash/core.logging_test.*
     }
     JobUtil.common(delegate, label)
     JobUtil.timeoutAndFailAfter(delegate, 180)
-    JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
+    // bench job no longer needs to clone since 'host-copy' of workspace is used
+    //JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
     parameters {
       ParametersUtil.IN_CI(delegate)

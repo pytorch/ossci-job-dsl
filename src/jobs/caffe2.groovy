@@ -471,7 +471,8 @@ fi
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
+      // test job no longer needs to clone since 'host-copy' of workspace is used
+      //GitUtil.mergeStep(delegate)
 
       environmentVariables {
         env(
@@ -597,7 +598,8 @@ rm -f ./crash/core.logging_test.*
     }
 
     steps {
-      GitUtil.mergeStep(delegate)
+      // bench job no longer needs to clone since 'host-copy' of workspace is used
+      //GitUtil.mergeStep(delegate)
 
       environmentVariables {
         env(

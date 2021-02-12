@@ -87,7 +87,7 @@ class Images {
     //'py3.6-clang8-rocmdeb-ubuntu16.04',
     //'py2-devtoolset7-rocmrpm-centos7.5',
     //'py3.6-devtoolset7-rocmrpm-centos7',
-    'pytorch-linux-bionic-rocm3.10-py3.6',
+    'pytorch-linux-bionic-rocm4.0.1-py3.6',
   ];
 
   /////////////////////////////////////////////////////////////////////////////
@@ -260,7 +260,7 @@ class Images {
     // 'py2-gcc4.8-ubuntu14.04',
 
     //'py3.6-devtoolset7-rocmrpm-centos7',
-    'pytorch-linux-bionic-rocm3.10-py3.6',
+    'pytorch-linux-bionic-rocm4.0.1-py3.6',
   ];
 
   static final List<String> buildOnlyEnvironments = [

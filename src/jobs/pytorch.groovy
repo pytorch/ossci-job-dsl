@@ -745,7 +745,7 @@ fi
         } else {
           JobUtil.common delegate, buildEnvironment.contains('cuda') ? 'docker && gpu' : 'docker && cpu'
         }
-        JobUtil.timeoutAndFailAfter(delegate, 180)
+        JobUtil.timeoutAndFailAfter(delegate, 210)
 
         parameters {
           ParametersUtil.IN_CI(delegate)

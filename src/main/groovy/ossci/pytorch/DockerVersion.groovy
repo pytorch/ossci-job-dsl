@@ -7,7 +7,7 @@ package ossci.pytorch
 class DockerVersion {
   // WARNING: if you change this to a new version number,
   // you **MUST** also add that version number to the allDeployedVersions list below
-  static final String version = "1e738bfb344693aef5c596b1582e140b8347381c";
+  static final String version = "f90df8e0edcb165bace6c48e23e5c27266f76638";
 
   // NOTE: this is a comma-separated list. E.g. "262,220,219"
   static final String allDeployedVersions = "271,262,256,278,282,291,300,323,327,347,389,401,402,403,405";

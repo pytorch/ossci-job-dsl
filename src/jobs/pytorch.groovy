@@ -189,7 +189,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
     parameters {
       ParametersUtil.IN_CI(delegate)
       ParametersUtil.DOCKER_IMAGE_TAG(delegate, DockerVersion.version)
-      ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
+      //ParametersUtil.CAFFE2_DOCKER_IMAGE_TAG(delegate, Caffe2DockerVersion.version)
       ParametersUtil.CMAKE_ARGS(delegate)
       ParametersUtil.HYPOTHESIS_SEED(delegate)
     }
@@ -227,33 +227,33 @@ def pullRequestJobSettings = { context, repo, commitSource ->
           }
         }
 
-        // Caffe2
-        def definePhaseJob = { name ->
-          phaseJob("caffe2-builds/${name}") {
-            parameters {
-              // Pass parameters of this job
-              currentBuild()
-              // override DOCKER_IMAGE_TAG
-              predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
-              predefinedProp('GITHUB_REPO', repo)
-              // See https://github.com/jenkinsci/ghprb-plugin/issues/591
-              predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
-              // Ensure consistent merge behavior in downstream builds.
-              propertiesFile(gitPropertiesFile)
-            }
-          }
-        }
+        //// Caffe2
+        //def definePhaseJob = { name ->
+        //  phaseJob("caffe2-builds/${name}") {
+        //    parameters {
+        //      // Pass parameters of this job
+        //      currentBuild()
+        //      // override DOCKER_IMAGE_TAG
+        //      predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
+        //      predefinedProp('GITHUB_REPO', repo)
+        //      // See https://github.com/jenkinsci/ghprb-plugin/issues/591
+        //      predefinedProp('ghprbCredentialsId', pytorchbotAuthId)
+        //      // Ensure consistent merge behavior in downstream builds.
+        //      propertiesFile(gitPropertiesFile)
+        //    }
+        //  }
+        //}
 
-        Caffe2Images.buildAndTestEnvironments.each {
-          definePhaseJob(it + "-trigger-test")
-        }
+        //Caffe2Images.buildAndTestEnvironments.each {
+        //  definePhaseJob(it + "-trigger-test")
+        //}
 
-        Caffe2Images.buildOnlyEnvironments.each {
-          // disable caffe2 Windows on PR
-          if (it != 'py2-cuda9.0-cudnn7-windows') {
-            definePhaseJob(it + "-trigger-build")
-          }
-        }
+        //Caffe2Images.buildOnlyEnvironments.each {
+        //  // disable caffe2 Windows on PR
+        //  if (it != 'py2-cuda9.0-cudnn7-windows') {
+        //    definePhaseJob(it + "-trigger-build")
+        //  }
+        //}
       }
     }
   }

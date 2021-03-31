@@ -176,12 +176,12 @@ multiJob("pytorch-master") {
 //}
 
 // Runs on debug build on master (triggered nightly)
-multiJob("caffe2-master-debug") {
-  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
-  triggers {
-    cron('@daily')
-  }
-}
+//multiJob("caffe2-master-debug") {
+//  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
+//  triggers {
+//    cron('@daily')
+//  }
+//}
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {

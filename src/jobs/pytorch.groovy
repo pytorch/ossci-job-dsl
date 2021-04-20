@@ -175,13 +175,12 @@ multiJob("pytorch-master") {
 //  masterJobSettings(delegate, "ROCmSoftwarePlatform/pytorch", "rocm-master", rocmMailRecipients)
 //}
 
+// we tried commenting this out before, but the cron trigger still fired
+// let's try keeping the job, but removing the cron trigger
 // Runs on debug build on master (triggered nightly)
-//multiJob("caffe2-master-debug") {
-//  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
-//  triggers {
-//    cron('@daily')
-//  }
-//}
+multiJob("caffe2-master-debug") {
+  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
+}
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {

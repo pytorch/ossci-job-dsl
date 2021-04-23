@@ -93,7 +93,7 @@ def rocmMailRecipients = "gains@fb.com jbai@fb.com Johannes.Dieterich@amd.com Ma
 // the actual Jenkins credential that contains the secret.
 def pytorchbotAuthId = 'd4d47d60-5aa5-4087-96d2-2baa15c22480'
 
-def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commitSource, localMailRecipients ->
+def masterJobSettings = { context, repo, triggerOnPush, enablePytorch, enableCaffe2, defaultCmakeArgs, commitSource, localMailRecipients ->
   context.with {
     JobUtil.masterTrigger(delegate, repo, "master", triggerOnPush)
     parameters {
@@ -115,49 +115,53 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
       GitUtil.resolveAndSaveParameters(delegate, gitPropertiesFile)
 
       phase("Master jobs") {
-        buildEnvironments.each {
-          def buildEnvironment = it;
-          phaseJob("${buildBasePath}/${it}-trigger") {
-            parameters {
-              // Pass parameters of this job
-              currentBuild()
-              // Checkout this exact same revision in downstream builds.
-              gitRevision()
-              propertiesFile(gitPropertiesFile)
-              // Only pytorch/pytorch master gets documentation pushes
-              booleanParam('DOC_PUSH', repo == "pytorch/pytorch")
-              predefinedProp('COMMIT_SOURCE', commitSource)
-              predefinedProp('GITHUB_REPO', repo)
-            }
-            if (!buildEnvironment.contains('linux') && !isRocmBuild(buildEnvironment)) {
-              PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
-            }
-          }
-        }
-        def definePhaseJob = { name, run_bench ->
-          phaseJob("caffe2-builds/${name}") {
-            parameters {
-              // Checkout this exact same revision in downstream builds.
-              gitRevision()
-              predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
-              predefinedProp('GITHUB_REPO', repo)
-              propertiesFile(gitPropertiesFile)
-              // Pass parameters of this job
-              currentBuild()
-              // Enable running bench scripts in ROCm CI for master commits
-              if (run_bench) {
-                booleanParam('RUN_BENCH', true)
+        if (enablePytorch) {
+          buildEnvironments.each {
+            def buildEnvironment = it;
+            phaseJob("${buildBasePath}/${it}-trigger") {
+              parameters {
+                // Pass parameters of this job
+                currentBuild()
+                // Checkout this exact same revision in downstream builds.
+                gitRevision()
+                propertiesFile(gitPropertiesFile)
+                // Only pytorch/pytorch master gets documentation pushes
+                booleanParam('DOC_PUSH', repo == "pytorch/pytorch")
+                predefinedProp('COMMIT_SOURCE', commitSource)
+                predefinedProp('GITHUB_REPO', repo)
+              }
+              if (!buildEnvironment.contains('linux') && !isRocmBuild(buildEnvironment)) {
+                PhaseJobUtil.condition(delegate, '!${RUN_DOCKER_ONLY}')
               }
             }
           }
         }
+        if (enableCaffe2) {
+          def definePhaseJob = { name, run_bench ->
+            phaseJob("caffe2-builds/${name}") {
+              parameters {
+                // Checkout this exact same revision in downstream builds.
+                gitRevision()
+                predefinedProp('DOCKER_IMAGE_TAG', '${CAFFE2_DOCKER_IMAGE_TAG}')
+                predefinedProp('GITHUB_REPO', repo)
+                propertiesFile(gitPropertiesFile)
+                // Pass parameters of this job
+                currentBuild()
+                // Enable running bench scripts in ROCm CI for master commits
+                if (run_bench) {
+                  booleanParam('RUN_BENCH', true)
+                }
+              }
+            }
+          }
 
-        Caffe2Images.buildAndTestEnvironments.each {
-          definePhaseJob(it + "-trigger-test", /* run_bench */ true)
-        }
+          Caffe2Images.buildAndTestEnvironments.each {
+            definePhaseJob(it + "-trigger-test", /* run_bench */ true)
+          }
 
-        Caffe2Images.buildOnlyEnvironments.each {
-          definePhaseJob(it + "-trigger-build", /* run_bench */ false)
+          Caffe2Images.buildOnlyEnvironments.each {
+            definePhaseJob(it + "-trigger-build", /* run_bench */ false)
+          }
         }
       }
     }
@@ -168,7 +172,7 @@ def masterJobSettings = { context, repo, triggerOnPush, defaultCmakeArgs, commit
 }
 
 multiJob("pytorch-master") {
-  masterJobSettings(delegate, "pytorch/pytorch", true, '-DCUDA_ARCH_NAME=All', "master", mailRecipients)
+  masterJobSettings(delegate, "pytorch/pytorch", true, true, false, '-DCUDA_ARCH_NAME=All', "master", mailRecipients)
 }
 
 //multiJob("rocm-pytorch-master") {
@@ -179,8 +183,17 @@ multiJob("pytorch-master") {
 // let's try keeping the job, but removing the cron trigger
 // Runs on debug build on master (triggered nightly)
 multiJob("caffe2-master-debug") {
-  masterJobSettings(delegate, "pytorch/pytorch", false, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
+  masterJobSettings(delegate, "pytorch/pytorch", false, true, true, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
 }
+
+// Adding nightly caffe2-only job
+multiJob("caffe2-master") {
+  masterJobSettings(delegate, "pytorch/pytorch", false, false, true, '-DCUDA_ARCH_NAME=All', "master", mailRecipients)
+  triggers {
+    cron('@daily')
+  }
+}
+
 
 def pullRequestJobSettings = { context, repo, commitSource ->
   context.with {

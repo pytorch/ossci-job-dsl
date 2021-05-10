@@ -181,17 +181,14 @@ multiJob("pytorch-master") {
 
 // we tried commenting this out before, but the cron trigger still fired
 // let's try keeping the job, but removing the cron trigger
-// Runs on debug build on master (triggered nightly)
+// Runs on debug build on master
 multiJob("caffe2-master-debug") {
   masterJobSettings(delegate, "pytorch/pytorch", false, true, true, '-DCMAKE_BUILD_TYPE=DEBUG', "master", mailRecipients)
 }
 
-// Adding nightly caffe2-only job
+// caffe2-only job
 multiJob("caffe2-master") {
   masterJobSettings(delegate, "pytorch/pytorch", false, false, true, '-DCUDA_ARCH_NAME=All', "master", mailRecipients)
-  triggers {
-    cron('@daily')
-  }
 }
 
 

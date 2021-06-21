@@ -221,7 +221,7 @@ def pullRequestJobSettings = { context, repo, commitSource ->
       phase("Skip if targeting LTS branch") {
         // No jenkins jobs should run on LTS branches
         def pr_build_target_branch_blacklist = ~/^lts*/
-        if (pr_build_target_branch_blacklist.matcher("${env.ghprbTargetBranch}").matches()) {
+        if (pr_build_target_branch_blacklist.matcher("${ghprbTargetBranch}").matches()) {
           currentBuild.result = 'SUCCESS'
           return
         }

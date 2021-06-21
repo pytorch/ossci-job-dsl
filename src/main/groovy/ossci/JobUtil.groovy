@@ -197,6 +197,9 @@ class JobUtil {
           // currently only being used by caffe2
           blackListLabels(['skip-tests'])
 
+          // No jenkins job should run on LTS branches
+          blackListTargetBranches(['^lts*'])
+
           // Only build the PR if it targets 'master'
           // 'sending_pr' is a special case for ROCmSoftwarePlatform/pytorch
           // 'tensor-merge' is a temporary working branch for tensor

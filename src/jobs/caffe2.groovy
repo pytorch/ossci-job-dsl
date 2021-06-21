@@ -449,7 +449,7 @@ fi
        label += ' && cpu'
     }
     JobUtil.common(delegate, label)
-    JobUtil.timeoutAndFailAfter(delegate, 210)
+    JobUtil.timeoutAndFailAfter(delegate, 240)
     // test job no longer needs to clone since 'host-copy' of workspace is used
     //JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 
@@ -577,7 +577,7 @@ rm -f ./crash/core.logging_test.*
        label += ' && cpu-bench'
     }
     JobUtil.common(delegate, label)
-    JobUtil.timeoutAndFailAfter(delegate, 210)
+    JobUtil.timeoutAndFailAfter(delegate, 240)
     // bench job no longer needs to clone since 'host-copy' of workspace is used
     //JobUtil.gitCommitFromPublicGitHub(delegate, '${GITHUB_REPO}')
 

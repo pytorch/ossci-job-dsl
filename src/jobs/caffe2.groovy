@@ -129,7 +129,14 @@ Images.allDockerBuildEnvironments.each {
 
       steps {
         def gitPropertiesFile = './git.properties'
-
+        // Extract docker image tag
+        dockerImageTag = sh(script: 'git rev-parse HEAD:.circleci/docker', returnStdout: true).trim()
+        environmentVariables {
+          env(
+            'DOCKER_IMAGE_TAG',
+            "${dockerImageTag}",
+          )
+        }
         // This is duplicated from the pull request trigger job such that
         // you don't need a pull request trigger job to test any branch
         // after merging it into any other branch (not just origin/master).
@@ -274,8 +281,8 @@ pushd pytorch_source
 # Reinitialize submodules
 git submodule update --init --recursive
 
-# Do not need to go into the caffe2 directory within the PyTorch 
-# repo since the root CMakeLists.txt handles the process of making 
+# Do not need to go into the caffe2 directory within the PyTorch
+# repo since the root CMakeLists.txt handles the process of making
 # caffe2 and its docs. So do the below from the pytorch repo root.
 
 # Make our build directory

@@ -22,6 +22,7 @@ class GitUtil {
           shallow()
           depth(70)
         }
+        pruneBranches()
       }
     }
   }

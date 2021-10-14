@@ -57,7 +57,7 @@ def buildEnvironments = [
 def experimentalBuildEnvironments = [
   // "pytorch-win-ws2016-cuda9-cudnn7-py3-dev",
   // "pytorch-win-ws2016-cuda10-cudnn7-py3-dev",
-  "py3.6-clang8-rocmdeb-ubuntu16.04",
+  // "py3.6-clang8-rocmdeb-ubuntu16.04",
 ]
 
 def isRocmBuild = { buildEnvironment ->
@@ -406,6 +406,18 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                 }
                 PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
               }
+            }
+            phaseJob("${buildBasePath}/${buildEnvironment}" + config + "-test-distributed") {
+              parameters {
+                currentBuild()
+                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
+                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
+                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
+                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
+                predefinedProp('IMAGE_COMMIT_ID', builtImageId)
+                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
+              }
+              PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
             }
           }
           if (buildEnvironment == perfTestEnvironment) {

@@ -285,7 +285,11 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
 
   def numParallelTests = 1;
   if (splitTestEnvironments.any { it.contains(buildEnvironment) }) {
-    numParallelTests = 2
+    if (isRocmBuild(buildEnvironment)) {
+      numParallelTests = 3
+    } else {
+      numParallelTests = 2
+    }
   }
 
   def testConfigs = [""]  // "" is the default config
@@ -393,7 +397,18 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
         phase("Test and Push") {
           for (config in testConfigs) {
             for (i = 1; i <= numParallelTests; i++) {
-              def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+              def suffix = ""
+              if (numParallelTests > 1) {
+                if (i == 1) {
+                  suffix = "1"
+                }
+                if (i == 2) {
+                  suffix = "2"
+                }
+                if (i == 3) {
+                  suffix = "-distributed"
+                }
+              }
               phaseJob("${buildBasePath}/${buildEnvironment}" + config + "-test" + suffix) {
                 parameters {
                   currentBuild()
@@ -406,18 +421,6 @@ def lintCheckBuildEnvironment = 'pytorch-linux-trusty-py2.7'
                 }
                 PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
               }
-            }
-            phaseJob("${buildBasePath}/${buildEnvironment}" + config + "-test-distributed") {
-              parameters {
-                currentBuild()
-                predefinedProp('GIT_COMMIT', '${GIT_COMMIT}')
-                predefinedProp('GIT_MERGE_TARGET', '${GIT_MERGE_TARGET}')
-                predefinedProp('DOCKER_IMAGE_TAG', builtImageTag)
-                predefinedProp('CAFFE2_DOCKER_IMAGE_TAG', caffe2BuiltImageTag)
-                predefinedProp('IMAGE_COMMIT_ID', builtImageId)
-                predefinedProp('GITHUB_REPO', '${GITHUB_REPO}')
-              }
-              PhaseJobUtil.condition(delegate, '${RUN_TESTS}')
             }
           }
           if (buildEnvironment == perfTestEnvironment) {
@@ -759,7 +762,18 @@ fi
 
   for (config in testConfigs) {
     for (i = 1; i <= numParallelTests; i++) {
-      def suffix = (numParallelTests > 1) ? Integer.toString(i) : ""
+      def suffix = ""
+      if (numParallelTests > 1) {
+        if (i == 1) {
+          suffix = "1"
+        }
+        if (i == 2) {
+          suffix = "2"
+        }
+        if (i == 3) {
+          suffix = "-distributed"
+        }
+      }
       job("${buildBasePath}/${buildEnvironment}" + config + "-test" + suffix) {
         if (isRocmBuild(buildEnvironment)) {
           JobUtil.common delegate, 'docker && rocm'

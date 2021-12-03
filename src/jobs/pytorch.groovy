@@ -167,6 +167,7 @@ def masterJobSettings = { context, repo, triggerOnPush, enablePytorch, enableCaf
     }
     publishers {
       mailer(localMailRecipients, false, true)
+      wsCleanup()
     }
   }
 }
@@ -264,6 +265,9 @@ def pullRequestJobSettings = { context, repo, commitSource ->
         //  }
         //}
       }
+    }
+    publishers {
+      wsCleanup()
     }
   }
 }

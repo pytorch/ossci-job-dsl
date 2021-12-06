@@ -59,7 +59,7 @@ class GitUtil {
 set -ex
 if [ -n "${GIT_MERGE_TARGET}" ]; then
   git reset --hard ${GIT_COMMIT}
-  git merge --no-ff ${GIT_MERGE_TARGET}
+  git merge --no-ff --allow-unrelated-histories ${GIT_MERGE_TARGET}
 fi
 '''
     }

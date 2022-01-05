@@ -47,7 +47,7 @@ def buildEnvironments = [
 
   // NB: This image is taken from Caffe2
   //"py3.6-clang7-rocmdeb-ubuntu16.04",
-  //"pytorch-linux-bionic-rocm4.3.1-py3.6",
+  "pytorch-linux-bionic-rocm4.5-py3.7",
 
   // This is really expensive to run because it is a total build
   // from scratch.  Maybe we have to do it nightly.

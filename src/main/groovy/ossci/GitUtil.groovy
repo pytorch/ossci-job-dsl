@@ -114,6 +114,9 @@ else
   # FIX ME
   echo "CAFFE2_CHANGED=0" >> "${file}"
 fi
+
+# after parameters saved, try to prevent running out of disk space on trigger host
+rm -rf .git
 """
     }
   }
